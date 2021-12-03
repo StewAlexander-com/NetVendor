@@ -154,7 +154,7 @@ for i in range(len(company_list)):
         #save each different element to a new list called OUI_list_final
         company_list_final.append(company_list[i])
 
-print("\n\nThe Companies seen in the <<# sh ip arp>> data file are:\n")
+print("\n\nThe companies seen in the <<# sh ip arp>> data file are:\n")
 
 #save the company list final to a file called company_list.txt
 with open('company_list.txt', 'w') as f:
