@@ -12,7 +12,7 @@ This program ingests a Cisco "sh ip arp" as a text file and produces the list of
 ## Output:
 * Program output: </br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
- ![image](https://user-images.githubusercontent.com/48565067/144657611-0f150271-29e4-4a99-a9a6-3da05d4e06ce.png)
+ ![image](https://user-images.githubusercontent.com/48565067/144658670-b68e9d71-37f6-4760-87a7-2f9bf3ce1b27.png)
 * Created text file "company_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
 * Created text file "oui_final_list.txt" output:</br></br>
