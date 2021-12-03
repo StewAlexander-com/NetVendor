@@ -8,7 +8,7 @@ This program ingests a Cisco "sh ip arp" as a text file and produces the list of
 * This needs the output of a "#sh ip arp", as it is using this to do the lookup
 ## Output:
 * Program output:
-*![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
+* ![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
 * Created text file "company_list.txt" output:
 * ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
 * Created text file "oui_final_list.txt" output:
