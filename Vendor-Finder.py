@@ -95,7 +95,10 @@ with open('oui_list_final.txt', 'r') as f:
 
 #for each element in vendor_list do a request to the OUI database
 for i in range(len(vendor_list)):
+    #make each element uppercase
+    vendor_list[i] = vendor_list[i].upper()
     r = requests.get("https://macvendors.co/api/" + vendor_list[i])
+    time.sleep(0.2)
     #if the request is successful, print the vendor name
     if r.status_code == 200:
         print(".", end="")
