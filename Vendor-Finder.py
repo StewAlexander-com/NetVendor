@@ -242,7 +242,7 @@ print(">>> Please see the company_list.txt file in the current directory for the
 print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count)
 
 if os.path.exists('Apple-Devices.txt'):
-    print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
+    print(">>> \nPlease see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
 else:
     pass
 
