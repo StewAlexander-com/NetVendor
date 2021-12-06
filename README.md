@@ -20,7 +20,7 @@ Table of Contents:
 ## Output:
 * Program output: </br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
- ![image](https://user-images.githubusercontent.com/48565067/144877917-12ef3779-acfd-4c21-b545-2a428100ba5a.png)
+ ![image](https://user-images.githubusercontent.com/48565067/144931922-88ef8e97-9c59-4e24-8600-d4d4f74cf8b1.png)
 * Created text file "company_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
 * Created text file "oui_final_list.txt" output:</br></br>
