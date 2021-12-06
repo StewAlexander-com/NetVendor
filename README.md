@@ -20,11 +20,13 @@ Table of Contents:
 ## Output:
 * Program output: </br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
- ![image](https://user-images.githubusercontent.com/48565067/144658670-b68e9d71-37f6-4760-87a7-2f9bf3ce1b27.png)
+ ![image](https://user-images.githubusercontent.com/48565067/144877917-12ef3779-acfd-4c21-b545-2a428100ba5a.png)
 * Created text file "company_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
 * Created text file "oui_final_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633706-24bbe2ef-6965-4847-b3a9-0f22242ff95f.png)
+* Created Vendor-Devices.txt file:</br></br>
+  ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 ## To Do ...
 - [ ] Add a progress bar for collecting oui info via “tqdm”
 - [ ] Collect counts of Apple, Cisco, Dell, HP, & Other devices seen using this meta code
@@ -42,8 +44,8 @@ with open(ip_arp_file, 'r') as f:
 #close the files
 f.close()
 ```
-- [ ] If the device files are empty, delete them, else sort the lines by IP address (word 1) and count the lines
-- [ ] Print to the user there are “count” devices in the “ip_arp_file”, see the “<vendor> Device File” for the items
-- [ ] While “<vendor> Device File” exists, add the “count” to a variable “total-vendor-count”
-- [ ] “Other-count” = “total-arp-line-count” - “total-vendor-count”
-- [ ] Print to the user “there are ‘other-count’ other devices in the ‘ip_arp_file’ 
+- [x] If the device files are empty, delete them, else sort the lines by IP address (word 1) and count the lines
+- [x] Print to the user there are “count” devices in the “ip_arp_file”, see the “<vendor> Device File” for the items
+- [x] While “<vendor> Device File” exists, add the “count” to a variable “total-vendor-count”
+- [x] “Other-count” = “total-arp-line-count” - “total-vendor-count”
+- [x] Print to the user “there are ‘other-count’ other devices in the ‘ip_arp_file’ 
