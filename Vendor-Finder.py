@@ -283,8 +283,39 @@ else:
     pass
 
 #######################################################################################
+#Finding all the Other Cisco ARP Entries ....
 
+#Delete the file Other-Cisco-Devices.txt if it exists
+if os.path.exists('Other-Cisco-Devices.txt'):
+    os.remove('Other-Cisco-Devices.txt')
+else :
+    pass
 
+#For every line in the file check the MAC address, if it is an Other-Cisco Address, add it the Other-Cisco-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in f:
+        print (".", end="")
+       #split the line into words
+        words = line.split()
+        #if words[2] starts with a Other-Cisco OUI add the line to the Other-Cisco-Devices.txt file 
+        if words[2].startswith("0007.7d") or words[2].startswith("0008.2f") or words[2].startswith("0021.a0") or words[2].startswith("0022.bd") or words[2].startswith("0023.5e") or words[2].startswith("003a.99") or words[2].startswith("005f.86") or words[2].startswith("00aa.6e") or words[2].startswith("0cf5.a4") or words[2].startswith("1833.9d") or words[2].startswith("1ce8.5d") or words[2].startswith("30e4.db") or words[2].startswith("40f4.ec") or words[2].startswith("4403.a7") or words[2].startswith("4c4e.35") or words[2].startswith("544a.00") or words[2].startswith("5486.bc") or words[2].startswith("588d.09") or words[2].startswith("58bf.ea") or words[2].startswith("6400.f1") or words[2].startswith("7c21.0d") or words[2].startswith("84b5.17") or words[2].startswith("8cb6.4f") or words[2].startswith("ac17.c8") or words[2].startswith("ac7e.8a") or words[2].startswith("bc67.1c") or words[2].startswith("c4b3.6a") or words[2].startswith("d4ad.71") or words[2].startswith("e0d1.73") or words[2].startswith("e8b7.48") or words[2].startswith("f09e.63") or words[2].startswith("f866.f2"):
+            with open('Other-Cisco-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
+#close the files
+f.close()
+
+if os.path.exists('Other-Cisco-Devices.txt'):
+#read the file Other-Cisco-Devices.txt and store the total number of lines in a variable called Other-Cisco-count
+    with open('Other-Cisco-Devices.txt', 'r') as f:
+        OtherCisco_count = 0
+        for line in f:
+            OtherCisco_count += 1
+else:
+    OtherCisco_count = 0
+    pass
+
+#######################################################################################
 
 # count the lines in the file oui_list_final.txt and print the number of lines
 with open('oui_list_final.txt', 'r') as f:
@@ -306,6 +337,9 @@ with open( ip_arp_file, 'r') as f:
     for line in f:
         count += 1
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
+    arpcount = count-1
+
+OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count)
 
 print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs")
 print(">>> Please see the company_list.txt file in the current directory for the list of companies seen in the", ip_arp_file, "file")
@@ -313,6 +347,8 @@ print("\n")
 print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count)
 print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count)
 print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", CiscoMeraki_count)
+print ("# The number of other Cisco devices in the", ip_arp_file, "file is", OtherCisco_count)
+print ("# The number of other devices in the", ip_arp_file, "file is", OtherTotal)
 print("\n")
 if os.path.exists('Apple-Devices.txt'):
     print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices")
@@ -326,6 +362,13 @@ else:
 
 if os.path.exists('Cisco-Meraki-Devices.txt'):
     print(">>> Please see the Cisco-Meraki-Devices.txt file in the current directory for the list of Cisco-Meraki devices")
+else:
+    pass
+
+if os.path.exists('Other-Cisco-Devices.txt'):
+    print(">>> Please see the Other-Cisco-Devices.txt file in the current directory for the list of Other Cisco devices")
+else:
+    pass
 
 #tell the user to press enter to quit
 input("\nPress enter to quit: ")
