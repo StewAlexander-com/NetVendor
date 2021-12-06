@@ -42,8 +42,8 @@ with open(ip_arp_file, 'r') as f:
 #close the files
 f.close()
 ```
-- [ ] If the device files are empty, delete them, else sort the lines by IP address (word 1) and count the lines
-- [ ] Print to the user there are “count” devices in the “ip_arp_file”, see the “<vendor> Device File” for the items
-- [ ] While “<vendor> Device File” exists, add the “count” to a variable “total-vendor-count”
-- [ ] “Other-count” = “total-arp-line-count” - “total-vendor-count”
-- [ ] Print to the user “there are ‘other-count’ other devices in the ‘ip_arp_file’ 
+- [x] If the device files are empty, delete them, else sort the lines by IP address (word 1) and count the lines
+- [x] Print to the user there are “count” devices in the “ip_arp_file”, see the “<vendor> Device File” for the items
+- [x] While “<vendor> Device File” exists, add the “count” to a variable “total-vendor-count”
+- [x] “Other-count” = “total-arp-line-count” - “total-vendor-count”
+- [x] Print to the user “there are ‘other-count’ other devices in the ‘ip_arp_file’ 
