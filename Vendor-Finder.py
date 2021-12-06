@@ -178,7 +178,82 @@ with open('company_list.txt', 'w') as f:
 for i in range(len(company_list_final)):
     print(company_list_final[i])
 
-#count the lines in the file oui_list_final.txt and print the number of lines
+#Collecting the output of the command sh ip arp
+print ("\n\nPlease be patient, while information is being retrieved\n")
+
+#######################################################################################
+
+#Finding all the Apple ARP Entries ....
+
+#Delete the file Apple-Devices.txt if it exists
+if os.path.exists('Apple-Devices.txt'):
+    os.remove('Apple-Devices.txt')
+else :
+    pass
+
+#For every line in the file check the MAC address, if it is an Apple Address, add it the Apple-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in f:
+        print(".", end="")
+       #split the line into words
+        words = line.split()
+        #if words[2] starts with Apple OUI add it to the Apple-Devices.txt file 
+        if words[2].startswith("0c4d.e9") or words[2].startswith("109a.dd") or words[2].startswith("10dd.b1") or words[2].startswith("28ff.3c") or words[2].startswith("38c9.86") or words[2].startswith("3c7d.0a") or words[2].startswith("501f.c6")or words[2].startswith("685b.35") or words[2].startswith("7cd1.c")or words[2].startswith("8866.5a") or words[2].startswith("9c20.7b") or words[2].startswith("a860.b6") or words[2].startswith("d081.7a"):
+            with open('Apple-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
+#close the files
+f.close()
+
+if os.path.exists('Apple-Devices.txt'):
+#read the file Apple-Devices.txt and store the total number of lines in a variable called Apple-count
+    with open('Apple-Devices.txt', 'r') as f:
+        Apple_count = 0
+        for line in f:
+            Apple_count += 1
+else:
+    Apple_count = 0
+    pass
+
+#######################################################################################
+
+#######################################################################################
+
+#Finding all the Dell ARP Entries ....
+
+#Delete the file Dell-Devices.txt if it exists
+if os.path.exists('Dell-Devices.txt'):
+    os.remove('Dell-Devices.txt')
+else :
+    pass
+
+#For every line in the file check the MAC address, if it is an Dell Address, add it the Dell-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in f:
+        print (".", end="")
+       #split the line into words
+        words = line.split()
+        #if words[2] starts with a Dell OUI add the line to the Dell-Devices.txt file 
+        if words[2].startswith("001a.a0") or words[2].startswith("004e.01") or words[2].startswith("14b3.1f") or words[2].startswith("14fe.b5") or words[2].startswith("1866.da") or words[2].startswith("28f1.0e") or words[2].startswith("484d.7e")or words[2].startswith("509a.4c") or words[2].startswith("5448.10")or words[2].startswith("54bf.64") or words[2].startswith("6400.6a") or words[2].startswith("6c2b.59") or words[2].startswith("782b.cb") or words[2].startswith("8cec.4b") or words[2].startswith("a41f.72") or words[2].startswith("a4bb.6d") or words[2].startswith("b083.fe") or words[2].startswith("b885.84") or words[2].startswith("b8ca.3a") or words[2].startswith("bc30.5b") or words[2].startswith("c81f.66") or words[2].startswith("d4be.d9") or words[2].startswith("d89e.f3") or words[2].startswith("e454.e8") or words[2].startswith("e4f0.04") or words[2].startswith("f04d.a2") or words[2].startswith("f402.70") or words[2].startswith("f48e.38") or words[2].startswith("f8bc.12"):
+            with open('Dell-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
+#close the files
+f.close()
+
+if os.path.exists('Dell-Devices.txt'):
+#read the file Dell-Devices.txt and store the total number of lines in a variable called Dell-count
+    with open('Dell-Devices.txt', 'r') as f:
+        Dell_count = 0
+        for line in f:
+            Dell_count += 1
+else:
+    Dell_count = 0
+    pass
+
+#######################################################################################
+
+# count the lines in the file oui_list_final.txt and print the number of lines
 with open('oui_list_final.txt', 'r') as f:
     count = 0
     for line in f:
@@ -199,58 +274,18 @@ with open( ip_arp_file, 'r') as f:
         count += 1
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
 
-<<<<<<< HEAD
-#######################################################################################
-=======
-########################################################################################################################
->>>>>>> 14c037c240312b31e2cb71f0fbcd6b88ed726fd8
-
-#Finding all the Apple ARP Entries ....
-
-#Delete the file Apple-Devices.txt if it exists
-if os.path.exists('Apple-Devices.txt'):
-    os.remove('Apple-Devices.txt')
-else :
-    pass
-
-#For every line in the file check the MAC address, if it is an Apple Address, add it the Apple-Devices.txt
-with open(ip_arp_file, 'r') as f:
-    for line in f:
-       #split the line into words
-        words = line.split()
-        #if words[2] starts with "0C:4D:E9" add it to the Apple-Devices.txt file 
-        if words[2].startswith("0c4d.e9") or words[2].startswith("109a.dd") or words[2].startswith("10dd.b1") or words[2].startswith("28ff.3c") or words[2].startswith("38c9.86") or words[2].startswith("3c7d.0a") or words[2].startswith("501f.c6")or words[2].startswith("685b.35") or words[2].startswith("7cd1.c")or words[2].startswith("8866.5a") or words[2].startswith("9c20.7b") or words[2].startswith("a860.b6") or words[2].startswith("d081.7a"):
-            with open('Apple-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
-#close the files
-f.close()
-
-if os.path.exists('Apple-Devices.txt'):
-#read the file Apple-Devices.txt and store the total number of lines in a variable called Apple-count
-    with open('Apple-Devices.txt', 'r') as f:
-        Apple_count = 0
-        for line in f:
-            Apple_count += 1
-else:
-    Apple_count = 0
-    pass
-
-<<<<<<< HEAD
-#######################################################################################
-=======
-########################################################################################################################
->>>>>>> 14c037c240312b31e2cb71f0fbcd6b88ed726fd8
-
-
-
-
-print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs\n")
+print("\n>>> Please see the oui_list_final.txt file in the current directory for the list of OUIs\n")
 print(">>> Please see the company_list.txt file in the current directory for the list of companies seen\n")
 print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count)
+print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count)
 
 if os.path.exists('Apple-Devices.txt'):
-    print(">>> \nPlease see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
+    print("\n >>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
+else:
+    pass
+
+if os.path.exists('Dell-Devices.txt'):
+    print(">>> Please see the Dell-Devices.txt file in the current directory for the list of Dell devices\n")
 else:
     pass
 
