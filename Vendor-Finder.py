@@ -116,7 +116,7 @@ for i in range(len(vendor_list)):
     #make each element uppercase
     vendor_list[i] = vendor_list[i].upper()
     r = requests.get("https://macvendors.co/api/" + vendor_list[i])
-    time.sleep(0.2)
+    time.sleep(0.1)
     #if the request is successful, print the vendor name
     if r.status_code == 200:
         #add the tqdm code here?
@@ -200,11 +200,43 @@ with open( ip_arp_file, 'r') as f:
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
 
 
+#Delete the file Apple-Devices.txt if it exists
+if os.path.exists('Apple-Devices.txt'):
+    os.remove('Apple-Devices.txt')
+else :
+    pass
+
+#For every line in the file check the MAC address, if it is an Apple Address, add it the Apple-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in f:
+       #split the line into words
+        words = line.split()
+        #if words[2] starts with "0C:4D:E9" add it to the Apple-Devices.txt file 
+        if words[2].startswith("0c4d.e9") or words[2].startswith("109a.dd"):
+            with open('Apple-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
 #close the files
 f.close()
 
+if os.path.exists('Apple-Devices.txt'):
+#read the file Apple-Devices.txt and store the total number of lines in a variable called Apple-count
+    with open('Apple-Devices.txt', 'r') as f:
+        Apple_count = 0
+        for line in f:
+            Apple_count += 1
+else:
+    Apple_count = 0
+    pass
+
 print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs\n")
 print(">>> Please see the company_list.txt file in the current directory for the list of companies seen\n")
+print (">>> The number of Apple devices in the", ip_arp_file, "file is", Apple_count, "\n")
+
+if os.path.exists('Apple-Devices.txt'):
+    print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
+else:
+    pass
 
 #tell the user to press enter to quit
 input("\nPress enter to quit: ")
