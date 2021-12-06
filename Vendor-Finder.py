@@ -212,7 +212,7 @@ with open(ip_arp_file, 'r') as f:
        #split the line into words
         words = line.split()
         #if words[2] starts with "0C:4D:E9" add it to the Apple-Devices.txt file 
-        if words[2].startswith("0c4d.e9") or words[2].startswith("109a.dd"):
+        if words[2].startswith("0c4d.e9") or words[2].startswith("109a.dd") or words[2].startswith("10dd.b1") or words[2].startswith("28ff.3c") or words[2].startswith("38c9.86") or words[2].startswith("3c7d.0a") or words[2].startswith("501f.c6")or words[2].startswith("685b.35") or words[2].startswith("7cd1.c")or words[2].startswith("8866.5a") or words[2].startswith("9c20.7b") or words[2].startswith("a860.b6") or words[2].startswith("d081.7a"):
             with open('Apple-Devices.txt', 'a') as f:
                 f.write(line)
                 time.sleep(0.1)
@@ -231,7 +231,7 @@ else:
 
 print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs\n")
 print(">>> Please see the company_list.txt file in the current directory for the list of companies seen\n")
-print (">>> The number of Apple devices in the", ip_arp_file, "file is", Apple_count, "\n")
+print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count, "\n")
 
 if os.path.exists('Apple-Devices.txt'):
     print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
