@@ -25,7 +25,7 @@ Table of Contents:
  ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
 * Created text file "oui_final_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633706-24bbe2ef-6965-4847-b3a9-0f22242ff95f.png)
-* Created vendor-devices.txt file:</br></br>
+* Created Vendor-Devices.txt file:</br></br>
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 ## To Do ...
 - [ ] Add a progress bar for collecting oui info via “tqdm”
