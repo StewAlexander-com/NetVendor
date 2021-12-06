@@ -24,7 +24,9 @@ except ImportError:
     os.system("pip install tqdm")
     print("[+] The requests library has been installed.")
     time.sleep(1)
-    import tqdm  
+    import tqdm 
+
+from tqdm import tqdm
 
 OUI_list = [] 
 OUI_list_final = []
@@ -58,6 +60,12 @@ with open(ip_arp_file, 'r') as f:
 
 #sort OUI_list
 OUI_list.sort()
+
+def loads(txt):
+    txt = txt.encode("utf-8")
+    value = json.loads(txt)
+
+    return value
 
 #compare each element to the previous element, if the element is different, print the element
 for i in range(len(OUI_list)):
@@ -111,6 +119,7 @@ for i in range(len(vendor_list)):
     time.sleep(0.2)
     #if the request is successful, print the vendor name
     if r.status_code == 200:
+        #add the tqdm code here?
         print(".", end="")
         #save the vendor name to a file called vendor_list.txt
         with open('raw_vendor_list.json', 'a') as f:
@@ -135,12 +144,6 @@ with open('raw_vendor_list.json', 'w') as f:
 f.close()
 
 time.sleep(1)
-
-def loads(txt):
-    txt = txt.encode("utf-8")
-    value = json.loads(txt)
-
-    return value
 
 #open the json file raw_vendor_list.json and read it, look for company name
 with open('raw_vendor_list.json', 'r') as f:

@@ -48,13 +48,6 @@
 {"result":{"company":"Hewlett Packard","mac_prefix":"10:62:E5","address":"11445 Compaq Center Drive,Houston  TX  77070,US","start_hex":"1062E5000000","end_hex":"1062E5FFFFFF","country":null,"type":"MA-L"}}
 {"result":{"company":"Apple, Inc.","mac_prefix":"10:9A:DD","address":"1 Infinite Loop,CUPERTINO  CA  95014,US","start_hex":"109ADD000000","end_hex":"109ADDFFFFFF","country":"US","type":"MA-L"}}
 {"result":{"company":"NETGEAR","mac_prefix":"10:DA:43","address":"350 East Plumeria Drive,San Jose    95134,US","start_hex":"10DA43000000","end_hex":"10DA43FFFFFF","country":"US","type":"MA-L"}}
-{"result":{"company":"Apple, Inc.","mac_prefix":"10:DD:B1","address":"1 Infinite Loop,CUPERTINO  CA  95014,US","start_hex":"10DDB1000000","end_hex":"10DDB1FFFFFF","country":"US","type":"MA-L"}}
-{"result":{"company":"Intel Corporate","mac_prefix":"14:AB:C5","address":"Lot 8, Jalan Hi-Tech 2\/3,Kulim  Kedah  09000,MY","start_hex":"14ABC5000000","end_hex":"14ABC5FFFFFF","country":"MY","type":"MA-L"}}
-{"result":{"company":"Dell Inc.","mac_prefix":"14:B3:1F","address":"One Dell Way,Round Rock  TX  78682,US","start_hex":"14B31F000000","end_hex":"14B31FFFFFFF","country":"US","type":"MA-L"}}
-{"result":{"company":"Dell Inc.","mac_prefix":"14:FE:B5","address":"One Dell Way,Round Rock  TX  78682,US","start_hex":"14FEB5000000","end_hex":"14FEB5FFFFFF","country":"US","type":"MA-L"}}
-{"result":{"company":"Cisco Systems, Inc","mac_prefix":"18:33:9D","address":"80 West Tasman Drive,San Jose  CA  94568,US","start_hex":"18339D000000","end_hex":"18339DFFFFFF","country":"US","type":"MA-L"}}
-{"result":{"company":"Top Victory Electronics (Taiwan) Co., Ltd.","mac_prefix":"18:65:71","address":"14F,No.166,Jian 1st Rd,New Taipei City  Taiwan  23511,TW","start_hex":"186571000000","end_hex":"186571FFFFFF","country":"TW","type":"MA-L"}}
-{"result":{"company":"Dell Inc.","mac_prefix":"18:66:DA","address":"One Dell Way,Round Rock  TX  78682,US","start_hex":"1866DA000000","end_hex":"1866DAFFFFFF","country":"US","type":"MA-L"}}
 {"result":{"company":"Ubiquiti Networks Inc.","mac_prefix":"18:E8:29","address":"2580 Orchard Pkwy,San Jose  CA  95131,US","start_hex":"18E829000000","end_hex":"18E829FFFFFF","country":null,"type":"MA-L"}}
 {"result":{"company":"Cisco Systems, Inc","mac_prefix":"1C:E8:5D","address":"170 West Tasman Drive,San Jose  CA  95134,US","start_hex":"1CE85D000000","end_hex":"1CE85DFFFFFF","country":"US","type":"MA-L"}}
 {"result":{"company":"Dell Inc.","mac_prefix":"28:F1:0E","address":"One Dell Way,Round Rock  TX  78682,US","start_hex":"28F10E000000","end_hex":"28F10EFFFFFF","country":"US","type":"MA-L"}}
