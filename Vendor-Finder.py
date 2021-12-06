@@ -217,8 +217,6 @@ else:
 
 #######################################################################################
 
-#######################################################################################
-
 #Finding all the Dell ARP Entries ....
 
 #Delete the file Dell-Devices.txt if it exists
@@ -252,6 +250,41 @@ else:
     pass
 
 #######################################################################################
+#Finding all the Cisco Meraki ARP Entries ....
+
+#Delete the file Cisco-Meraki-Devices.txt if it exists
+if os.path.exists('Cisco-Meraki-Devices.txt'):
+    os.remove('Cisco-Meraki-Devices.txt')
+else :
+    pass
+
+#For every line in the file check the MAC address, if it is an Cisco-Meraki Address, add it the Cisco-Meraki-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in f:
+        print (".", end="")
+       #split the line into words
+        words = line.split()
+        #if words[2] starts with a Cisco-Meraki OUI add the line to the Cisco-Meraki-Devices.txt file 
+        if words[2].startswith("ac17.c8") or words[2].startswith("f89e.28"):
+            with open('Cisco-Meraki-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
+#close the files
+f.close()
+
+if os.path.exists('Cisco-Meraki-Devices.txt'):
+#read the file Cisco-Meraki-Devices.txt and store the total number of lines in a variable called Cisco-Meraki-count
+    with open('Cisco-Meraki-Devices.txt', 'r') as f:
+        CiscoMeraki_count = 0
+        for line in f:
+            CiscoMeraki_count += 1
+else:
+    CiscoMeraki_count = 0
+    pass
+
+#######################################################################################
+
+
 
 # count the lines in the file oui_list_final.txt and print the number of lines
 with open('oui_list_final.txt', 'r') as f:
@@ -274,20 +307,25 @@ with open( ip_arp_file, 'r') as f:
         count += 1
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
 
-print("\n>>> Please see the oui_list_final.txt file in the current directory for the list of OUIs\n")
-print(">>> Please see the company_list.txt file in the current directory for the list of companies seen\n")
+print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs")
+print(">>> Please see the company_list.txt file in the current directory for the list of companies seen in the", ip_arp_file, "file")
+print("\n")
 print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count)
 print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count)
-
+print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", CiscoMeraki_count)
+print("\n")
 if os.path.exists('Apple-Devices.txt'):
-    print("\n >>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
+    print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices")
 else:
     pass
 
 if os.path.exists('Dell-Devices.txt'):
-    print(">>> Please see the Dell-Devices.txt file in the current directory for the list of Dell devices\n")
+    print(">>> Please see the Dell-Devices.txt file in the current directory for the list of Dell devices")
 else:
     pass
+
+if os.path.exists('Cisco-Meraki-Devices.txt'):
+    print(">>> Please see the Cisco-Meraki-Devices.txt file in the current directory for the list of Cisco-Meraki devices")
 
 #tell the user to press enter to quit
 input("\nPress enter to quit: ")
