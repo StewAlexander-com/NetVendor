@@ -199,6 +199,9 @@ with open( ip_arp_file, 'r') as f:
         count += 1
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
 
+########################################################################################################################
+
+#Finding all the Apple ARP Entries ....
 
 #Delete the file Apple-Devices.txt if it exists
 if os.path.exists('Apple-Devices.txt'):
@@ -229,9 +232,14 @@ else:
     Apple_count = 0
     pass
 
+########################################################################################################################
+
+
+
+
 print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs\n")
 print(">>> Please see the company_list.txt file in the current directory for the list of companies seen\n")
-print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count, "\n")
+print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count)
 
 if os.path.exists('Apple-Devices.txt'):
     print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices\n")
