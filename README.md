@@ -6,10 +6,10 @@ This program reads a Cisco ARP table ("```sh ip arp```"), and produces informati
 
 Table of Contents:
   - [Why?](#why)
-  - [Requirements:](#requirements)
-  - [Input:](#input)
-  - [Output:](#output)
-  - [To Do ...](#to-do-)
+  - [Requirements](#requirements)
+  - [Input](#input)
+  - [Output](#output)
+  - [To Do](#to-do-)
 
 ## Why?
 Answers the questions:
