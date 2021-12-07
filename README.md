@@ -29,7 +29,7 @@ Table of Contents:
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 ## To Do ...
 - [ ] Add a progress bar for collecting oui info via “tqdm”
-- [ ] Collect counts of Apple, Cisco, Dell, HP, & Other devices seen using this meta code
+- [x] Collect counts of Apple, Cisco, Dell, HP, & Other devices seen using this meta code
 ``` python
 #For every line in the file check the MAC address
 with open(ip_arp_file, 'r') as f:
