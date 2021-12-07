@@ -16,22 +16,24 @@ except ImportError:
     time.sleep(1)
     import requests
 
-# if the library requests is not installed, install it via pip
-try:
-    import tqdm
-except ImportError:
-    print("[!] The requests library is not installed. Installing...")
-    os.system("pip install tqdm")
-    print("[+] The requests library has been installed.")
-    time.sleep(1)
-    import tqdm 
-
-from tqdm import tqdm
+# if the library tqdm is not installed, install it via pip  -- future development
+# try:
+#     import tqdm
+# except ImportError:
+#     print("[!] The requests library is not installed. Installing...")
+#     os.system("pip install tqdm")
+#     print("[+] The requests library has been installed.")
+#     time.sleep(1)
+#     import tqdm 
+# 
+# from tqdm import tqdm
 
 OUI_list = [] 
 OUI_list_final = []
 company_list =[]
 company_list_final = []
+vlan_list = []
+vlan_list_final = []
 
 #Show the contents of the current directory
 print("\nPlease select the #SH IP ARP Data text file from the current directory\n")
@@ -67,7 +69,7 @@ def loads(txt):
 
     return value
 
-#compare each element to the previous element, if the element is different, print the element
+#compare each element to the previous element, if the element is different, save the element
 for i in range(len(OUI_list)):
     if OUI_list[i] != OUI_list[i-1]:
         #save each different element to a new list called OUI_list_final
@@ -164,7 +166,7 @@ company_list.sort()
 #compare each element to the previous element, if the element is different, print the element
 for i in range(len(company_list)):
     if company_list[i] != company_list[i-1]:
-        #save each different element to a new list called OUI_list_final
+        #save each different element to a new list called vlan_list_final
         company_list_final.append(company_list[i])
 
 print("\n\nThe companies seen in the <<# sh ip arp>> data file are:\n")
@@ -316,48 +318,59 @@ else:
     pass
 
 #######################################################################################
-#Finding all the Hewlett Pakard (HP) ARP Entries ....
+# Find all the unique vlans in the ip_arp_file
 
-#Delete the file HP-Devices.txt if it exists
-if os.path.exists('HP-Devices.txt'):
-    os.remove('HP-Devices.txt')
-else :
-    pass
-
-#For every line in the file check the MAC address, if it is an HP Address, add it the HP-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in f:
-        print (".", end="")
-       #split the line into words
-        words = line.split()
-        #if words[2] starts with a HP OUI add the line to the HP-Devices.txt file 
-        if words[2].startswith("3024.a9") or words[2].startswith("3822.e2") or words[2].startswith("842a.fd") or words[2].startswith("f80d.ac") or words[2].startswith("0017.a4") or words[2].startswith("001b.78") or words[2].startswith("0023.7d") or words[2].startswith("0030.6e") or words[2].startswith("009c.02") or words[2].startswith("1062.e5") or words[2].startswith("308d.99")or words[2].startswith("30e1.71") or words[2].startswith("38ea.a7") or words[2].startswith("40b0.34") or words[2].startswith("68b5.99") or words[2].startswith("6cc2.17") or words[2].startswith("80ce.62") or words[2].startswith("80e8.2c") or words[2].startswith("8434.97") or words[2].startswith("98e7.f4") or words[2].startswith("9cb6.54") or words[2].startswith("a08c.fd") or words[2].startswith("a0d3.c1") or words[2].startswith("a45d.36") or words[2].startswith("b00c.d1") or words[2].startswith("e4e7.49") or words[2].startswith("ec8e.b5") or words[2].startswith("f092.1c") or words[2].startswith("f430.b9") or words[2].startswith("fc15.b4") :
-            with open('HP-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
+        for line in f:
+            #split the line into words
+            vlanwords = line.split()
+            #send words[3] to a list
+            vlan_Element = vlanwords[3]
+            #split vlan_Element into different elements
+            vlan_Element = vlan_Element.split()
+            #append vlan_Element to a list called vlan_list
+            vlan_list.append(vlan_Element)
+
+#sort the vlan_list
+vlan_list.sort()
+
+#compare each element to the previous element, if the element is different, save the element
+for i in range(len(vlan_list)):
+    if vlan_list[i] != vlan_list[i-1]:
+        #save each different element to a new list called vlan_list_final
+        vlan_list_final.append(vlan_list[i])
+
+#save oui list final to a file called vlan_list_final.txt
+with open('vlan_list.txt', 'w') as f:
+    for i in range(len(vlan_list_final)):
+        f.write(vlan_list_final[i][0] + '\n')
 
 #close the files
 f.close()
 
-if os.path.exists('HP-Devices.txt'):
-#read the file HP-Devices.txt and store the total number of lines in a variable called HP-count
-    with open('HP-Devices.txt', 'r') as f:
-        HP_count = 0
-        for line in f:
-            HP_count += 1
-else:
-    HP_count = 0
-    pass
+#Check each line of the file vlan_list.txt if it is "Interface" delete it
+with open('vlan_list.txt', 'r') as f:
+    lines = f.readlines()
+with open('vlan_list.txt', 'w') as f:
+  for line in lines:
+      if line.strip("\n") != "Interface":
+          f.write(line)
+
+# count the lines in the file vlan_list_final.txt and print the number of lines
+with open('vlan_list.txt', 'r') as f:
+    vlan_count = 0
+    for line in f:
+        vlan_count += 1
+    print("\n\n++ There are", vlan_count, "different vlans in the", ip_arp_file, "file")
 
 #######################################################################################
 
-
 # count the lines in the file oui_list_final.txt and print the number of lines
 with open('oui_list_final.txt', 'r') as f:
-    count = 0
+    OUI_count = 0
     for line in f:
-        count += 1
-    print("\n\n++ There are", count, "different OUIs in the", ip_arp_file, "file")
+        OUI_count += 1
+    print("++ There are", OUI_count, "different OUIs in the", ip_arp_file, "file")
 
 #count the lines in the file oui_list_final.txt and print the number of lines
 with open('company_list.txt', 'r') as f:
@@ -374,16 +387,19 @@ with open( ip_arp_file, 'r') as f:
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
     arpcount = count-1
 
-OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count + HP_count)
+OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count)
+
+#######################################################################################
+
 
 print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs")
 print(">>> Please see the company_list.txt file in the current directory for the list of companies seen in the", ip_arp_file, "file")
+print(">>> Please see the vlan_list.txt file in the current directory for the list of VLANs seen in the", ip_arp_file, "file")
 print("\n")
 print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count)
 print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count)
 print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", CiscoMeraki_count)
 print ("# The number of other Cisco devices in the", ip_arp_file, "file is", OtherCisco_count)
-print ("# The number of HP devices in the", ip_arp_file, "file is", HP_count)
 print ("# The number of other devices in the", ip_arp_file, "file is", OtherTotal)
 print("\n")
 if os.path.exists('Apple-Devices.txt'):
@@ -403,11 +419,6 @@ else:
 
 if os.path.exists('Other-Cisco-Devices.txt'):
     print(">>> Please see the Other-Cisco-Devices.txt file in the current directory for the list of Other Cisco devices")
-else:
-    pass
-
-if os.path.exists('HP-Devices.txt'):
-    print(">>> Please see the HP-Devices.txt file in the current directory for the list of HP devices")
 else:
     pass
 
