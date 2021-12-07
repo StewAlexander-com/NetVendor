@@ -3,6 +3,7 @@ This program reads a Cisco ARP table ("```sh ip arp```"), and produces informati
 * How many different vendors (as in companies) exist witin the ARP table
 * How many OUIs (MAC Address hardware types) exist within the ARP table
 * A list (and total) of all the Apple, Cisco, Dell and HP products exist in the ARP table
+* A list (and total) of all the VLANs within the ARP table
 
 Table of Contents:
   - [Why?](#why)
