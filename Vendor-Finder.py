@@ -331,7 +331,7 @@ with open(ip_arp_file, 'r') as f:
        #split the line into words
         words = line.split()
         #if words[2] starts with a HP OUI add the line to the HP-Devices.txt file 
-        if words[2].startswith("3024.a9") or words[2].startswith("3822.e2") or words[2].startswith("842a.fd") or words[2].startswith("f80d.ac") or words[2].startswith("0017.a4") or words[2].startswith("001b.78") or words[2].startswith("0023.7d") or words[2].startswith("0030.6e") or words[2].startswith("009c.02") or words[2].startswith("1062.e5") or words[2].startswith("308d.99") :
+        if words[2].startswith("3024.a9") or words[2].startswith("3822.e2") or words[2].startswith("842a.fd") or words[2].startswith("f80d.ac") or words[2].startswith("0017.a4") or words[2].startswith("001b.78") or words[2].startswith("0023.7d") or words[2].startswith("0030.6e") or words[2].startswith("009c.02") or words[2].startswith("1062.e5") or words[2].startswith("308d.99")or words[2].startswith("30e1.71") or words[2].startswith("38ea.a7") or words[2].startswith("40b0.34") or words[2].startswith("68b5.99") or words[2].startswith("6cc2.17") or words[2].startswith("80ce.62") or words[2].startswith("80e8.2c") or words[2].startswith("8434.97") or words[2].startswith("98e7.f4") or words[2].startswith("9cb6.54") or words[2].startswith("a08c.fd") or words[2].startswith("a0d3.c1") or words[2].startswith("a45d.36") or words[2].startswith("b00c.d1") or words[2].startswith("e4e7.49") or words[2].startswith("ec8e.b5") or words[2].startswith("f092.1c") or words[2].startswith("f430.b9") or words[2].startswith("fc15.b4") :
             with open('HP-Devices.txt', 'a') as f:
                 f.write(line)
                 time.sleep(0.1)
