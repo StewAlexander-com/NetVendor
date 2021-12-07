@@ -1,0 +1,54 @@
+AMERICAN POWER CONVERSION CORP
+Advantech Technology (CHINA) Co., Ltd.
+Alertus Technologies LLC
+Apple, Inc.
+Asiamajor Inc.
+Axis Communications AB
+BrightSign LLC
+Broadcom
+Broadcom Limited
+Chelsio Communications
+Cisco Meraki
+Cisco Systems, Inc
+Dell Inc.
+Eaton Corporation
+Emerson Network Power, Avocent Division
+Espressif Inc.
+Extron Electronics
+GIGA-BYTE TECHNOLOGY CO.,LTD.
+HP Inc.
+Hewlett Packard
+Hon Hai Precision Ind. Co., Ltd.
+ICANN, IANA Department
+Intel Corporate
+KONICA MINOLTA HOLDINGS, INC.
+KRONOS, INC.
+LANNER ELECTRONICS, INC.
+LCFC(HeFei) Electronics Technology co., ltd
+Loopcomm Technology, Inc.
+MITEL CORPORATION
+NETGEAR
+OSI Security Devices
+PORTWELL, INC.
+Polycom
+Posiflex Inc.
+Quanta Computer Inc.
+RICOH COMPANY, LTD.
+RICOH COMPANY,LTD.
+ROLAND DG CORPORATION
+Raspberry Pi Foundation
+Rockwell Automation
+Routerboard.com
+SAMSUNG ELECTRONICS CO., LTD.
+Samsung Electronics
+Samsung Electronics Co., LTD
+Samsung Electronics ITS, Printer division
+Seiko Epson Corporation
+Speed Dragon Multimedia Limited
+Super Micro Computer, Inc.
+Top Victory Electronics (Taiwan) Co., Ltd.
+Tripp Lite
+Tyan Computer Corp
+Ubiquiti Networks Inc.
+ViaVideo Communications, Inc.
+Xerox Corporation

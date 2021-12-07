@@ -316,6 +316,41 @@ else:
     pass
 
 #######################################################################################
+#Finding all the Hewlett Pakard (HP) ARP Entries ....
+
+#Delete the file HP-Devices.txt if it exists
+if os.path.exists('HP-Devices.txt'):
+    os.remove('HP-Devices.txt')
+else :
+    pass
+
+#For every line in the file check the MAC address, if it is an HP Address, add it the HP-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in f:
+        print (".", end="")
+       #split the line into words
+        words = line.split()
+        #if words[2] starts with a HP OUI add the line to the HP-Devices.txt file 
+        if words[2].startswith("3024.a9") or words[2].startswith("3822.e2") or words[2].startswith("842a.fd") or words[2].startswith("f80d.ac") or words[2].startswith("0017.a4") or words[2].startswith("001b.78") or words[2].startswith("0023.7d") or words[2].startswith("0030.6e") or words[2].startswith("009c.02") or words[2].startswith("1062.e5") or words[2].startswith("308d.99") :
+            with open('HP-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
+
+#close the files
+f.close()
+
+if os.path.exists('HP-Devices.txt'):
+#read the file HP-Devices.txt and store the total number of lines in a variable called HP-count
+    with open('HP-Devices.txt', 'r') as f:
+        HP_count = 0
+        for line in f:
+            HP_count += 1
+else:
+    HP_count = 0
+    pass
+
+#######################################################################################
+
 
 # count the lines in the file oui_list_final.txt and print the number of lines
 with open('oui_list_final.txt', 'r') as f:
@@ -339,7 +374,7 @@ with open( ip_arp_file, 'r') as f:
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
     arpcount = count-1
 
-OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count)
+OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count + HP_count)
 
 print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs")
 print(">>> Please see the company_list.txt file in the current directory for the list of companies seen in the", ip_arp_file, "file")
@@ -348,6 +383,7 @@ print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_cou
 print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count)
 print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", CiscoMeraki_count)
 print ("# The number of other Cisco devices in the", ip_arp_file, "file is", OtherCisco_count)
+print ("# The number of HP devices in the", ip_arp_file, "file is", HP_count)
 print ("# The number of other devices in the", ip_arp_file, "file is", OtherTotal)
 print("\n")
 if os.path.exists('Apple-Devices.txt'):
@@ -367,6 +403,11 @@ else:
 
 if os.path.exists('Other-Cisco-Devices.txt'):
     print(">>> Please see the Other-Cisco-Devices.txt file in the current directory for the list of Other Cisco devices")
+else:
+    pass
+
+if os.path.exists('HP-Devices.txt'):
+    print(">>> Please see the HP-Devices.txt file in the current directory for the list of HP devices")
 else:
     pass
 
