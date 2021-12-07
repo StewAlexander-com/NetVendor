@@ -12,11 +12,16 @@ Table of Contents:
   - [To Do ...](#to-do-)
 
 ## Why?
-* Answers the question what are the different vendors seen in a Cisco ```#sh ip arp```
-* Helps to understand what is in a network
+Answers the questions:
+* What are the different companies seen in the ARP table?
+* How many different hardware types (OUIs) are there in the network?
+* How many Apples, Ciscos, Dells, and HPs does this equipment / network see?
+<br>
+All Of this is useful for understanding what is in a network for security purposes... <br>
+
 ## Requirements:
 * This uses a restful API to search for the vendors, so it needs an internet connection
-* This needs the output of a "#sh ip arp", as it is using this to do the lookup
+* This needs the output of an ARP table (in the format seen below), as it is using this to do the lookup
 ## Input:
 * Contents of a text file with the Cisco ```#sh ip arp``` output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
