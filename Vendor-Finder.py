@@ -6,6 +6,16 @@ import time
 import subprocess
 import json
 
+try :
+    import plotly
+    import plotly.graph_objs as go
+except ImportError:
+    print("[!] Plotly library not installed, Installing...")
+    os.system("pip3 install plotly")
+    time.sleep(30)
+    import plotly
+    import plotly.graph_objs as go
+
 #if the library requests is not installed, install it via pip
 try:
     import requests
@@ -402,6 +412,31 @@ print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", Ci
 print ("# The number of other Cisco devices in the", ip_arp_file, "file is", OtherCisco_count)
 print ("# The number of other devices in the", ip_arp_file, "file is", OtherTotal)
 print("\n")
+
+#######################################################################################
+
+#Plotting the Apple, Dell, Cisco-Meraki, Other Cisco, and Other devices
+
+labels = ['Apple', 'Dell', 'Cisco-Meraki', 'Other Cisco', 'Other']
+values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, OtherTotal]
+
+#check if Google Chrome or Firefox or is installed on Windows
+if os.path.exists('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe') or os.path.exists('C:\\Program Files\\Google\\Chrome\\Application\\Firefox.exe'):
+    fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
+    fig.show()
+elif os.name == 'Linux':
+    #check if Google Chrome or Firefox is installed on Linux
+    if os.path.exists('/usr/bin/google-chrome') or os.path.exists('/usr/bin/firefox'):
+        fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
+        fig.show()
+    else :
+        pass
+else:
+    pass   
+
+#######################################################################################
+
+
 if os.path.exists('Apple-Devices.txt'):
     print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices")
 else:
