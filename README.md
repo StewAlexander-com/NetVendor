@@ -30,6 +30,8 @@ All Of this is useful for understanding what is in a network for security purpos
 * Program output: </br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
  ![image](https://user-images.githubusercontent.com/48565067/145101360-d6cf7cf1-bb5e-4608-bf20-f2b9fddfc63f.png)
+ - If an internet browser is available it also provides a graph:
+ ![image](https://user-images.githubusercontent.com/48565067/145288325-e4daa630-ce3f-4487-99ec-5e0402f8edaf.png)
  * Created text file "company_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
 * Created text file "oui_final_list.txt" output:</br></br>
