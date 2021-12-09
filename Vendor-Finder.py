@@ -457,8 +457,10 @@ if os.path.exists('Other-Cisco-Devices.txt'):
 else:
     pass
 
+
 #tell the user to press enter to quit
 input("\nPress enter to quit: ")
+time.sleep(3)
 #exit the program
 sys.exit()
 
