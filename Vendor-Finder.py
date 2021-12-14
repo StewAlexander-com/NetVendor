@@ -64,6 +64,14 @@ mac_temp = input("\nPlease enter the column in the file that contains the MAC Ad
 mac_column = int(mac_temp)
 mac_word = mac_column - 1
 
+#Ask the user to input which word containts the VLAN_Element
+vlan_temp = input("\nPlease enter the column in the file that contains the VLANs: ")
+
+#convert the input to an int and subtract 1 to match the column number
+vlan_column = int(vlan_temp)
+vlan_word = vlan_column - 1
+
+
 with open(ip_arp_file, 'r') as f:
         for line in f:
             #split the line into words
@@ -217,7 +225,7 @@ with open(ip_arp_file, 'r') as f:
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with Apple OUI add it to the Apple-Devices.txt file 
-        if words[mac_word].startswith("0c4d.e9") or words[mac_word].startswith("109a.dd") or words[mac_word].startswith("10dd.b1") or words[mac_word].startswith("28ff.3c") or words[mac_word].startswith("38c9.86") or words[mac_word].startswith("3c7d.0a") or words[mac_word].startswith("501f.c6")or words[mac_word].startswith("685b.35") or words[mac_word].startswith("7cd1.c")or words[mac_word].startswith("8866.5a") or words[mac_word].startswith("9c20.7b") or words[mac_word].startswith("a860.b6") or words[mac_word].startswith("d081.7a"):
+        if words[mac_word].startswith("0c4d.e9") or words[mac_word].startswith("109a.dd") or words[mac_word].startswith("10dd.b1") or words[mac_word].startswith("28ff.3c") or words[mac_word].startswith("38c9.86") or words[mac_word].startswith("3c7d.0a") or words[mac_word].startswith("501f.c6")or words[mac_word].startswith("685b.35") or words[mac_word].startswith("7cd1.c")or words[mac_word].startswith("8866.5a") or words[mac_word].startswith("9c20.7b") or words[mac_word].startswith("a860.b6") or words[mac_word].startswith("d081.7a") or words[mac_word].startswith("cc29.f5"):
             with open('Apple-Devices.txt', 'a') as f:
                 f.write(line)
                 time.sleep(0.1)
@@ -251,7 +259,7 @@ with open(ip_arp_file, 'r') as f:
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Dell OUI add the line to the Dell-Devices.txt file 
-        if words[mac_word].startswith("001a.a0") or words[mac_word].startswith("004e.01") or words[mac_word].startswith("14b3.1f") or words[mac_word].startswith("14fe.b5") or words[mac_word].startswith("1866.da") or words[mac_word].startswith("28f1.0e") or words[mac_word].startswith("484d.7e")or words[mac_word].startswith("509a.4c") or words[mac_word].startswith("5448.10")or words[mac_word].startswith("54bf.64") or words[mac_word].startswith("6400.6a") or words[mac_word].startswith("6c2b.59") or words[mac_word].startswith("782b.cb") or words[mac_word].startswith("8cec.4b") or words[mac_word].startswith("a41f.72") or words[mac_word].startswith("a4bb.6d") or words[mac_word].startswith("b083.fe") or words[mac_word].startswith("b885.84") or words[mac_word].startswith("b8ca.3a") or words[mac_word].startswith("bc30.5b") or words[mac_word].startswith("c81f.66") or words[mac_word].startswith("d4be.d9") or words[mac_word].startswith("d89e.f3") or words[mac_word].startswith("e454.e8") or words[mac_word].startswith("e4f0.04") or words[mac_word].startswith("f04d.a2") or words[mac_word].startswith("f402.70") or words[mac_word].startswith("f48e.38") or words[mac_word].startswith("f8bc.12"):
+        if words[mac_word].startswith("001a.a0") or words[mac_word].startswith("004e.01") or words[mac_word].startswith("14b3.1f") or words[mac_word].startswith("14fe.b5") or words[mac_word].startswith("1866.da") or words[mac_word].startswith("28f1.0e") or words[mac_word].startswith("484d.7e")or words[mac_word].startswith("509a.4c") or words[mac_word].startswith("5448.10")or words[mac_word].startswith("54bf.64") or words[mac_word].startswith("6400.6a") or words[mac_word].startswith("6c2b.59") or words[mac_word].startswith("782b.cb") or words[mac_word].startswith("8cec.4b") or words[mac_word].startswith("a41f.72") or words[mac_word].startswith("a4bb.6d") or words[mac_word].startswith("b083.fe") or words[mac_word].startswith("b885.84") or words[mac_word].startswith("b8ca.3a") or words[mac_word].startswith("bc30.5b") or words[mac_word].startswith("c81f.66") or words[mac_word].startswith("d4be.d9") or words[mac_word].startswith("d89e.f3") or words[mac_word].startswith("e454.e8") or words[mac_word].startswith("e4f0.04") or words[mac_word].startswith("f04d.a2") or words[mac_word].startswith("f402.70") or words[mac_word].startswith("f48e.38") or words[mac_word].startswith("f8bc.12") or words[mac_word].startswith("a44c.c8"):
             with open('Dell-Devices.txt', 'a') as f:
                 f.write(line)
                 time.sleep(0.1)
@@ -317,7 +325,7 @@ with open(ip_arp_file, 'r') as f:
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Other-Cisco OUI add the line to the Other-Cisco-Devices.txt file 
-        if words[mac_word].startswith("0007.7d") or words[mac_word].startswith("0008.2f") or words[mac_word].startswith("0021.a0") or words[mac_word].startswith("0022.bd") or words[mac_word].startswith("0023.5e") or words[mac_word].startswith("003a.99") or words[mac_word].startswith("005f.86") or words[mac_word].startswith("00aa.6e") or words[mac_word].startswith("0cf5.a4") or words[mac_word].startswith("1833.9d") or words[mac_word].startswith("1ce8.5d") or words[mac_word].startswith("30e4.db") or words[mac_word].startswith("40f4.ec") or words[mac_word].startswith("4403.a7") or words[mac_word].startswith("4c4e.35") or words[mac_word].startswith("544a.00") or words[mac_word].startswith("5486.bc") or words[mac_word].startswith("588d.09") or words[mac_word].startswith("58bf.ea") or words[mac_word].startswith("6400.f1") or words[mac_word].startswith("7c21.0d") or words[mac_word].startswith("84b5.17") or words[mac_word].startswith("8cb6.4f") or words[mac_word].startswith("ac17.c8") or words[mac_word].startswith("ac7e.8a") or words[mac_word].startswith("bc67.1c") or words[mac_word].startswith("c4b3.6a") or words[mac_word].startswith("d4ad.71") or words[mac_word].startswith("e0d1.73") or words[mac_word].startswith("e8b7.48") or words[mac_word].startswith("f09e.63") or words[mac_word].startswith("f866.f2"):
+        if words[mac_word].startswith("0007.7d") or words[mac_word].startswith("0008.2f") or words[mac_word].startswith("0021.a0") or words[mac_word].startswith("0022.bd") or words[mac_word].startswith("0023.5e") or words[mac_word].startswith("003a.99") or words[mac_word].startswith("005f.86") or words[mac_word].startswith("00aa.6e") or words[mac_word].startswith("0cf5.a4") or words[mac_word].startswith("1833.9d") or words[mac_word].startswith("1ce8.5d") or words[mac_word].startswith("30e4.db") or words[mac_word].startswith("40f4.ec") or words[mac_word].startswith("4403.a7") or words[mac_word].startswith("4c4e.35") or words[mac_word].startswith("544a.00") or words[mac_word].startswith("5486.bc") or words[mac_word].startswith("588d.09") or words[mac_word].startswith("58bf.ea") or words[mac_word].startswith("6400.f1") or words[mac_word].startswith("7c21.0d") or words[mac_word].startswith("84b5.17") or words[mac_word].startswith("8cb6.4f") or words[mac_word].startswith("ac17.c8") or words[mac_word].startswith("ac7e.8a") or words[mac_word].startswith("bc67.1c") or words[mac_word].startswith("c4b3.6a") or words[mac_word].startswith("d4ad.71") or words[mac_word].startswith("e0d1.73") or words[mac_word].startswith("e8b7.48") or words[mac_word].startswith("f09e.63") or words[mac_word].startswith("f866.f2") or words[mac_word].startswith("0025.45") or words[mac_word].startswith("002a.6a") :
             with open('Other-Cisco-Devices.txt', 'a') as f:
                 f.write(line)
                 time.sleep(0.1)
@@ -342,7 +350,7 @@ with open(ip_arp_file, 'r') as f:
             #split the line into words
             vlanwords = line.split()
             #send words[3] to a list
-            vlan_Element = vlanwords[3]
+            vlan_Element = vlanwords[vlan_word]
             #split vlan_Element into different elements
             vlan_Element = vlan_Element.split()
             #append vlan_Element to a list called vlan_list
