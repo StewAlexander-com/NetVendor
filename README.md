@@ -1,4 +1,4 @@
-#Vendor_lookup
+# Vendor_lookup
 This program reads an ARP or MAC Addreess table ("```sh ip arp```" or ```sh mac add```), and produces information on what it contains, including:
 * How many different vendors (as in companies) exist witin the ARP table
 * How many OUIs (MAC Address hardware types) exist within the ARP table
