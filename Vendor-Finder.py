@@ -439,13 +439,9 @@ values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, OtherTot
 if os.path.exists('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe') or os.path.exists('C:\\Program Files\\Google\\Chrome\\Application\\Firefox.exe'):
     fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
     fig.show()
-elif os.name == 'Linux':
-    #check if Google Chrome or Firefox is installed on Linux
-    if os.path.exists('/usr/bin/google-chrome') or os.path.exists('/usr/bin/firefox'):
-        fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
-        fig.show()
-    else :
-        pass
+elif os.path.exists('/usr/bin/google-chrome') or os.path.exists('/usr/bin/firefox'):
+    fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
+    fig.show()   
 else:
     pass   
 
