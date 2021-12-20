@@ -1,8 +1,8 @@
 # Vendor_lookup
-This program reads an ARP or MAC Addreess table ("```sh ip arp```" or ```sh mac add```), and produces information on what it contains, including:
-* How many different vendors (as in companies) exist witin the ARP table
-* How many OUIs (MAC Address hardware types) exist within the ARP table
-* A list (and total) of all the Apple, Cisco, Dell and HP products that exist in the ARP table
+This program reads an ARP or MAC Addreess table ("```sh ip arp```" or "```sh mac add```"), and produces information on what it contains, including:
+* How many different vendors (as in companies) exist witin the ARP /MAC table
+* How many OUIs (MAC Address hardware types) exist within the ARP  / MAC table
+* A list (and total) of all the Apple, Cisco, Dell and HP products that exist in the ARP / MAC table
 * A list (and total) of all the VLANs within the ARP table
 
 Table of Contents:
@@ -14,17 +14,17 @@ Table of Contents:
 
 ## Why?
 Answers the questions:
-* What are the different companies seen in the ARP table?
+* What are the different companies seen in the ARP / MAC table?
 * How many different hardware types (OUIs) are there in the network?
-* How many Apples, Ciscos, Dells, and HPs does this equipment / network see?
+* How many Apples, Ciscos, Dells, and HPs does specific equipment and or network see?
 <br>
-All Of this is useful for understanding what is in a network for security purposes... <br>
+All Of this is useful for understanding what is in a network for security and benchmarking purposes... <br>
 
 ## Requirements
 * This uses a restful API to search for the vendors, so it needs an internet connection
 * This needs the output of an ARP or MAC Address table (such as the format seen below), as it is using this to do the lookup
 ## Input
-* Contents of a ARP table as a text file (such as a Cisco ```#sh ip arp``` output):</br></br>
+* Contents of a ARP or MAC Address table as a text file (such as a Cisco ```#sh ip arp``` output, like below):</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Program output: </br></br>
