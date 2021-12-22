@@ -1,8 +1,8 @@
-# IP-ARP-Vendor_lookup
-This program reads a Cisco ARP table ("```sh ip arp```"), and produces information on what it contains, including:
-* How many different vendors (as in companies) exist witin the ARP table
-* How many OUIs (MAC Address hardware types) exist within the ARP table
-* A list (and total) of all the Apple, Cisco, Dell and HP products that exist in the ARP table
+# Vendor_lookup
+This program reviews an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on what it contains, including:
+* How many different vendors (as in companies) exist witin the ARP / MAC table
+* How many OUIs (MAC Address hardware types) exist within the ARP  / MAC table
+* A list (and total) of all the Apple, Cisco, Dell and HP products that exist in the ARP / MAC table
 * A list (and total) of all the VLANs within the ARP table
 
 Table of Contents:
@@ -14,17 +14,17 @@ Table of Contents:
 
 ## Why?
 Answers the questions:
-* What are the different companies seen in the ARP table?
-* How many different hardware types (OUIs) are there in the network?
-* How many Apples, Ciscos, Dells, and HPs does this equipment / network see?
+* What are the different products (companies) seen in the ARP / MAC table?
+* How many different hardware types (OUIs) are there in the network? (The less there are, the safer a network is from a security standpoint)
+* How many Apples, Ciscos, Dells, and HPs does the Cisco (or other) equipment and or network see?
 <br>
-All Of this is useful for understanding what is in a network for security purposes... <br>
+All of this is useful for understanding what is in a network for security and benchmarking purposes... <br>
 
 ## Requirements
-* This uses a restful API to search for the vendors, so it needs an internet connection
-* This needs the output of an ARP table (in the format seen below), as it is using this to do the lookup
+* This uses a restful API to search for the vendors, so it needs a working internet connection
+* This needs the output of an ARP or MAC Address table as a text file (such as the Cisco IOS ```#sh ip arp ``` format seen below), as it is using this to do the lookup
 ## Input
-* Contents of a ARP table as a text file (such as a Cisco ```#sh ip arp``` output):</br></br>
+* Contents of a ARP or MAC Address table as a text file (such as a Cisco ```#sh ip arp``` output, like below):</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Program output: </br></br>
