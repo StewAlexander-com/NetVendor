@@ -6,6 +6,15 @@ import time
 import subprocess
 import json
 
+#check if the tqdm module exists, if not install it
+try :
+    from tqdm import tqdm
+except ImportError:
+    subprocess.call([sys.executable, "-m", "pip", "install", "tqdm"])
+    time.sleep(10)
+    from tqdm import tqdm
+
+#check if the plotly module exists, if not install it
 try :
     import plotly
     import plotly.graph_objs as go
@@ -46,7 +55,7 @@ vlan_list = []
 vlan_list_final = []
 
 #Show the contents of the current directory
-print("\nPlease select the #SH IP ARP Data text file from the current directory\n")
+print("\nPlease select the ARP or MAC Data text file from the current directory\n")
 print(os.listdir(), "\n")
 
 #while the file name is not valid, ask the user to input the file name again
@@ -139,15 +148,13 @@ with open('oui_list_final.txt', 'r') as f:
         vendor_list.append(line)
 
 #for each element in vendor_list do a request to the OUI database
-for i in range(len(vendor_list)):
+for i in tqdm (range(len(vendor_list))):
     #make each element uppercase
     vendor_list[i] = vendor_list[i].upper()
     r = requests.get("https://macvendors.co/api/" + vendor_list[i])
     time.sleep(0.1)
     #if the request is successful, print the vendor name
     if r.status_code == 200:
-        #add the tqdm code here?
-        print(".", end="")
         #save the vendor name to a file called vendor_list.txt
         with open('raw_vendor_list.json', 'a') as f:
             f.write(r.text + '\n')
@@ -194,7 +201,7 @@ for i in range(len(company_list)):
         #save each different element to a new list called vlan_list_final
         company_list_final.append(company_list[i])
 
-print("\n\nThe companies seen in the <<# sh ip arp>> data file are:\n")
+print("\n\nThe companies seen in the "+ ip_arp_file + " data file are:\n")
 
 #save the company list final to a file called company_list.txt
 with open('company_list.txt', 'w') as f:
@@ -218,10 +225,10 @@ if os.path.exists('Apple-Devices.txt'):
 else :
     pass
 
+print ("\nFinding any Apple devices in the " + ip_arp_file + " file....")
 #For every line in the file check the MAC address, if it is an Apple Address, add it the Apple-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in f:
-        print(".", end="")
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with Apple OUI add it to the Apple-Devices.txt file 
@@ -252,10 +259,11 @@ if os.path.exists('Dell-Devices.txt'):
 else :
     pass
 
+print ("\nFinding any Dell devices in the " + ip_arp_file + " file....")
+
 #For every line in the file check the MAC address, if it is an Dell Address, add it the Dell-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in f:
-        print (".", end="")
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Dell OUI add the line to the Dell-Devices.txt file 
@@ -285,10 +293,11 @@ if os.path.exists('Cisco-Meraki-Devices.txt'):
 else :
     pass
 
+print ("\nFinding any Cisco Meraki devices in the " + ip_arp_file + " file....")
+
 #For every line in the file check the MAC address, if it is an Cisco-Meraki Address, add it the Cisco-Meraki-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in f:
-        print (".", end="")
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Cisco-Meraki OUI add the line to the Cisco-Meraki-Devices.txt file 
@@ -318,10 +327,11 @@ if os.path.exists('Other-Cisco-Devices.txt'):
 else :
     pass
 
+print ("\nFinding any other Cisco devices in the " + ip_arp_file + " file....")
+
 #For every line in the file check the MAC address, if it is an Other-Cisco Address, add it the Other-Cisco-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in f:
-        print (".", end="")
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Other-Cisco OUI add the line to the Other-Cisco-Devices.txt file 
