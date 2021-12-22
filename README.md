@@ -1,5 +1,5 @@
 # Vendor_lookup
-This program reads an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on what it contains, including:
+This program reviews an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on what it contains, including:
 * How many different vendors (as in companies) exist witin the ARP / MAC table
 * How many OUIs (MAC Address hardware types) exist within the ARP  / MAC table
 * A list (and total) of all the Apple, Cisco, Dell and HP products that exist in the ARP / MAC table
