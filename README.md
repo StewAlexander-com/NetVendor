@@ -39,5 +39,5 @@ All of this is useful for understanding what is in a network for security and be
 * Created Vendor-Devices.txt file:</br></br>
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 ## To Do 
-- [ ] Add a progress bar for collecting oui info via “tqdm”
+- [x] Add a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
 
