@@ -28,8 +28,9 @@ All of this is useful for understanding what is in a network for security and be
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Program output: </br></br>
- ![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
- ![image](https://user-images.githubusercontent.com/48565067/145101360-d6cf7cf1-bb5e-4608-bf20-f2b9fddfc63f.png)
+ ![Screenshot from 2021-12-22 19-01-08](https://user-images.githubusercontent.com/48565067/147168300-38ffcb63-7c46-4abf-a188-0b6744e0bd35.png)
+ ![Screenshot from 2021-12-22 19-03-29](https://user-images.githubusercontent.com/48565067/147168385-6488f96f-5946-4785-87b7-47e2a1245d6a.png)
+
  - If Chrome or Firefox is available, it will create a pie chart and display it in the browser:
  ![image](https://user-images.githubusercontent.com/48565067/145288325-e4daa630-ce3f-4487-99ec-5e0402f8edaf.png)
  * Created text file "company_list.txt" output:</br></br>
