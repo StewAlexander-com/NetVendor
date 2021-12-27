@@ -35,18 +35,6 @@ except ImportError:
     time.sleep(1)
     import requests
 
-# if the library tqdm is not installed, install it via pip  -- future development
-# try:
-#     import tqdm
-# except ImportError:
-#     print("[!] The requests library is not installed. Installing...")
-#     os.system("pip install tqdm")
-#     print("[+] The requests library has been installed.")
-#     time.sleep(1)
-#     import tqdm 
-# 
-# from tqdm import tqdm
-
 OUI_list = [] 
 OUI_list_final = []
 company_list =[]
