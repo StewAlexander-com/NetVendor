@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+
+#####################################
+#                                   #
+#      Created by Stew Alexander    #
+#                2021               #
+#                                   #
+#####################################
+
 import os
 import sys
 import csv
