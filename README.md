@@ -1,8 +1,8 @@
-# IP-ARP-Vendor_lookup
-This program reads a Cisco ARP table ("```sh ip arp```"), and produces information on what it contains, including:
-* How many different vendors (as in companies) exist witin the ARP table
-* How many OUIs (MAC Address hardware types) exist within the ARP table
-* A list (and total) of all the Apple, Cisco, Dell and HP products that exist in the ARP table
+# Vendor_lookup
+This program reviews an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on what it contains, including:
+* How many different vendors (as in companies) exist witin the ARP / MAC table
+* How many OUIs (MAC Address hardware types) exist within the ARP  / MAC table
+* A list (and total) of all the Apple, Cisco, Dell and HP products that exist in the ARP / MAC table
 * A list (and total) of all the VLANs within the ARP table
 
 Table of Contents:
@@ -14,22 +14,23 @@ Table of Contents:
 
 ## Why?
 Answers the questions:
-* What are the different companies seen in the ARP table?
-* How many different hardware types (OUIs) are there in the network?
-* How many Apples, Ciscos, Dells, and HPs does this equipment / network see?
+* What are the different products (companies) seen in the ARP / MAC table?
+* How many different hardware types (OUIs) are there in the network? (The less there are, the safer a network is from a security standpoint)
+* How many Apples, Ciscos, Dells, and HPs does the Cisco (or other) equipment and or network see?
 <br>
-All Of this is useful for understanding what is in a network for security purposes... <br>
+All of this is useful for understanding what is in a network for security and benchmarking purposes... <br>
 
 ## Requirements
-* This uses a restful API to search for the vendors, so it needs an internet connection
-* This needs the output of an ARP table (in the format seen below), as it is using this to do the lookup
+* This uses a restful API to search for the vendors, so it needs a working internet connection
+* This needs the output of an ARP or MAC Address table as a text file (such as the Cisco IOS ```#sh ip arp ``` format seen below), as it is using this to do the lookup
 ## Input
-* Contents of a ARP table as a text file (such as a Cisco ```#sh ip arp``` output):</br></br>
+* Contents of a ARP or MAC Address table as a text file (such as a Cisco ```#sh ip arp``` output, like below):</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Program output: </br></br>
- ![image](https://user-images.githubusercontent.com/48565067/144634065-582c1eec-2576-4866-8057-112bf1f5e06d.png)
- ![image](https://user-images.githubusercontent.com/48565067/145101360-d6cf7cf1-bb5e-4608-bf20-f2b9fddfc63f.png)
+ ![Screenshot from 2021-12-22 19-01-08](https://user-images.githubusercontent.com/48565067/147168300-38ffcb63-7c46-4abf-a188-0b6744e0bd35.png)
+ ![Screenshot from 2021-12-22 19-03-29](https://user-images.githubusercontent.com/48565067/147168385-6488f96f-5946-4785-87b7-47e2a1245d6a.png)
+
  - If Chrome or Firefox is available, it will create a pie chart and display it in the browser:
  ![image](https://user-images.githubusercontent.com/48565067/145288325-e4daa630-ce3f-4487-99ec-5e0402f8edaf.png)
  * Created text file "company_list.txt" output:</br></br>
@@ -39,5 +40,5 @@ All Of this is useful for understanding what is in a network for security purpos
 * Created Vendor-Devices.txt file:</br></br>
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 ## To Do 
-- [ ] Add a progress bar for collecting oui info via “tqdm”
-
+- [x] Add a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
+- [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
