@@ -465,6 +465,7 @@ print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_cou
 print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count)
 print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", CiscoMeraki_count)
 print ("# The number of other Cisco devices in the", ip_arp_file, "file is", OtherCisco_count)
+print ("# The number of HP devices in the", ip_arp_file, "file is", HP_count)
 print ("# The number of other devices in the", ip_arp_file, "file is", OtherTotal)
 print("\n")
 
