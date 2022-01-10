@@ -349,6 +349,40 @@ else:
     pass
 
 #######################################################################################
+#Finding all the HP ARP Entries ....
+
+#Delete the file HP-Devices.txt if it exists
+if os.path.exists('HP-Devices.txt'):
+    os.remove('HP-Devices.txt')
+else :
+    pass
+
+print ("\nFinding any HP devices in the " + ip_arp_file + " file....")
+
+#For every line in the file check the MAC address, if it is an HP OUI Address, add it the HP-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in tqdm(f):
+       #split the line into words
+        words = line.split()
+        #if words[mac_word] starts with a HP OUI add the line to the HP-Devices.txt file 
+        if words[mac_word].startswith("1111") or words[mac_word].startswith("11112"):
+            with open('HP-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
+#close the files
+f.close()
+
+if os.path.exists('HP-Devices.txt'):
+#read the file HP-Devices.txt and store the total number of lines in a variable called HP-count
+    with open('HP-Devices.txt', 'r') as f:
+        HP_count = 0
+        for line in f:
+            HP_count += 1
+else:
+    HP_count = 0
+    pass
+
+#######################################################################################
 # Find all the unique vlans in the ip_arp_file
 
 with open(ip_arp_file, 'r') as f:
@@ -418,7 +452,7 @@ with open( ip_arp_file, 'r') as f:
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
     arpcount = count-1
 
-OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count)
+OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count + HP_count)
 
 #######################################################################################
 
@@ -438,8 +472,8 @@ print("\n")
 
 #Plotting the Apple, Dell, Cisco-Meraki, Other Cisco, and Other devices
 
-labels = ['Apple', 'Dell', 'Cisco-Meraki', 'Other Cisco', 'Other']
-values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, OtherTotal]
+labels = ['Apple', 'Dell', 'Cisco-Meraki', 'Other Cisco', 'HP', 'Other']
+values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, HP_count, OtherTotal]
 
 #check if Google Chrome or Firefox or is installed on Windows
 if os.path.exists('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe') or os.path.exists('C:\\Program Files\\Google\\Chrome\\Application\\Firefox.exe'):
