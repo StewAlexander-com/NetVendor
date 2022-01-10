@@ -365,7 +365,7 @@ with open(ip_arp_file, 'r') as f:
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a HP OUI add the line to the HP-Devices.txt file 
-        if words[mac_word].startswith("1111") or words[mac_word].startswith("11112"):
+        if words[mac_word].startswith("0017.a4") or words[mac_word].startswith("001b.78") or words[mac_word].startswith("0023.7d") or words[mac_word].startswith("0030.6e") or words[mac_word].startswith("009c.02") or words[mac_word].startswith("1062.e5") or words[mac_word].startswith("3024.a9") or words[mac_word].startswith("308d.99") or words[mac_word].startswith("30e1.71") or words[mac_word].startswith("3822.e2") or words[mac_word].startswith("38ea.a7") or words[mac_word].startswith("40b0.34") or words[mac_word].startswith("68b5.99") or words[mac_word].startswith("6cc2.17") or words[mac_word].startswith("80ce.62") or words[mac_word].startswith("80e8.2c") or words[mac_word].startswith("8434.97") or words[mac_word].startswith("98e7.f4") or words[mac_word].startswith("9cb6.54") or words[mac_word].startswith("a08c.fd") or words[mac_word].startswith("a0d3.c1") or words[mac_word].startswith("a45d.36") or words[mac_word].startswith("b00c.d1") or words[mac_word].startswith("e4e7.49") or words[mac_word].startswith("ec8e.b5") or words[mac_word].startswith("f092.1c") or words[mac_word].startswith("f430.b9") or words[mac_word].startswith("fc15.b4") :
             with open('HP-Devices.txt', 'a') as f:
                 f.write(line)
                 time.sleep(0.1)
