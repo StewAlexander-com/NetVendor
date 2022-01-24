@@ -389,7 +389,7 @@ with open(ip_arp_file, 'r') as f:
         for line in f:
             #split the line into words
             vlanwords = line.split()
-            #send words[3] to a list
+            #send words[vlanword] to a list
             vlan_Element = vlanwords[vlan_word]
             #split vlan_Element into different elements
             vlan_Element = vlan_Element.split()
@@ -471,12 +471,12 @@ print("\n")
 
 #######################################################################################
 
-#Plotting the Apple, Dell, Cisco-Meraki, Other Cisco, and Other devices
+#Plotting the Apple, Dell, Cisco-Meraki, Other Cisco, HP, and Other devices
 
 labels = ['Apple', 'Dell', 'Cisco-Meraki', 'Other Cisco', 'HP', 'Other']
 values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, HP_count, OtherTotal]
 
-#check if Google Chrome or Firefox or is installed on Windows
+#check if Google Chrome or Firefox or is installed on Windows (or on Linux)
 if os.path.exists('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe') or os.path.exists('C:\\Program Files\\Google\\Chrome\\Application\\Firefox.exe'):
     fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
     fig.show()
