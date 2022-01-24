@@ -257,7 +257,7 @@ else :
 
 print ("\nFinding any Dell devices in the " + ip_arp_file + " file....")
 
-#For every line in the file check the MAC address, if it is an Dell Address, add it the Dell-Devices.txt
+#For every line in the file check the MAC address, if it is a Dell Address, add it the Dell-Devices.txt
 with open(ip_arp_file, 'r') as f:
     for line in tqdm(f):
        #split the line into words
