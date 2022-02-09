@@ -40,7 +40,7 @@ except ImportError:
     print("[!] The requests library is not installed. Installing...")
     os.system("pip install requests")
     print("[+] The requests library has been installed.")
-    time.sleep(1)
+    time.sleep(30)
     import requests
 
 OUI_list = [] 
@@ -509,6 +509,8 @@ if os.path.exists('Other-Cisco-Devices.txt'):
 else:
     pass
 
+#close any remainng files
+f.close()
 
 #tell the user to press enter to quit
 input("\nPress enter to quit: ")
