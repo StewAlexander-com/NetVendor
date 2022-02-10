@@ -93,12 +93,6 @@ with open(ip_arp_file, 'r') as f:
 #sort OUI_list
 OUI_list.sort()
 
-def loads(txt):
-    txt = txt.encode("utf-8")
-    value = json.loads(txt)
-
-    return value
-
 #compare each element to the previous element, if the element is different, save the element
 for i in range(len(OUI_list)):
     if OUI_list[i] != OUI_list[i-1]:
@@ -152,7 +146,7 @@ for i in tqdm (range(len(vendor_list))):
     #if the request is successful, print the vendor name
     if r.status_code == 200:
         #save the vendor name to a file called vendor_list.txt
-        with open('raw_vendor_list.json', 'a') as f:
+        with open('oui_name_result.txt', 'a') as f:
             f.write(r.text + '\n')
     #else if the request is not successful, print the error message
     else:
@@ -161,13 +155,13 @@ for i in tqdm (range(len(vendor_list))):
 #close the file
 f.close()
 
-#Check each line of the file vendor_list.txt if it is "{"result":{"error":"no result"}}" delete it
+#Check each line of the file vendor_list.txt if it is "No vendor" delete it
 
-with open('raw_vendor_list.json', 'r') as f:
+with open('oui_name_result.txt', 'r') as f:
     lines = f.readlines()
-with open('raw_vendor_list.json', 'w') as f:
+with open('oui_name_result.txt', 'w') as f:
   for line in lines:
-      if line.strip("\n") != '{\"result\":{\"error\":\"no result\"}}':
+      if line.strip("\n") != 'No vendor':
           f.write(line)
 
 #close the file
@@ -175,15 +169,11 @@ f.close()
 
 time.sleep(1)
 
-#open the json file raw_vendor_list.json and read it, look for company name
-with open('raw_vendor_list.json', 'r') as f:
+#open the text file oui_name_result.txt and read it, look for company name
+with open('oui_name_result.txt', 'r') as f:
     for line in f:
-        #load the json file
-        data = loads(line)
-        #get the company name
-        company = data['result']['company']
-        #append the company name to a list called company_list
-        company_list.append(company)
+        #load the line into a list called company_list
+        company_list.append(line)
 
 #close the file
 f.close()
@@ -194,7 +184,7 @@ company_list.sort()
 #compare each element to the previous element, if the element is different, print the element
 for i in range(len(company_list)):
     if company_list[i] != company_list[i-1]:
-        #save each different element to a new list called vlan_list_final
+        #save each different element to a new list called company_list_final
         company_list_final.append(company_list[i])
 
 print("\n\nThe companies seen in the "+ ip_arp_file + " data file are:\n")
@@ -202,7 +192,7 @@ print("\n\nThe companies seen in the "+ ip_arp_file + " data file are:\n")
 #save the company list final to a file called company_list.txt
 with open('company_list.txt', 'w') as f:
     for i in range(len(company_list_final)):
-        f.write(company_list_final[i] + '\n')
+        f.write(company_list_final[i])
 
 #print the list company_list one element a t time
 for i in range(len(company_list_final)):
@@ -476,13 +466,16 @@ print("\n")
 labels = ['Apple', 'Dell', 'Cisco-Meraki', 'Other Cisco', 'HP', 'Other']
 values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, HP_count, OtherTotal]
 
-#check if Google Chrome or Firefox or is installed on Windows (or on Linux)
+#check if Google Chrome or Firefox or is installed on Windows, Linux or Mac
 if os.path.exists('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe') or os.path.exists('C:\\Program Files\\Google\\Chrome\\Application\\Firefox.exe'):
     fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
     fig.show()
 elif os.path.exists('/usr/bin/google-chrome') or os.path.exists('/usr/bin/firefox'):
     fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
-    fig.show()   
+    fig.show()
+elif os.path.exists('/Applications/Google Chrome.app') or os.path.exists('/Applications/Firefox.app'):
+    fig =go.Figure(data=[go.Pie(labels=labels, values=values)])
+    fig.show()
 else:
     pass   
 
