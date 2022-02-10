@@ -147,7 +147,7 @@ with open('oui_list_final.txt', 'r') as f:
 for i in tqdm (range(len(vendor_list))):
     #make each element uppercase
     vendor_list[i] = vendor_list[i].upper()
-    r = requests.get("https://macvendors.co/api/" + vendor_list[i])
+    r = requests.get("https://macvendors.co/api/vendorname/" + vendor_list[i])
     time.sleep(0.1)
     #if the request is successful, print the vendor name
     if r.status_code == 200:
