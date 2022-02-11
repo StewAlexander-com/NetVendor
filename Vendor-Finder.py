@@ -196,6 +196,8 @@ with open('company_list.txt', 'w') as f:
 
 #print the list company_list one element a t time
 for i in range(len(company_list_final)):
+    #remove the new line character from the end of the line
+    company_list_final[i] = company_list_final[i].rstrip()
     print(company_list_final[i])
 
 #Collecting the output of the command sh ip arp
