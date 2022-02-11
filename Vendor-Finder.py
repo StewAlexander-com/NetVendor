@@ -341,6 +341,45 @@ else:
     pass
 
 #######################################################################################
+
+#sleep for 1 second
+time.sleep(1)
+
+#Finding all the Mitel Corperation Entries ....
+
+#Delete the file Mitel-Devices.txt if it exists
+if os.path.exists('Mitel-Devices.txt'):
+    os.remove('Mitel-Devices.txt')
+else :
+    pass
+
+print ("\nFinding any Mitel devices in the " + ip_arp_file + " file....")
+
+#For every line in the file check the MAC address, if it is an Mitel Address, add it the Mitel-Devices.txt
+with open(ip_arp_file, 'r') as f:
+    for line in tqdm(f):
+       #split the line into words
+        words = line.split()
+        #if words[mac_word] starts with a Mitel OUI add the line to the Mitel-Devices.txt file 
+        if words[mac_word].startswith("0800.0f") :
+            with open('Mitel-Devices.txt', 'a') as f:
+                f.write(line)
+                time.sleep(0.1)
+#close the files
+f.close()
+
+if os.path.exists('Mitel-Devices.txt'):
+#read the file Mitel-Devices.txt and store the total number of lines in a variable called Mitel-count
+    with open('Mitel-Devices.txt', 'r') as f:
+        Mitel_count = 0
+        for line in f:
+            Mitel_count += 1
+else:
+    Mitel_count = 0
+    pass
+
+#######################################################################################
+
 #Finding all the HP ARP Entries ....
 
 #Delete the file HP-Devices.txt if it exists
@@ -444,7 +483,7 @@ with open( ip_arp_file, 'r') as f:
     print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
     arpcount = count-1
 
-OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count + HP_count)
+OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count + HP_count + Mitel_count)
 
 #######################################################################################
 
@@ -458,15 +497,16 @@ print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count
 print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", CiscoMeraki_count)
 print ("# The number of other Cisco devices in the", ip_arp_file, "file is", OtherCisco_count)
 print ("# The number of HP devices in the", ip_arp_file, "file is", HP_count)
+print ("# The number of Mitel devices in the", ip_arp_file, "file is", Mitel_count)
 print ("# The number of other devices in the", ip_arp_file, "file is", OtherTotal)
 print("\n")
 
 #######################################################################################
 
-#Plotting the Apple, Dell, Cisco-Meraki, Other Cisco, HP, and Other devices
+#Plotting the Apple, Dell, Cisco-Meraki, Other Cisco, HP, Mitel and Other devices
 
-labels = ['Apple', 'Dell', 'Cisco-Meraki', 'Other Cisco', 'HP', 'Other']
-values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, HP_count, OtherTotal]
+labels = ['Apple', 'Dell', 'Cisco-Meraki', 'Other Cisco', 'HP', 'Mitel','Other']
+values = [Apple_count, Dell_count, CiscoMeraki_count, OtherCisco_count, HP_count, Mitel_count, OtherTotal]
 
 #check if Google Chrome or Firefox or is installed on Windows, Linux or Mac
 if os.path.exists('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe') or os.path.exists('C:\\Program Files\\Google\\Chrome\\Application\\Firefox.exe'):
@@ -503,6 +543,9 @@ if os.path.exists('Other-Cisco-Devices.txt'):
     print(">>> Please see the Other-Cisco-Devices.txt file in the current directory for the list of Other Cisco devices")
 else:
     pass
+
+if os.path.exists('Mitel-Devices.txt'):
+    print(">>> Please see the Mitel-Devices.txt file in the current directory for the list of Mitel devices")  
 
 #close any remainng files
 f.close()
