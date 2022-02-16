@@ -31,7 +31,7 @@ All of this is useful for understanding what is in a network for security and be
  ![Screenshot from 2021-12-22 19-01-08](https://user-images.githubusercontent.com/48565067/147168300-38ffcb63-7c46-4abf-a188-0b6744e0bd35.png)
  ![Screenshot from 2021-12-22 19-03-29](https://user-images.githubusercontent.com/48565067/147168385-6488f96f-5946-4785-87b7-47e2a1245d6a.png)
 
- - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create a pie chart and display it in the browser:
+ - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create an interactive pie chart and display it in the browser:
  ![image](https://user-images.githubusercontent.com/48565067/145288325-e4daa630-ce3f-4487-99ec-5e0402f8edaf.png)
  * Created text file "company_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
