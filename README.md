@@ -16,7 +16,7 @@ Table of Contents:
 Answers the questions:
 * What are the different products (companies) seen in the ARP / MAC table?
 * How many different hardware types (OUIs) are there in the network? (The less there are, the safer a network is from a security standpoint)
-* How many Apples, Ciscos, Dells, and HPs does the Cisco (or other) equipment and or network see?
+* How many Apples, Ciscos, Dells, HPs, and Mitel's are on the network?
 <br>
 All of this is useful for understanding what is in a network for security and benchmarking purposes... <br>
 
