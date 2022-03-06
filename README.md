@@ -28,8 +28,9 @@ All of this is useful for understanding what is in a network for security and be
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Program output: </br></br>
- ![Screenshot from 2021-12-22 19-01-08](https://user-images.githubusercontent.com/48565067/147168300-38ffcb63-7c46-4abf-a188-0b6744e0bd35.png)
- ![Screenshot from 2021-12-22 19-03-29](https://user-images.githubusercontent.com/48565067/147168385-6488f96f-5946-4785-87b7-47e2a1245d6a.png)
+![program_output1](https://user-images.githubusercontent.com/48565067/156942008-643d9fa1-20f7-42c9-bcca-0f8fbfa1f8f5.png)
+![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
+![program_output3](https://user-images.githubusercontent.com/48565067/156942020-3e77ec75-1e32-4318-b864-40cd5029625f.png)
 
  - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create an interactive pie chart and display it in the browser:
  ![image](https://user-images.githubusercontent.com/48565067/145288325-e4daa630-ce3f-4487-99ec-5e0402f8edaf.png)
@@ -43,5 +44,5 @@ All of this is useful for understanding what is in a network for security and be
 - [x] Added lookup for Mitel Corperation Phones (02/11/2022)
 - [x] Streamlined API call, add support for Apple Macs (supporting Windows, Linux or Mac computers; Added 02/10/2022)
 - [x] Add a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
-- [ ] Use the [rich](https://github.com/Textualize/rich) library to colorize cli output
+- [x] Use the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
