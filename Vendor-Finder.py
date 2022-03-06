@@ -140,7 +140,7 @@ with open('oui_list_final.txt', 'w') as f:
 f.close()
 
 #print please be patient the vendor information is being retrieved
-print("\n[italic yellow]Please be patient while the vendor information is being retrieved[/italic yellow]\n")
+print("\n[italic yellow]Please be patient while the [cyan]company[/cyan] information is being retrieved[/italic yellow]\n")
 
 #for each line in the file oui_list_final.txt, store this in a list called vendor_list
 vendor_list = []
