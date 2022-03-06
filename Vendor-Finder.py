@@ -72,16 +72,16 @@ while True:
         print("\n[italic yellow]The file name is not valid, please try again[/italic yellow]\n")
 
 #Ask the user to input which word containts the MAC_Element
-print("Please enter the column in the file that contains the [italic green]Mac Addresses[/italic green]")
-mac_temp = input(": ")
+print("Please enter the column in the file that contains the [cyan]Mac Addresses[/cyan]:")
+mac_temp = input("> ")
 
 #convert the input to an int and subtract 1 to match the column number
 mac_column = int(mac_temp)
 mac_word = mac_column - 1
 
 #Ask the user to input which word containts the VLAN_Element
-print("\nPlease enter the column in the file that contains the [italic green]VLANs[/italic green]")
-vlan_temp = input(": ")
+print("\nPlease enter the column in the file that contains the [cyan]VLANs[/cyan]:")
+vlan_temp = input("> ")
 
 #convert the input to an int and subtract 1 to match the column number
 vlan_column = int(vlan_temp)
@@ -198,7 +198,7 @@ for i in range(len(company_list)):
         #save each different element to a new list called company_list_final
         company_list_final.append(company_list[i])
 
-print("\n\nThe companies seen in the "+ ip_arp_file + " data file are:\n")
+print("\n\nThe companies seen in the [italic green]"+ ip_arp_file + "[/italic green] data file are:\n")
 
 #save the company list final to a file called company_list.txt
 with open('company_list.txt', 'w') as f:

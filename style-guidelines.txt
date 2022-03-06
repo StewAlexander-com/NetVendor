@@ -1,2 +1,3 @@
  [italic yellow] - Attention statements
- [italic green]  - important words
+ [italic green]  - file name related words
+ [cyan] - important words
