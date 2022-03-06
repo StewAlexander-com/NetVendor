@@ -14,6 +14,15 @@ import time
 import subprocess
 import json
 
+#check if the rich module exists, if not, install it
+try:
+    import rich
+except ImportError:
+    subprocess.call([sys.executable, "-m", "pip", "install", "rich"])
+    import rich
+    time.sleep (10)
+    from rich import print
+
 #check if the tqdm module exists, if not install it
 try :
     from tqdm import tqdm
