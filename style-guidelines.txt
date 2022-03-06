@@ -1,3 +1,6 @@
- [italic yellow] - Attention statements
- [italic green]  - file name related words
- [cyan] - important words
+[italic yellow] - Attention statements
+[italic green]  - file name related words
+[cyan] - important words
+[bold yellow] -- "++"
+[blue] -- numbers
+[magenta] -- ">>"
