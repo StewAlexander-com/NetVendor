@@ -30,7 +30,7 @@ All of this is useful for understanding what is in a network for security and be
 * Program output: </br></br>
 ![program_output1](https://user-images.githubusercontent.com/48565067/156942008-643d9fa1-20f7-42c9-bcca-0f8fbfa1f8f5.png)
 ![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
-![program_output3](https://user-images.githubusercontent.com/48565067/156946290-91b7fa94-f26d-484c-847d-208821c72932.png)
+![program_output3](https://user-images.githubusercontent.com/48565067/156946968-1ab3e081-5925-43dd-a012-b65c85d53b3a.png)
 
  - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create an interactive pie chart and display it in the browser:
  ![image](https://user-images.githubusercontent.com/48565067/145288325-e4daa630-ce3f-4487-99ec-5e0402f8edaf.png)
@@ -46,5 +46,5 @@ All of this is useful for understanding what is in a network for security and be
 - [x] Add a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
 - [x] Use the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
 - [x] Fix the display of the "#[...]device" "other Cisco count" [Fixed 03/06/2022]
-- [ ] Correct minor style issue [ongoing,fix applied 03/06/2022]
+- [x] Correct minor style issue [ongoing,fix applied 03/06/2022]
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
