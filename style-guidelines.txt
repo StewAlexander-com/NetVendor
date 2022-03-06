@@ -4,3 +4,4 @@
 [bold yellow] -- "++"
 [bright_red] -- numbers
 [magenta] -- ">>"
+[bright_green] -- "#"
