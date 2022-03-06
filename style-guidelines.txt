@@ -2,5 +2,5 @@
 [italic green]  - file name related words
 [cyan] - important words
 [bold yellow] -- "++"
-[blue] -- numbers
+[bright_red] -- numbers
 [magenta] -- ">>"

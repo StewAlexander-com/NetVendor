@@ -469,7 +469,7 @@ with open('vlan_list.txt', 'r') as f:
     vlan_count = 0
     for line in f:
         vlan_count += 1
-    print ("\n[bold yellow]++[/bold yellow] There are [blue]" + str(vlan_count) + "[/blue] unique VLANs in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("\n[bold yellow]++[/bold yellow] There are [bright_red]" + str(vlan_count) + "[/bright_red] unique VLANs in the [italic green]" + ip_arp_file + "[/italic green] file....")
     
 
 #######################################################################################
@@ -479,7 +479,7 @@ with open('oui_list_final.txt', 'r') as f:
     OUI_count = 0
     for line in f:
         OUI_count += 1
-    print ("[bold yellow]++[/bold yellow] There are [blue]" + str(OUI_count) + "[/blue] unique OUI's in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(OUI_count) + "[/bright_red] unique OUI's in the [italic green]" + ip_arp_file + "[/italic green] file....")
     f.close()
     
 
@@ -488,7 +488,7 @@ with open('company_list.txt', 'r') as f:
     count = 0
     for line in f:
         count += 1
-    print ("[bold yellow]++[/bold yellow] There are [blue]" + str(count) + "[/blue] vendors in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(count) + "[/bright_red] vendors in the [italic green]" + ip_arp_file + "[/italic green] file....")
     f.close()
     
 #count the lines in the file oui_list_final.txt and print the number of lines
@@ -496,7 +496,7 @@ with open( ip_arp_file, 'r') as f:
     count = 0
     for line in f:
         count += 1
-    print ("[bold yellow]++[/bold yellow] There are [blue]" + str(count) + "[/blue] total devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(count) + "[/bright_red] total devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
     arpcount = count-1
     f.close()
 
@@ -509,13 +509,13 @@ print("[magenta]>>>[/magenta] Please see the [italic green]oui_list_final.txt[/i
 print("[magenta]>>>[/magenta] Please see the [italic green]company_list.txt[/italic green] file in the current directory for the list of companies") 
 print("[magenta]>>>[/magenta] Please see the [italic green]vlan_list.txt[/italic green] file in the current directory for the list of VLANs")
 print("\n")
-print ("# The number of Apple devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]" +str(Apple_count)+ "[/blue]")
-print ("# The number of Dell devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [blue]" +str(Dell_count)+ "[/blue]")
-print ("# The number of Cisco-Meraki devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [blue]" +str(CiscoMeraki_count)+ "[/blue]")
-print ("# The number of other Cisco devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue" + str(OtherCisco_count)+ "[/blue]")
-print ("# The number of HP devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]"+ str(HP_count)+ "[/blue]")
-print ("# The number of Mitel devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]"+ str (Mitel_count)+ "[/blue]")
-print ("# The number of other devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]"+ str(OtherTotal)+ "[/blue]")
+print ("# The number of [cyan]Apple[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]" +str(Apple_count)+ "[/bright_red]")
+print ("# The number of [cyan]Dell[/cyan] devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [bright_red]" +str(Dell_count)+ "[/bright_red]")
+print ("# The number of [cyan]Cisco-Meraki[/cyan] devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red]")
+print ("# The number of [cyan]other Cisco[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]" + str(OtherCisco_count)+ "[/bright_red]")
+print ("# The number of [cyan]HP[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str(HP_count)+ "[/bright_red]")
+print ("# The number of [cyan]Mitel[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str (Mitel_count)+ "[/bright_red]")
+print ("# The number of [cyan]other devices[/cyan] in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str(OtherTotal)+ "[/bright_red]")
 print("\n")
 
 #######################################################################################
@@ -542,27 +542,27 @@ else:
 
 
 if os.path.exists('Apple-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Apple-Devices.txt[/italic green] file in the current directory for the list of Apple devices")
+    print("[magenta]>>>[/magenta] Please see the [italic green]Apple-Devices.txt[/italic green] file in the current directory for the list of [cyan]Apple[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Dell-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Dell-Devices.txt[/italic green] file in the current directory for the list of Dell devices")
+    print("[magenta]>>>[/magenta] Please see the [italic green]Dell-Devices.txt[/italic green] file in the current directory for the list of [cyan]Dell[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Cisco-Meraki-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Cisco-Meraki-Devices.txt[/italic green] file in the current directory for the list of Cisco-Meraki devices")
+    print("[magenta]>>>[/magenta] Please see the [italic green]Cisco-Meraki-Devices.txt[/italic green] file in the current directory for the list of [cyan]Cisco-Meraki[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Other-Cisco-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Other-Cisco-Devices.txt[/italic green] file in the current directory for the list of Other Cisco devices")
+    print("[magenta]>>>[/magenta] Please see the [italic green]Other-Cisco-Devices.txt[/italic green] file in the current directory for the list of [cyan]Other Cisco[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Mitel-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Mitel-Devices.txt[/italic green] file in the current directory for the list of Mitel devices")  
+    print("[magenta]>>>[/magenta] Please see the [italic green]Mitel-Devices.txt[/italic green] file in the current directory for the list of [cyan]Mitel[/cyan] devices")  
 
 #close any remainng files
 f.close()
