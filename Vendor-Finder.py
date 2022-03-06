@@ -16,12 +16,12 @@ import json
 
 #check if the rich module exists, if not, install it
 try:
-    import rich
+    from rich import print
 except ImportError:
     subprocess.call([sys.executable, "-m", "pip", "install", "rich"])
     import rich
     time.sleep (10)
-    from rich import print
+    from rich import print as rprint
 
 #check if the tqdm module exists, if not install it
 try :
@@ -60,7 +60,7 @@ vlan_list = []
 vlan_list_final = []
 
 #Show the contents of the current directory
-print("\nPlease select the ARP or MAC Data text file from the current directory\n")
+print("\nPlease select the [italic green]ARP[/italic green] or [italic green]MAC[/italic green] Data text file from the current directory\n")
 print(os.listdir(), "\n")
 
 #while the file name is not valid, ask the user to input the file name again
@@ -69,17 +69,19 @@ while True:
     if os.path.isfile(ip_arp_file):
         break
     else:
-        print("\nThe file name is not valid, please try again\n")
+        print("\n[italic yellow]The file name is not valid, please try again[/italic yellow]\n")
 
 #Ask the user to input which word containts the MAC_Element
-mac_temp = input("\nPlease enter the column in the file that contains the MAC Addresses: ")
+print("Please enter the column in the file that contains the [italic green]Mac Addresses[/italic green]")
+mac_temp = input(": ")
 
 #convert the input to an int and subtract 1 to match the column number
 mac_column = int(mac_temp)
 mac_word = mac_column - 1
 
 #Ask the user to input which word containts the VLAN_Element
-vlan_temp = input("\nPlease enter the column in the file that contains the VLANs: ")
+print("\nPlease enter the column in the file that contains the [italic green]VLANs[/italic green]")
+vlan_temp = input(": ")
 
 #convert the input to an int and subtract 1 to match the column number
 vlan_column = int(vlan_temp)
@@ -138,7 +140,7 @@ with open('oui_list_final.txt', 'w') as f:
 f.close()
 
 #print please be patient the vendor information is being retrieved
-print("\nPlease be patient, the vendor information is being retrieved\n")
+print("\n[italic yellow]Please be patient while the vendor information is being retrieved[/italic yellow]\n")
 
 #for each line in the file oui_list_final.txt, store this in a list called vendor_list
 vendor_list = []
@@ -147,7 +149,7 @@ with open('oui_list_final.txt', 'r') as f:
         vendor_list.append(line)
 
 #for each element in vendor_list do a request to the OUI database
-for i in tqdm (range(len(vendor_list))):
+for i in tqdm (range(len(vendor_list)), colour="cyan"):
     #make each element uppercase
     vendor_list[i] = vendor_list[i].upper()
     r = requests.get("https://macvendors.co/api/vendorname/" + vendor_list[i])
@@ -210,7 +212,7 @@ for i in range(len(company_list_final)):
     print(company_list_final[i])
 
 #Collecting the output of the command sh ip arp
-print ("\n\nPlease be patient, while information is being retrieved\n")
+print ("\n\n[italic yellow]Please be patient, while information is being retrieved[/italic yellow]\n")
 
 #######################################################################################
 
