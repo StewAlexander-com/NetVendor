@@ -506,15 +506,15 @@ OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCis
 
 print("\n")
 print("[magenta]>>>[/magenta] Please see the [italic green]oui_list_final.txt[/italic green] file in the current directory for the list of OUIs")
-print("[magenta]>>>[/magenta] Please see the [italic green]company_list.txt[/italic green] file in the current directory for the list of companies seen in the", ip_arp_file, "file")
-print("[magenta]>>>[/magenta] Please see the [italic green]vlan_list.txt[/italic green] file in the current directory for the list of VLANs seen in the", ip_arp_file, "file")
+print("[magenta]>>>[/magenta] Please see the [italic green]company_list.txt[/italic green] file in the current directory for the list of companies") 
+print("[magenta]>>>[/magenta] Please see the [italic green]vlan_list.txt[/italic green] file in the current directory for the list of VLANs")
 print("\n")
 print ("# The number of Apple devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]" +str(Apple_count)+ "[/blue]")
 print ("# The number of Dell devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [blue]" +str(Dell_count)+ "[/blue]")
 print ("# The number of Cisco-Meraki devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [blue]" +str(CiscoMeraki_count)+ "[/blue]")
 print ("# The number of other Cisco devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue" + str(OtherCisco_count)+ "[/blue]")
 print ("# The number of HP devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]"+ str(HP_count)+ "[/blue]")
-print ("# The number of Mitel devices in the [italic green]" + ip_arp_file + "[/italic green] file is [[blue]"+ str (Mitel_count)+ "[/blue]")
+print ("# The number of Mitel devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]"+ str (Mitel_count)+ "[/blue]")
 print ("# The number of other devices in the [italic green]" + ip_arp_file + "[/italic green] file is [blue]"+ str(OtherTotal)+ "[/blue]")
 print("\n")
 
