@@ -509,13 +509,13 @@ OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCis
 
 print("\n")
 print ("[bold yellow]Device Counts in the [italic green]" + ip_arp_file + "[/italic green] file:[/bold yellow]\n")
-print ("[bright_green]#[/bright_green] of [cyan]Apple devices[/cyan] is [bright_red]" +str(Apple_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] of [cyan]Dell devices[/cyan] is [bright_red]" +str(Dell_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] of [cyan]Cisco-Meraki devices[/cyan] is [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] of [cyan]other Cisco devices[/cyan] is [bright_red]" + str(OtherCisco_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] of [cyan]HP devices[/cyan] is [bright_red]"+ str(HP_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] of [cyan]Mitel devices[/cyan] is [bright_red]"+ str (Mitel_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] of [cyan]other devices[/cyan] is [bright_red]"+ str(OtherTotal)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] [bright_red]" +str(Apple_count)+ "[/bright_red] [cyan]Apple devices[/cyan]")
+print ("[bright_green]#[/bright_green] [bright_red]" +str(Dell_count)+ "[/bright_red] [cyan]Dell devices[/cyan]")   
+print ("[bright_green]#[/bright_green] [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red] [cyan]Cisco-Meraki devices[/cyan]")
+print ("[bright_green]#[/bright_green] [bright_red]" + str(OtherCisco_count)+ "[/bright_red] [cyan]other Cisco devices[/cyan]")
+print ("[bright_green]#[/bright_green] [bright_red]"+ str(HP_count)+ "[/bright_red] [cyan] HP devices[/cyan]")
+print ("[bright_green]#[/bright_green] [bright_red]"+ str (Mitel_count)+ "[/bright_red] [cyan]Mitel devices[/cyan]")
+print ("[bright_green]#[/bright_green] [bright_red]"+ str(OtherTotal)+ "[/bright_red] [cyan]other devices[/cyan]")
 print("\n")
 
 #######################################################################################
@@ -566,8 +566,15 @@ if os.path.exists('Other-Cisco-Devices.txt'):
 else:
     pass
 
+if os.path.exists('HP-Devices.txt'):
+    print("[magenta]>>>[/magenta][italic green] HP-Devices.txt[/italic green] file for the list of [cyan]HP[/cyan] devices")
+else:
+    pass
+
 if os.path.exists('Mitel-Devices.txt'):
-    print("[magenta]>>>[/magenta][italic green] Mitel-Devices.txt[/italic green] file for the list of [cyan]Mitel[/cyan] devices")  
+    print("[magenta]>>>[/magenta][italic green] Mitel-Devices.txt[/italic green] file for the list of [cyan]Mitel[/cyan] devices") 
+else:
+    pass 
 
 #close any remainng files
 f.close()
