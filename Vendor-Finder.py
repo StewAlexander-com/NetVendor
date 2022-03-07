@@ -513,7 +513,7 @@ print ("[bright_green]#[/bright_green] [bright_red]" +str(Apple_count)+ "[/brigh
 print ("[bright_green]#[/bright_green] [bright_red]" +str(Dell_count)+ "[/bright_red] [cyan]Dell devices[/cyan]")   
 print ("[bright_green]#[/bright_green] [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red] [cyan]Cisco-Meraki devices[/cyan]")
 print ("[bright_green]#[/bright_green] [bright_red]" + str(OtherCisco_count)+ "[/bright_red] [cyan]other Cisco devices[/cyan]")
-print ("[bright_green]#[/bright_green] [bright_red]"+ str(HP_count)+ "[/bright_red] [cyan] HP devices[/cyan]")
+print ("[bright_green]#[/bright_green] [bright_red]"+ str(HP_count)+ "[/bright_red][cyan] HP devices[/cyan]")
 print ("[bright_green]#[/bright_green] [bright_red]"+ str (Mitel_count)+ "[/bright_red] [cyan]Mitel devices[/cyan]")
 print ("[bright_green]#[/bright_green] [bright_red]"+ str(OtherTotal)+ "[/bright_red] [cyan]other devices[/cyan]")
 print("\n")
