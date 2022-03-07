@@ -20,7 +20,7 @@ Answers the questions:
 <br>
 All of this is useful for understanding what is in a network for security and benchmarking purposes... <br>
 
-## Requirements
+## Dependencies 
 * This uses a restful API to search for the vendors, so it needs a working internet connection
 * This needs the output of an ARP or MAC Address table as a text file (such as the Cisco IOS ```#sh ip arp ``` format seen below), as it is using this to do the lookup
 ## Input
