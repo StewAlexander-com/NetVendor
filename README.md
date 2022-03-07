@@ -29,7 +29,7 @@ All of this is useful for understanding what is in a network for security and be
 * Example of the output: </br></br>
 ![program_output1](https://user-images.githubusercontent.com/48565067/156947568-60770c6b-f270-4087-abbc-7c7c40043439.png)
 ![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
-![image](https://user-images.githubusercontent.com/48565067/157081648-edddbbac-da03-4133-adf0-4b72f22bd188.png)
+![image](https://user-images.githubusercontent.com/48565067/157099296-e46c8d0b-c3ec-4a0d-9ecb-947f4d60d761.png)
 
  - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create an interactive pie chart and display it in the browser:
  ![2022-03-06 18 43 25](https://user-images.githubusercontent.com/48565067/156947443-4510c608-b49f-4f3c-a8c9-60da13627ba6.png)
