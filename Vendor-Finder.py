@@ -552,7 +552,7 @@ else:
     pass
 
 if os.path.exists('Dell-Devices.txt'):
-    print("[magenta]>>>[/magenta][italic green] Dell-Devices.txt[/italic green] filefor the list of [cyan]Dell[/cyan] devices")
+    print("[magenta]>>>[/magenta][italic green] Dell-Devices.txt[/italic green] file for the list of [cyan]Dell[/cyan] devices")
 else:
     pass
 
