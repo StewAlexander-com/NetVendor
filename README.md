@@ -7,7 +7,7 @@ This program reviews an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip 
 
 Table of Contents:
   - [Why?](#why)
-  - [Requirements](#requirements)
+  - [Dependencies](#dependencies)
   - [Input](#input)
   - [Output](#output)
   - [To Do](#to-do-)
