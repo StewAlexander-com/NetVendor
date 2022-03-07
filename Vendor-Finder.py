@@ -427,6 +427,7 @@ else:
 
 #######################################################################################
 # Find all the unique vlans in the ip_arp_file
+print("\n[bold yellow]Misc details about the [italic green]" + ip_arp_file + "[/italic green] file....[/bold yellow]")
 
 with open(ip_arp_file, 'r') as f:
         for line in f:
@@ -469,17 +470,19 @@ with open('vlan_list.txt', 'r') as f:
     vlan_count = 0
     for line in f:
         vlan_count += 1
-    print ("\n[bold yellow]++[/bold yellow] There are [bright_red]" + str(vlan_count) + "[/bright_red] unique VLANs in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("\n[bold yellow]++[/bold yellow] [bright_red]" + str(vlan_count) + "[/bright_red] unique [cyan]VLANs[/cyan]")
     
 
 #######################################################################################
 
+
 # count the lines in the file oui_list_final.txt and print the number of lines
+
 with open('oui_list_final.txt', 'r') as f:
     OUI_count = 0
     for line in f:
         OUI_count += 1
-    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(OUI_count) + "[/bright_red] unique OUI's in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("[bold yellow]++[/bold yellow] [bright_red]" + str(OUI_count) + "[/bright_red] unique [cyan]OUI's[cyan]  ")
     f.close()
     
 
@@ -488,7 +491,7 @@ with open('company_list.txt', 'r') as f:
     count = 0
     for line in f:
         count += 1
-    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(count) + "[/bright_red] vendors in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("[bold yellow]++[/bold yellow] [bright_red]" + str(count) + "[/bright_red] [cyan]companies[/cyan]")
     f.close()
     
 #count the lines in the file oui_list_final.txt and print the number of lines
@@ -496,7 +499,7 @@ with open( ip_arp_file, 'r') as f:
     count = 0
     for line in f:
         count += 1
-    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(count) + "[/bright_red] total devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print ("[bold yellow]++[/bold yellow] [bright_red]" + str(count) + "[/bright_red] [cyan]total devices[/cyan] ")
     arpcount = count-1
     f.close()
 
@@ -505,17 +508,14 @@ OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCis
 #######################################################################################
 
 print("\n")
-print("[magenta]>>>[/magenta] Please see the [italic green]oui_list_final.txt[/italic green] file in the current directory for the list of OUIs")
-print("[magenta]>>>[/magenta] Please see the [italic green]company_list.txt[/italic green] file in the current directory for the list of companies") 
-print("[magenta]>>>[/magenta] Please see the [italic green]vlan_list.txt[/italic green] file in the current directory for the list of VLANs")
-print("\n")
-print ("[bright_green]#[/bright_green] The number of [cyan]Apple[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]" +str(Apple_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]Dell[/cyan] devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [bright_red]" +str(Dell_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]Cisco-Meraki[/cyan] devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] IThe number of [cyan]other Cisco[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]" + str(OtherCisco_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]HP[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str(HP_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]Mitel[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str (Mitel_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]other devices[/cyan] in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str(OtherTotal)+ "[/bright_red]")
+print ("[bold yellow]Device Counts in the [italic green]" + ip_arp_file + "[/italic green] file:[/bold yellow]\n")
+print ("[bright_green]#[/bright_green] of [cyan]Apple devices[/cyan] is [bright_red]" +str(Apple_count)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] of [cyan]Dell devices[/cyan] is [bright_red]" +str(Dell_count)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] of [cyan]Cisco-Meraki devices[/cyan] is [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] of [cyan]other Cisco devices[/cyan] is [bright_red]" + str(OtherCisco_count)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] of [cyan]HP devices [/cyan] is [bright_red]"+ str(HP_count)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] of [cyan]Mitel devices[/cyan] is [bright_red]"+ str (Mitel_count)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] of [cyan]other devices[/cyan] is [bright_red]"+ str(OtherTotal)+ "[/bright_red]")
 print("\n")
 
 #######################################################################################
@@ -539,7 +539,12 @@ else:
     pass   
 
 #######################################################################################
+# Created file list
 
+print("[magenta]>>>[/magenta] Please see the [italic green]oui_list_final.txt[/italic green] file in the current directory for the list of OUIs")
+print("[magenta]>>>[/magenta] Please see the [italic green]company_list.txt[/italic green] file in the current directory for the list of companies") 
+print("[magenta]>>>[/magenta] Please see the [italic green]vlan_list.txt[/italic green] file in the current directory for the list of VLANs")
+print("\n")
 
 if os.path.exists('Apple-Devices.txt'):
     print("[magenta]>>>[/magenta] Please see the [italic green]Apple-Devices.txt[/italic green] file in the current directory for the list of [cyan]Apple[/cyan] devices")
