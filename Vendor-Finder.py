@@ -513,7 +513,7 @@ print ("[bright_green]#[/bright_green] of [cyan]Apple devices[/cyan] is [bright_
 print ("[bright_green]#[/bright_green] of [cyan]Dell devices[/cyan] is [bright_red]" +str(Dell_count)+ "[/bright_red]")
 print ("[bright_green]#[/bright_green] of [cyan]Cisco-Meraki devices[/cyan] is [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red]")
 print ("[bright_green]#[/bright_green] of [cyan]other Cisco devices[/cyan] is [bright_red]" + str(OtherCisco_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] of [cyan]HP devices [/cyan] is [bright_red]"+ str(HP_count)+ "[/bright_red]")
+print ("[bright_green]#[/bright_green] of [cyan]HP devices[/cyan] is [bright_red]"+ str(HP_count)+ "[/bright_red]")
 print ("[bright_green]#[/bright_green] of [cyan]Mitel devices[/cyan] is [bright_red]"+ str (Mitel_count)+ "[/bright_red]")
 print ("[bright_green]#[/bright_green] of [cyan]other devices[/cyan] is [bright_red]"+ str(OtherTotal)+ "[/bright_red]")
 print("\n")
@@ -541,33 +541,33 @@ else:
 #######################################################################################
 # Created file list
 
-print("[magenta]>>>[/magenta] Please see the [italic green]oui_list_final.txt[/italic green] file in the current directory for the list of OUIs")
-print("[magenta]>>>[/magenta] Please see the [italic green]company_list.txt[/italic green] file in the current directory for the list of companies") 
-print("[magenta]>>>[/magenta] Please see the [italic green]vlan_list.txt[/italic green] file in the current directory for the list of VLANs")
-print("\n")
+print ("[bold yellow]Created file list in the [cyan]current directory[/cyan]:[/bold yellow]\n")
+print("[magenta]>>>[/magenta][italic green] oui_list_final.txt[/italic green] file for the list of [cyan]OUIs[/cyan]")
+print("[magenta]>>>[/magenta][italic green] company_list.txt[/italic green] file for the list of [cyan]companies[/cyan]") 
+print("[magenta]>>>[/magenta][italic green] vlan_list.txt[/italic green] file for the list of [cyan]VLANs[/cyan]")
 
 if os.path.exists('Apple-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Apple-Devices.txt[/italic green] file in the current directory for the list of [cyan]Apple[/cyan] devices")
+    print("[magenta]>>>[/magenta][italic green] Apple-Devices.txt[/italic green] file for the list of [cyan]Apple[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Dell-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Dell-Devices.txt[/italic green] file in the current directory for the list of [cyan]Dell[/cyan] devices")
+    print("[magenta]>>>[/magenta][italic green] Dell-Devices.txt[/italic green] filefor the list of [cyan]Dell[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Cisco-Meraki-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Cisco-Meraki-Devices.txt[/italic green] file in the current directory for the list of [cyan]Cisco-Meraki[/cyan] devices")
+    print("[magenta]>>>[/magenta][italic green] Cisco-Meraki-Devices.txt[/italic green] file for the list of [cyan]Cisco-Meraki[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Other-Cisco-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Other-Cisco-Devices.txt[/italic green] file in the current directory for the list of [cyan]Other Cisco[/cyan] devices")
+    print("[magenta]>>>[/magenta][italic green] Other-Cisco-Devices.txt[/italic green] file for the list of [cyan]Other Cisco[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Mitel-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Mitel-Devices.txt[/italic green] file in the current directory for the list of [cyan]Mitel[/cyan] devices")  
+    print("[magenta]>>>[/magenta][italic green] Mitel-Devices.txt[/italic green] file for the list of [cyan]Mitel[/cyan] devices")  
 
 #close any remainng files
 f.close()
