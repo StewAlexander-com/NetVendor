@@ -14,15 +14,6 @@ import time
 import subprocess
 import json
 
-#check if the rich module exists, if not, install it
-try:
-    from rich import print
-except ImportError:
-    subprocess.call([sys.executable, "-m", "pip", "install", "rich"])
-    import rich
-    time.sleep (10)
-    from rich import print as rprint
-
 #check if the tqdm module exists, if not install it
 try :
     from tqdm import tqdm
@@ -60,7 +51,7 @@ vlan_list = []
 vlan_list_final = []
 
 #Show the contents of the current directory
-print("\nPlease select the [italic green]ARP[/italic green] or [italic green]MAC[/italic green] Data text file from the current directory\n")
+print("\nPlease select the ARP or MAC Data text file from the current directory\n")
 print(os.listdir(), "\n")
 
 #while the file name is not valid, ask the user to input the file name again
@@ -69,19 +60,17 @@ while True:
     if os.path.isfile(ip_arp_file):
         break
     else:
-        print("\n[italic yellow]The file name is not valid, please try again[/italic yellow]\n")
+        print("\nThe file name is not valid, please try again\n")
 
 #Ask the user to input which word containts the MAC_Element
-print("Please enter the column in the file that contains the [cyan]Mac Addresses[/cyan]:")
-mac_temp = input("> ")
+mac_temp = input("\nPlease enter the column in the file that contains the MAC Addresses: ")
 
 #convert the input to an int and subtract 1 to match the column number
 mac_column = int(mac_temp)
 mac_word = mac_column - 1
 
 #Ask the user to input which word containts the VLAN_Element
-print("\nPlease enter the column in the file that contains the [cyan]VLANs[/cyan]:")
-vlan_temp = input("> ")
+vlan_temp = input("\nPlease enter the column in the file that contains the VLANs: ")
 
 #convert the input to an int and subtract 1 to match the column number
 vlan_column = int(vlan_temp)
@@ -140,7 +129,7 @@ with open('oui_list_final.txt', 'w') as f:
 f.close()
 
 #print please be patient the vendor information is being retrieved
-print("\n[italic yellow]Please be patient while the [cyan]company[/cyan] information is being retrieved[/italic yellow]\n")
+print("\nPlease be patient, the vendor information is being retrieved\n")
 
 #for each line in the file oui_list_final.txt, store this in a list called vendor_list
 vendor_list = []
@@ -149,7 +138,7 @@ with open('oui_list_final.txt', 'r') as f:
         vendor_list.append(line)
 
 #for each element in vendor_list do a request to the OUI database
-for i in tqdm (range(len(vendor_list)), colour="cyan"):
+for i in tqdm (range(len(vendor_list))):
     #make each element uppercase
     vendor_list[i] = vendor_list[i].upper()
     r = requests.get("https://macvendors.co/api/vendorname/" + vendor_list[i])
@@ -198,7 +187,7 @@ for i in range(len(company_list)):
         #save each different element to a new list called company_list_final
         company_list_final.append(company_list[i])
 
-print("\n\nThe companies seen in the [italic green]"+ ip_arp_file + "[/italic green] data file are:\n")
+print("\n\nThe companies seen in the "+ ip_arp_file + " data file are:\n")
 
 #save the company list final to a file called company_list.txt
 with open('company_list.txt', 'w') as f:
@@ -209,11 +198,10 @@ with open('company_list.txt', 'w') as f:
 for i in range(len(company_list_final)):
     #remove the new line character from the end of the line
     company_list_final[i] = company_list_final[i].rstrip()
-    #print the element in cyan
-    print("[cyan]" + company_list_final[i] + "[/cyan]")
+    print(company_list_final[i])
 
 #Collecting the output of the command sh ip arp
-print ("\n\n[italic yellow]Please be patient, while information is being retrieved[/italic yellow]\n")
+print ("\n\nPlease be patient, while information is being retrieved\n")
 
 #######################################################################################
 
@@ -225,10 +213,10 @@ if os.path.exists('Apple-Devices.txt'):
 else :
     pass
 
-print ("\nFinding any [cyan]Apple[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+print ("\nFinding any Apple devices in the " + ip_arp_file + " file....")
 #For every line in the file check the MAC address, if it is an Apple Address, add it the Apple-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f, colour="cyan"):
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with Apple OUI add it to the Apple-Devices.txt file 
@@ -259,11 +247,11 @@ if os.path.exists('Dell-Devices.txt'):
 else :
     pass
 
-print ("\nFinding any [cyan]Dell[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+print ("\nFinding any Dell devices in the " + ip_arp_file + " file....")
 
 #For every line in the file check the MAC address, if it is a Dell Address, add it the Dell-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f, colour="cyan"):
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Dell OUI add the line to the Dell-Devices.txt file 
@@ -293,11 +281,11 @@ if os.path.exists('Cisco-Meraki-Devices.txt'):
 else :
     pass
 
-print ("\nFinding any [cyan]Cisco Meraki[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+print ("\nFinding any Cisco Meraki devices in the " + ip_arp_file + " file....")
 
 #For every line in the file check the MAC address, if it is an Cisco-Meraki Address, add it the Cisco-Meraki-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f,colour='cyan'):
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Cisco-Meraki OUI add the line to the Cisco-Meraki-Devices.txt file 
@@ -327,11 +315,11 @@ if os.path.exists('Other-Cisco-Devices.txt'):
 else :
     pass
 
-print ("\nFinding any other [cyan]Cisco[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+print ("\nFinding any other Cisco devices in the " + ip_arp_file + " file....")
 
 #For every line in the file check the MAC address, if it is an Other-Cisco Address, add it the Other-Cisco-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f, colour='cyan'):
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Other-Cisco OUI add the line to the Other-Cisco-Devices.txt file 
@@ -365,11 +353,11 @@ if os.path.exists('Mitel-Devices.txt'):
 else :
     pass
 
-print ("\nFinding any [cyan]Mitel[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+print ("\nFinding any Mitel devices in the " + ip_arp_file + " file....")
 
 #For every line in the file check the MAC address, if it is an Mitel Address, add it the Mitel-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f, colour='cyan'):
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a Mitel OUI add the line to the Mitel-Devices.txt file 
@@ -400,11 +388,11 @@ if os.path.exists('HP-Devices.txt'):
 else :
     pass
 
-print ("\nFinding any [cyan]HP[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+print ("\nFinding any HP devices in the " + ip_arp_file + " file....")
 
 #For every line in the file check the MAC address, if it is an HP OUI Address, add it the HP-Devices.txt
 with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f, colour='cyan'):
+    for line in tqdm(f):
        #split the line into words
         words = line.split()
         #if words[mac_word] starts with a HP OUI add the line to the HP-Devices.txt file 
@@ -469,8 +457,7 @@ with open('vlan_list.txt', 'r') as f:
     vlan_count = 0
     for line in f:
         vlan_count += 1
-    print ("\n[bold yellow]++[/bold yellow] There are [bright_red]" + str(vlan_count) + "[/bright_red] unique VLANs in the [italic green]" + ip_arp_file + "[/italic green] file....")
-    
+    print("\n\n++ There are", vlan_count, "different vlans in the", ip_arp_file, "file")
 
 #######################################################################################
 
@@ -479,43 +466,39 @@ with open('oui_list_final.txt', 'r') as f:
     OUI_count = 0
     for line in f:
         OUI_count += 1
-    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(OUI_count) + "[/bright_red] unique OUI's in the [italic green]" + ip_arp_file + "[/italic green] file....")
-    f.close()
-    
+    print("++ There are", OUI_count, "different OUIs in the", ip_arp_file, "file")
 
 #count the lines in the file oui_list_final.txt and print the number of lines
 with open('company_list.txt', 'r') as f:
     count = 0
     for line in f:
         count += 1
-    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(count) + "[/bright_red] vendors in the [italic green]" + ip_arp_file + "[/italic green] file....")
-    f.close()
-    
+    print("++ There are", count, "different vendors in the", ip_arp_file, "file")
+
 #count the lines in the file oui_list_final.txt and print the number of lines
 with open( ip_arp_file, 'r') as f:
     count = 0
     for line in f:
         count += 1
-    print ("[bold yellow]++[/bold yellow] There are [bright_red]" + str(count) + "[/bright_red] total devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+    print("++ There are a total of", count-1, "devices in the", ip_arp_file, "file\n")
     arpcount = count-1
-    f.close()
 
 OtherTotal = arpcount - (Apple_count + Dell_count + CiscoMeraki_count + OtherCisco_count + HP_count + Mitel_count)
 
 #######################################################################################
 
+
+print(">>> Please see the oui_list_final.txt file in the current directory for the list of OUIs")
+print(">>> Please see the company_list.txt file in the current directory for the list of companies seen in the", ip_arp_file, "file")
+print(">>> Please see the vlan_list.txt file in the current directory for the list of VLANs seen in the", ip_arp_file, "file")
 print("\n")
-print("[magenta]>>>[/magenta] Please see the [italic green]oui_list_final.txt[/italic green] file in the current directory for the list of OUIs")
-print("[magenta]>>>[/magenta] Please see the [italic green]company_list.txt[/italic green] file in the current directory for the list of companies") 
-print("[magenta]>>>[/magenta] Please see the [italic green]vlan_list.txt[/italic green] file in the current directory for the list of VLANs")
-print("\n")
-print ("[bright_green]#[/bright_green] The number of [cyan]Apple[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]" +str(Apple_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]Dell[/cyan] devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [bright_red]" +str(Dell_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]Cisco-Meraki[/cyan] devices in the [italic green]"+ ip_arp_file + "[/italic green] file is [bright_red]" +str(CiscoMeraki_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] IThe number of [cyan]other Cisco[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]" + str(OtherCisco_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]HP[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str(HP_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]Mitel[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str (Mitel_count)+ "[/bright_red]")
-print ("[bright_green]#[/bright_green] The number of [cyan]other devices[/cyan] in the [italic green]" + ip_arp_file + "[/italic green] file is [bright_red]"+ str(OtherTotal)+ "[/bright_red]")
+print ("# The number of Apple devices in the", ip_arp_file, "file is", Apple_count)
+print ("# The number of Dell devices in the", ip_arp_file, "file is", Dell_count)
+print ("# The number of Cisco-Meraki devices in the", ip_arp_file, "file is", CiscoMeraki_count)
+print ("# The number of other Cisco devices in the", ip_arp_file, "file is", OtherCisco_count)
+print ("# The number of HP devices in the", ip_arp_file, "file is", HP_count)
+print ("# The number of Mitel devices in the", ip_arp_file, "file is", Mitel_count)
+print ("# The number of other devices in the", ip_arp_file, "file is", OtherTotal)
 print("\n")
 
 #######################################################################################
@@ -542,27 +525,27 @@ else:
 
 
 if os.path.exists('Apple-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Apple-Devices.txt[/italic green] file in the current directory for the list of [cyan]Apple[/cyan] devices")
+    print(">>> Please see the Apple-Devices.txt file in the current directory for the list of Apple devices")
 else:
     pass
 
 if os.path.exists('Dell-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Dell-Devices.txt[/italic green] file in the current directory for the list of [cyan]Dell[/cyan] devices")
+    print(">>> Please see the Dell-Devices.txt file in the current directory for the list of Dell devices")
 else:
     pass
 
 if os.path.exists('Cisco-Meraki-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Cisco-Meraki-Devices.txt[/italic green] file in the current directory for the list of [cyan]Cisco-Meraki[/cyan] devices")
+    print(">>> Please see the Cisco-Meraki-Devices.txt file in the current directory for the list of Cisco-Meraki devices")
 else:
     pass
 
 if os.path.exists('Other-Cisco-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Other-Cisco-Devices.txt[/italic green] file in the current directory for the list of [cyan]Other Cisco[/cyan] devices")
+    print(">>> Please see the Other-Cisco-Devices.txt file in the current directory for the list of Other Cisco devices")
 else:
     pass
 
 if os.path.exists('Mitel-Devices.txt'):
-    print("[magenta]>>>[/magenta] Please see the [italic green]Mitel-Devices.txt[/italic green] file in the current directory for the list of [cyan]Mitel[/cyan] devices")  
+    print(">>> Please see the Mitel-Devices.txt file in the current directory for the list of Mitel devices")  
 
 #close any remainng files
 f.close()
