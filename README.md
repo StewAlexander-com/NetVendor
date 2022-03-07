@@ -26,7 +26,7 @@ All of this is useful for understanding what is in a network for security and be
 * Contents of a ARP or MAC Address table as a text file (such as a Cisco ```#sh ip arp``` output, like below):</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
-* Example of the Program output: </br></br>
+* Example of the output: </br></br>
 ![program_output1](https://user-images.githubusercontent.com/48565067/156947568-60770c6b-f270-4087-abbc-7c7c40043439.png)
 ![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
 ![program_output3](https://user-images.githubusercontent.com/48565067/156946968-1ab3e081-5925-43dd-a012-b65c85d53b3a.png)
