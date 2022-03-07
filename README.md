@@ -41,9 +41,9 @@ All of this is useful for understanding what is in a network for security and be
 * Created Vendor-Devices.txt file:</br></br>
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 ## To Do 
+- [x] Use the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
+- [x] Correct minor style issues [on-going,fix applied 03/06/2022]
 - [x] Added lookup for Mitel Corperation Phones (02/11/2022)
 - [x] Streamlined API call, add support for Apple Macs (supporting Windows, Linux or Mac computers; Added 02/10/2022)
 - [x] Add a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
-- [x] Use the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
-- [x] Correct minor style issues [on-going,fix applied 03/06/2022]
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
