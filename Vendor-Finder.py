@@ -17,6 +17,7 @@ import json
 #check if the rich module exists, if not, install it
 try:
     from rich import print
+    from rich import pretty
 except ImportError:
     subprocess.call([sys.executable, "-m", "pip", "install", "rich"])
     import rich
@@ -59,8 +60,11 @@ company_list_final = []
 vlan_list = []
 vlan_list_final = []
 
+#Get the current working directory and store it in a variable called "cwd"
+cwd = os.getcwd()
+
 #Show the contents of the current directory
-print("\nPlease select the [italic green]ARP[/italic green] or [italic green]MAC[/italic green] Data text file from the current directory\n")
+print("\nPlease select the [italic green]ARP[/italic green] or [italic green]MAC[/italic green] Data text file from [cyan]"+cwd+"[/cyan] \n")
 print(os.listdir(), "\n")
 
 #while the file name is not valid, ask the user to input the file name again
@@ -541,7 +545,7 @@ else:
 #######################################################################################
 # Created file list
 
-print ("[bold yellow]Created file list in the [cyan]current directory[/cyan]:[/bold yellow]\n")
+print ("[bold yellow]Created file list in the [cyan]"+cwd+"[/cyan] folder:[/bold yellow]\n")
 print("[magenta]>>>[/magenta][italic green] oui_list_final.txt[/italic green] file for the list of [cyan]OUIs[/cyan]")
 print("[magenta]>>>[/magenta][italic green] company_list.txt[/italic green] file for the list of [cyan]companies[/cyan]") 
 print("[magenta]>>>[/magenta][italic green] vlan_list.txt[/italic green] file for the list of [cyan]VLANs[/cyan]")
