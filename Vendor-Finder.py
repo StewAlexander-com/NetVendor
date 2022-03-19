@@ -53,12 +53,33 @@ except ImportError:
     time.sleep(30)
     import requests
 
+#if the csv library is not installed, install it via pip
+try:
+    import csv
+except ImportError:
+    print("[!] The csv library is not installed. Installing...")
+    os.system("pip install csv")
+    print("[+] The csv library has been installed.")
+    time.sleep(30)
+    import csv
+
+#if the shutil library is not installed, install it via pip
+try:
+    import shutil
+except ImportError:
+    print("[!] The shutil library is not installed. Installing...")
+    os.system("pip install shutil")
+    print("[+] The shutil library has been installed.")
+    time.sleep(30)
+    import shutil   
+
 OUI_list = [] 
 OUI_list_final = []
 company_list =[]
 company_list_final = []
 vlan_list = []
 vlan_list_final = []
+word_list = []
 
 #Get the current working directory and store it in a variable called "cwd"
 cwd = os.getcwd()
@@ -543,6 +564,30 @@ else:
     pass   
 
 #######################################################################################
+#define a function to convert the text file to a csv file
+def make_csv(file): 
+    #open the file
+    with open(file, 'r') as f:
+        for line in f:
+            words = line.split()
+            word_list.append(words)  
+    #close the file
+    f.close()
+
+    #create a new csv file
+    csv_file =file.replace(".txt", ".csv")
+
+    #save the word_list to the csv file
+    with open(csv_file, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerows(word_list)
+    #close the file
+    f.close()
+
+#Create a folder called csv_files
+os.mkdir ('csv_files')
+
+#######################################################################################
 # Created file list
 
 print ("[bold yellow]Created file list in the [cyan]"+cwd+"[/cyan] folder:[/bold yellow]\n")
@@ -551,33 +596,60 @@ print("[magenta]>>>[/magenta][italic green] company_list.txt[/italic green] file
 print("[magenta]>>>[/magenta][italic green] vlan_list.txt[/italic green] file for the list of [cyan]VLANs[/cyan]")
 
 if os.path.exists('Apple-Devices.txt'):
+    #call function make-csv to convert the text file to a csv file
+    make_csv('Apple-Devices.txt')
+    #move Apple-devices.csv to the csv_files folder
+    shutil.move('Apple-Devices.csv', 'csv_files')
     print("[magenta]>>>[/magenta][italic green] Apple-Devices.txt[/italic green] file for the list of [cyan]Apple[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Dell-Devices.txt'):
+    #call function make-csv to convert the text file to a csv file
+    make_csv('Dell-Devices.txt')
+    #move Dell-devices.csv to the csv_files folder
+    shutil.move('Dell-Devices.csv', 'csv_files')
     print("[magenta]>>>[/magenta][italic green] Dell-Devices.txt[/italic green] file for the list of [cyan]Dell[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Cisco-Meraki-Devices.txt'):
+    #call function make-csv to convert the text file to a csv file
+    make_csv('Cisco-Meraki-Devices.txt')
+    #move Cisco-Meraki-devices.csv to the csv_files folder
+    shutil.move('Cisco-Meraki-Devices.csv', 'csv_files')
     print("[magenta]>>>[/magenta][italic green] Cisco-Meraki-Devices.txt[/italic green] file for the list of [cyan]Cisco-Meraki[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Other-Cisco-Devices.txt'):
+    #call function make-csv to convert the text file to a csv file
+    make_csv('Other-Cisco-Devices.txt')
+    #move Other-Cisco-devices.csv to the csv_files folder
+    shutil.move('Other-Cisco-Devices.csv', 'csv_files')
     print("[magenta]>>>[/magenta][italic green] Other-Cisco-Devices.txt[/italic green] file for the list of [cyan]Other Cisco[/cyan] devices")
 else:
     pass
 
 if os.path.exists('HP-Devices.txt'):
+    #call function make-csv to convert the text file to a csv file
+    make_csv('HP-Devices.txt')
+    #move HP-devices.csv to the csv_files folder
+    shutil.move('HP-Devices.csv', 'csv_files')
     print("[magenta]>>>[/magenta][italic green] HP-Devices.txt[/italic green] file for the list of [cyan]HP[/cyan] devices")
 else:
     pass
 
 if os.path.exists('Mitel-Devices.txt'):
+    #call function make-csv to convert the text file to a csv file
+    make_csv('Mitel-Devices.txt')
+    #move Mitel-devices.csv to the csv_files folder
+    shutil.move('Mitel-Devices.csv', 'csv_files')
     print("[magenta]>>>[/magenta][italic green] Mitel-Devices.txt[/italic green] file for the list of [cyan]Mitel[/cyan] devices") 
-else:
+
+#if the folder csv_files exists, then print the following message
+if os.path.exists('csv_files'):
+    print("\n[bold yellow]##[/bold yellow] See the [cyan]csv_files[/cyan] folder for the csv files")
     pass 
 
 #close any remainng files
