@@ -40,10 +40,11 @@ All of this is useful for understanding what is in a network for security and be
 * Created Vendor-Devices.txt file:</br></br>
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 ## To Do / Updates
+- [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/19/2022)
 - [x] Used the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
 - [x] Style Improvements [on-going, started 03/06/2022]
 - [x] Added lookup for Mitel Corperation Phones (02/11/2022)
 - [x] Streamlined API call, add support for Apple Macs (supporting Windows, Linux or Mac computers (Added 02/10/2022)
 - [x] Add a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
-- [ ] Create a CSV file for every text file in a separate ```CSV-Files``` folder, for easy review by spreadsheet apps like [visidata](https://www.visidata.org)
+
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
