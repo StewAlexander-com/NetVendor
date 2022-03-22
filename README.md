@@ -39,6 +39,8 @@ All of this is useful for understanding what is in a network for security and be
  ![image](https://user-images.githubusercontent.com/48565067/144633706-24bbe2ef-6965-4847-b3a9-0f22242ff95f.png)
 * Created Vendor-Devices.txt file:</br></br>
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
+* List of CSV "spreadsheet" files in a new "csv_files" folder, representing any of the devices found 
+
 ## To Do / Updates
 - [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/19/2022)
 - [x] Used the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
