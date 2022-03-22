@@ -567,11 +567,11 @@ else:
 #define a function to convert the text file to a csv file
 def make_csv(file): 
     #check if a file is open, if so close it
-    if file.closed == False:
-        file.close()    #close the file
+    if f.closed == False:
+        f.close()    #close the file
     else:
         pass
-    
+
     #open the file in read mode
     with open(file, 'r') as f:
         for line in f:
