@@ -566,16 +566,25 @@ else:
 #######################################################################################
 #define a function to convert the text file to a csv file
 def make_csv(file): 
-    #open the file
+    #check if a file is open, if so close it
+    if file.closed == False:
+        file.close()    #close the file
+    else:
+        pass
+    
+    #open the file in read mode
     with open(file, 'r') as f:
         for line in f:
             words = line.split()
             word_list.append(words)  
     #close the file
     f.close()
+    time.sleep(0.5)
 
     #create a new csv file
     csv_file =file.replace(".txt", ".csv")
+    f.close()
+    time.sleep(0.5)
 
     #save the word_list to the csv file
     with open(csv_file, 'w') as f:
@@ -583,9 +592,17 @@ def make_csv(file):
         writer.writerows(word_list)
     #close the file
     f.close()
+    time.sleep(0.5)
 
-#Create a folder called csv_files
-os.mkdir ('csv_files')
+    #if folder csv_files does not exist create it
+    if not os.path.exists('csv_files'):
+        os.makedirs('csv_files')
+    else:
+        pass
+    time.sleep(0.5) 
+
+    #move the csv file to the csv_files folder
+    shutil.move(csv_file, 'csv_files')
 
 #######################################################################################
 # Created file list
@@ -596,56 +613,51 @@ print("[magenta]>>>[/magenta][italic green] company_list.txt[/italic green] file
 print("[magenta]>>>[/magenta][italic green] vlan_list.txt[/italic green] file for the list of [cyan]VLANs[/cyan]")
 
 if os.path.exists('Apple-Devices.txt'):
+    print("[magenta]>>>[/magenta][italic green] Apple-Devices.txt[/italic green] file for the list of [cyan]Apple[/cyan] devices")
     #call function make-csv to convert the text file to a csv file
     make_csv('Apple-Devices.txt')
-    #move Apple-devices.csv to the csv_files folder
-    shutil.move('Apple-Devices.csv', 'csv_files')
-    print("[magenta]>>>[/magenta][italic green] Apple-Devices.txt[/italic green] file for the list of [cyan]Apple[/cyan] devices")
+    f.close()
 else:
     pass
 
 if os.path.exists('Dell-Devices.txt'):
+    print("[magenta]>>>[/magenta][italic green] Dell-Devices.txt[/italic green] file for the list of [cyan]Dell[/cyan] devices")
     #call function make-csv to convert the text file to a csv file
     make_csv('Dell-Devices.txt')
-    #move Dell-devices.csv to the csv_files folder
-    shutil.move('Dell-Devices.csv', 'csv_files')
-    print("[magenta]>>>[/magenta][italic green] Dell-Devices.txt[/italic green] file for the list of [cyan]Dell[/cyan] devices")
-else:
+    f.close()
     pass
 
 if os.path.exists('Cisco-Meraki-Devices.txt'):
+    print("[magenta]>>>[/magenta][italic green] Cisco-Meraki-Devices.txt[/italic green] file for the list of [cyan]Cisco-Meraki[/cyan] devices")
     #call function make-csv to convert the text file to a csv file
     make_csv('Cisco-Meraki-Devices.txt')
-    #move Cisco-Meraki-devices.csv to the csv_files folder
-    shutil.move('Cisco-Meraki-Devices.csv', 'csv_files')
-    print("[magenta]>>>[/magenta][italic green] Cisco-Meraki-Devices.txt[/italic green] file for the list of [cyan]Cisco-Meraki[/cyan] devices")
+    f.close()   
 else:
     pass
 
 if os.path.exists('Other-Cisco-Devices.txt'):
+    print("[magenta]>>>[/magenta][italic green] Other-Cisco-Devices.txt[/italic green] file for the list of [cyan]Other Cisco[/cyan] devices")
     #call function make-csv to convert the text file to a csv file
     make_csv('Other-Cisco-Devices.txt')
-    #move Other-Cisco-devices.csv to the csv_files folder
-    shutil.move('Other-Cisco-Devices.csv', 'csv_files')
-    print("[magenta]>>>[/magenta][italic green] Other-Cisco-Devices.txt[/italic green] file for the list of [cyan]Other Cisco[/cyan] devices")
+    f.close()
 else:
     pass
 
 if os.path.exists('HP-Devices.txt'):
+    print("[magenta]>>>[/magenta][italic green] HP-Devices.txt[/italic green] file for the list of [cyan]HP[/cyan] devices")
     #call function make-csv to convert the text file to a csv file
     make_csv('HP-Devices.txt')
-    #move HP-devices.csv to the csv_files folder
-    shutil.move('HP-Devices.csv', 'csv_files')
-    print("[magenta]>>>[/magenta][italic green] HP-Devices.txt[/italic green] file for the list of [cyan]HP[/cyan] devices")
+    f.close()
 else:
     pass
 
 if os.path.exists('Mitel-Devices.txt'):
+    print("[magenta]>>>[/magenta][italic green] Mitel-Devices.txt[/italic green] file for the list of [cyan]Mitel[/cyan] devices")
     #call function make-csv to convert the text file to a csv file
     make_csv('Mitel-Devices.txt')
-    #move Mitel-devices.csv to the csv_files folder
-    shutil.move('Mitel-Devices.csv', 'csv_files')
-    print("[magenta]>>>[/magenta][italic green] Mitel-Devices.txt[/italic green] file for the list of [cyan]Mitel[/cyan] devices") 
+    f.close()
+else:
+    pass
 
 #if the folder csv_files exists, then print the following message
 if os.path.exists('csv_files'):
