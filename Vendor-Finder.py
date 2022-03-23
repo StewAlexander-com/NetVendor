@@ -572,6 +572,8 @@ def make_csv(file):
     else:
         pass
 
+# Maybe set word_list to null may help having the CSV issue?
+
     #open the file in read mode
     with open(file, 'r') as f:
         for line in f:
