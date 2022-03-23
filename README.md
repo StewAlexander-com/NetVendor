@@ -43,8 +43,8 @@ All of this is useful for understanding what is in a network for security and be
 * All the ```*.txt``` files are put in the ```text_files``` folder 
 
 ## To Do / Updates
-- [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/19/2022)
-- [x] Added code to move all the ```*.txt``` files to a created ```text_files``` folder
+- [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/23/2022)
+- [x] Added code to move all the ```*.txt``` files to a created ```text_files``` folder (added 03/23/2022)
 - [x] Fixed a bug where a created csv file may have contents from more than one device file in it (resolved 03/23/2022)
 - [x] Used the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
 - [x] Style Improvements [on-going, started 03/06/2022]
