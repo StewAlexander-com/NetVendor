@@ -566,13 +566,9 @@ else:
 #######################################################################################
 #define a function to convert the text file to a csv file
 def make_csv(file): 
-    #check if a file is open, if so close it
-    if f.closed == False:
-        f.close()    #close the file
-    else:
-        pass
-
-# Maybe set word_list to null may help having the CSV issue?
+    
+    # Maybe set word_list to null may help having the CSV issue?
+    word_list.clear()
 
     #open the file in read mode
     with open(file, 'r') as f:
@@ -581,17 +577,41 @@ def make_csv(file):
             word_list.append(words)  
     #close the file
     f.close()
-    time.sleep(0.5)
 
     #create a new csv file
     csv_file =file.replace(".txt", ".csv")
-    f.close()
     time.sleep(0.5)
 
     #save the word_list to the csv file
     with open(csv_file, 'w') as f:
         writer = csv.writer(f)
         writer.writerows(word_list)
+    #close the file
+    f.close()
+    time.sleep(0.5)
+    
+    #Convert the newline characters to a PC format
+    with open(csv_file , 'r') as f:
+        data = f.read().replace('\r', '')
+    time.sleep(0.5)
+
+    #overwrite the file with the new data
+    with open(csv_file, 'w') as f:
+        f.write(data)
+    #close the file
+    f.close()
+    time.sleep(0.5)
+
+    #Remove duplicate \n characters from the file
+    with open(csv_file, 'r') as f:
+        data = f.read().replace('\n\n', '\n')
+    #close the file
+    f.close()
+    time.sleep(0.5)
+
+    #overwrite the file with the new data
+    with open(csv_file, 'w') as f:
+        f.write(data)
     #close the file
     f.close()
     time.sleep(0.5)
@@ -609,7 +629,7 @@ def make_csv(file):
 #######################################################################################
 # Created file list
 
-print ("[bold yellow]Created file list in the [cyan]"+cwd+"[/cyan] folder:[/bold yellow]\n")
+print ("[bold yellow]Created file list in the [cyan]text_files[/cyan] folder:[/bold yellow]\n")
 print("[magenta]>>>[/magenta][italic green] oui_list_final.txt[/italic green] file for the list of [cyan]OUIs[/cyan]")
 print("[magenta]>>>[/magenta][italic green] company_list.txt[/italic green] file for the list of [cyan]companies[/cyan]") 
 print("[magenta]>>>[/magenta][italic green] vlan_list.txt[/italic green] file for the list of [cyan]VLANs[/cyan]")
@@ -665,6 +685,23 @@ else:
 if os.path.exists('csv_files'):
     print("\n[bold yellow]##[/bold yellow] See the [cyan]csv_files[/cyan] folder for the csv files")
     pass 
+
+#Check if there are any .txt files in the current directory
+for file in os.listdir():
+    if file.endswith(".txt"):
+        if not os.path.exists('text_files'):
+            os.makedirs('text_files')
+        else:
+            pass
+    else:
+        pass
+
+#move the .txt files to the text_files folder
+for file in os.listdir():
+    if file.endswith(".txt"):
+        shutil.move(file, 'text_files')
+    else:
+        pass
 
 #close any remainng files
 f.close()
