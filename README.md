@@ -23,7 +23,7 @@ All of this is useful for understanding what is in a network for security and be
 * This uses a restful API to search for the vendors, so it needs a working internet connection
 * This needs the output of an ARP or MAC Address table as a text file (such as the Cisco IOS ```#sh ip arp ``` format seen below), as it is using this to do the lookup
 ## Input
-* Contents of a ARP or MAC Address table as a text file (such as a Cisco ```#sh ip arp``` output, like below):</br></br>
+* Contents of an ARP or MAC Address table as a text file (such as a Cisco ```#sh ip arp``` output, like below):</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Example of the output: </br></br>
