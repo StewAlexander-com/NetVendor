@@ -34,7 +34,7 @@ Table of Contents:
 ![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
 ![image](https://user-images.githubusercontent.com/48565067/159778884-924f1c9c-ecf6-46ea-88aa-c4529eb741c3.png)
 
- - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create an interactive pie chart and display it in the browser:
+ - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create an interactive web-based pie chart and display it in the browser:
  ![2022-03-06 18 43 25](https://user-images.githubusercontent.com/48565067/156947443-4510c608-b49f-4f3c-a8c9-60da13627ba6.png)
  * Created text file "company_list.txt" output:</br></br>
  ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
