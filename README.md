@@ -42,8 +42,8 @@ Table of Contents:
  ![image](https://user-images.githubusercontent.com/48565067/144633706-24bbe2ef-6965-4847-b3a9-0f22242ff95f.png)
 * Created Vendor-Devices.txt file:</br></br>
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
-* List of CSV "spreadsheet" files put in a new ```csv_files``` folder, representing any of the devices found in the input file
-* All the ```*.txt``` files are put in the ```text_files``` folder 
+* Creates a list of CSV "spreadsheet" device files and puts them in a new ```csv_files``` folder
+* Puts all the ```*.txt``` files created into the ```text_files``` folder 
 
 ## To Do / Updates
 - [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/23/2022)
