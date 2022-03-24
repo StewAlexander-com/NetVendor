@@ -19,7 +19,7 @@ Table of Contents:
 
 ## Why?
 Answers the questions:
-* What are the different products (companies) seen in the ARP / MAC table?
+* What are the different vendors (companies) on your network, and where are they?
 * How many different hardware types (OUIs) are there in the network? (The less there are, the safer a network is from a security standpoint)
 * How many Apples, Ciscos, Dells, HPs, and Mitel's are on the network?
 <br>
