@@ -6,7 +6,7 @@
 
 ## How?
 This program reviews an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on your network like:
-* How many different vendors (as in companies) exist witin your network?
+* How many different vendors (as in companies) exist within your network?
 * How many different types of hardware (MAC OUIs) exist within your network?
 * Where are all these things, and what are their IPs?
 * A list (and total) of all the Apple, Cisco, Dell, HP, and Mitel products that exist on your network
