@@ -5,11 +5,12 @@
 *This software figures this out!* 
 
 ## How?
-This program reviews an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on what it contains, including:
-* How many different vendors (as in companies) exist witin the ARP / MAC table
-* How many OUIs (MAC Address hardware types) exist within the ARP  / MAC table
-* A list (and total) of all the Apple, Cisco, Dell, HP, and Mitel products that exist in the ARP / MAC table
-* A list (and total) of all the VLANs within the ARP table
+This program reviews an ARP or MAC Addreess table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on your network like:
+* How many different vendors (as in companies) exist witin your network?
+* How many different types of hardware (MAC OUIs) exist within your network?
+* Where are all these things, and what are their IPs?
+* A list (and total) of all the Apple, Cisco, Dell, HP, and Mitel products that exist on your network
+* Are there any hidden VLANs lurking within your network? *This answers this too!*
 
 Table of Contents:
   - [Why?](#why)
@@ -18,12 +19,8 @@ Table of Contents:
   - [Output](#output)
 
 ## Why?
-Answers the questions:
-* What are the different vendors (companies) on your network, and where are they?
-* How many different hardware types (OUIs) are there in the network? (The less there are, the safer a network is from a security standpoint)
-* How many Apples, Ciscos, Dells, HPs, and Mitel's are on the network?
-<br>
-All of this is useful for understanding what is in a network for security and benchmarking purposes... <br>
+* Understanding what *exactly* is in your network is **_essential_** for security reasons... <br>
+* Benchmarks your network so you can easily see changes
 
 ## Dependencies 
 * This uses a restful API to search for the vendors, so it needs a working internet connection
