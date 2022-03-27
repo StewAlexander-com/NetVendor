@@ -21,16 +21,25 @@ try:
 except ImportError:
     subprocess.call([sys.executable, "-m", "pip", "install", "rich"])
     import rich
-    time.sleep (10)
-    from rich import print as rprint
+    time.sleep (1)
+     #tell the user the library is installed
+    print("[!] Rich module is now installed")
+    #Tell the user to please restart the program
+    print("Please restart the program")
+    time.sleep(3)
+    sys.exit()
 
 #check if the tqdm module exists, if not install it
 try :
     from tqdm import tqdm
 except ImportError:
     subprocess.call([sys.executable, "-m", "pip", "install", "tqdm"])
-    time.sleep(10)
-    from tqdm import tqdm
+     #tell the user the library is installed
+    print("[!] The tqdm library is now installed")
+    #tell the user to please restart the program
+    print("Please restart the program")
+    time.sleep(3)
+    sys.exit()
 
 #check if the plotly module exists, if not install it
 try :
@@ -39,9 +48,13 @@ try :
 except ImportError:
     print("[!] Plotly library not installed, Installing...")
     os.system("pip3 install plotly")
-    time.sleep(30)
-    import plotly
-    import plotly.graph_objs as go
+    time.sleep(1)
+     #tell the user the library is installed
+    print("[!] Plotly library is now installed")
+    #tell the user to please restart the program
+    print("Please restart the program")
+    time.sleep(3)
+
 
 #if the library requests is not installed, install it via pip
 try:
@@ -49,9 +62,13 @@ try:
 except ImportError:
     print("[!] The requests library is not installed. Installing...")
     os.system("pip install requests")
-    print("[+] The requests library has been installed.")
-    time.sleep(30)
-    import requests
+    time.sleep(1)
+    #tell the user the library is installed
+    print("[!] The requests library is now installed")
+    #tell the user to please restart the program
+    print("Please restart the program")
+    time.sleep(3)
+    sys.exit()
 
 #if the csv library is not installed, install it via pip
 try:
@@ -59,9 +76,13 @@ try:
 except ImportError:
     print("[!] The csv library is not installed. Installing...")
     os.system("pip install csv")
-    print("[+] The csv library has been installed.")
-    time.sleep(30)
-    import csv
+    print("[!] The csv library has been installed.")
+    time.sleep(1)
+    #tell the user to please restart the program
+    print("Please restart the program")
+    time.sleep(3)
+    sys.exit()
+   
 
 #if the shutil library is not installed, install it via pip
 try:
@@ -70,8 +91,10 @@ except ImportError:
     print("[!] The shutil library is not installed. Installing...")
     os.system("pip install shutil")
     print("[+] The shutil library has been installed.")
-    time.sleep(30)
-    import shutil   
+    #tell the user to please restart the program
+    print("Please restart the program")
+    time.sleep(3)
+    sys.exit()
 
 OUI_list = [] 
 OUI_list_final = []
