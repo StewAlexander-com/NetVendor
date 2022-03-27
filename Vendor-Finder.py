@@ -24,7 +24,6 @@ except ImportError:
     time.sleep (1)
      #tell the user the library is installed
     print("[!] Rich module is now installed")
-    #Tell the user to please restart the program
     print("Please restart the program")
     time.sleep(3)
     sys.exit()
