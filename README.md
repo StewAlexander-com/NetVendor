@@ -56,4 +56,6 @@ Table of Contents:
 - [x] Streamlined API call, add support for Apple Macs (supporting Windows, Linux or Mac computers (Added 02/10/2022)
 - [x] Added a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
-
+-----
+## This app is free
+* However if you want to help fund my development, feel free using my tag, ```$StewAlexander``` via cash app (further instructions here)[https://cash.app/help/us/en-us/1105-sending-a-payment]
