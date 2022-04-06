@@ -46,7 +46,7 @@ Table of Contents:
 * Puts all the ```*.txt``` files created into the ```text_files``` folder 
 
 ## To Do / Updates
-- [x] Add a timeout to the Vendor lookup, and *significantly* improved company lookup time (04/06/2022)
+- [x] Added a timeout to the Vendor lookup, and *significantly* improved company lookup time (04/06/2022)
 - [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/23/2022)
 - [x] Added code to move all the ```*.txt``` files to a created ```text_files``` folder (added 03/23/2022)
 - [x] Fixed a bug where a created csv file may have contents from more than one device file in it (resolved 03/23/2022)
