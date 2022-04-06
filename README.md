@@ -59,4 +59,4 @@ Table of Contents:
 -----
 ## This app is free
 * However if you want to help fund my development of this app, feel free using my tag, ```$StewAlexander``` via [cash app]( https://cash.app/)
-*  [Further instructions on how to send money via Cash App here](https://cash.app/help/us/en-us/1105-sending-a-payment)
+*  [Click here for further instructions on how to send money via Cash App](https://cash.app/help/us/en-us/1105-sending-a-payment)
