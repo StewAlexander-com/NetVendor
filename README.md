@@ -57,6 +57,6 @@ Table of Contents:
 - [x] Added a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
 -----
-## This app is free
+## This app is free❗
 * However if you want to help fund my development of this app, feel free using my tag, ```$StewAlexander``` via [cash app]( https://cash.app/)
 *  [Click here for further instructions on how to send money via Cash App](https://cash.app/help/us/en-us/1105-sending-a-payment)
