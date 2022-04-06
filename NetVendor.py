@@ -199,16 +199,19 @@ with open('oui_list_final.txt', 'r') as f:
 for i in tqdm (range(len(vendor_list)), colour="cyan"):
     #make each element uppercase
     vendor_list[i] = vendor_list[i].upper()
-    r = requests.get("https://macvendors.co/api/vendorname/" + vendor_list[i])
-    time.sleep(0.1)
-    #if the request is successful, print the vendor name
-    if r.status_code == 200:
+    #try to get the vendor for 2 seconds
+    try:
+        r = requests.get("https://macvendors.co/api/vendorname/" + vendor_list[i], timeout=2)
+        #if the request is successful, print the vendor name
+        if r.status_code == 200:
         #save the vendor name to a file called vendor_list.txt
-        with open('oui_name_result.txt', 'a') as f:
-            f.write(r.text + '\n')
-    #else if the request is not successful, print the error message
-    else:
-        print("\nError:", r.status_code, r.reason)
+            with open('oui_name_result.txt', 'a') as f:
+                f.write(r.text + '\n')
+        #else if the request is not successful, print the error message
+        else:
+            print("\nError:", r.status_code, r.reason)
+    except requests.exceptions.Timeout:
+        print("\nRequest Timed Out")
 
 #close the file
 f.close()
