@@ -711,7 +711,7 @@ else:
 
 #if the folder csv_files exists, then print the following message
 if os.path.exists('csv_files'):
-    print("\n[bold yellow]##[/bold yellow] See the [cyan]csv_files[/cyan] folder for the csv files")
+    print("\n[bold yellow]##[/bold yellow] See the [cyan]csv_files[/cyan] folder for the csv files\n")
     pass 
 
 #Check if there are any .txt files in the current directory
