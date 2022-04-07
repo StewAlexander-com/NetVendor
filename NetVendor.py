@@ -648,8 +648,11 @@ def make_csv(file):
         pass
     time.sleep(0.5) 
 
-    #move the csv file to the csv_files folder
-    shutil.move(csv_file, 'csv_files')
+    #move the csv file to the csv_files folder, if a copy does not exist
+    if not os.path.exists('csv_files/' + csv_file):
+        shutil.move(csv_file, 'csv_files/' + csv_file)
+    else:
+        pass
 
 #######################################################################################
 # Created file list
@@ -724,7 +727,11 @@ for file in os.listdir():
 #move the .txt files to the text_files folder
 for file in os.listdir():
     if file.endswith(".txt"):
-        shutil.move(file, 'text_files')
+        #if file does not exist in the text_files folder, then move it
+        if not os.path.exists('text_files/' + file):
+            shutil.move(file, 'text_files')
+        else:
+            print("[bold red]##[/bold red] The [cyan]" + file + "[cyan] file already exists in the [cyan]text_files[/cyan] folder")
     else:
         pass
 
