@@ -536,7 +536,7 @@ with open('oui_list_final.txt', 'r') as f:
     f.close()
     
 
-#count the lines in the file oui_list_final.txt and print the number of lines
+#count the lines in the file company_list.txt and print the number of lines
 with open('company_list.txt', 'r') as f:
     count = 0
     for line in f:
@@ -544,7 +544,7 @@ with open('company_list.txt', 'r') as f:
     print ("[bold yellow]++[/bold yellow] [bright_red]" + str(count) + "[/bright_red] [cyan]companies[/cyan]")
     f.close()
     
-#count the lines in the file oui_list_final.txt and print the number of lines
+#count the lines in the ip_arp_file.txt and print the number of lines
 with open( ip_arp_file, 'r') as f:
     count = 0
     for line in f:
