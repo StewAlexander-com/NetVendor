@@ -119,8 +119,8 @@ print('''[bright_blue]
  │  [white]or IP ARP and finds all the vendors.[/white]               │
  │                                                     │
  │  [bright_red]Plus:[/bright_red]                                              │
- │  [white]It also collects the Apples, Ciscos,Dells,HPs, and[/white] │
- │  [white]Mitel Phones in your network into csv files[/white]        │
+ │  [white]It also collects the Apples, Ciscos, Dells, HPs[/white]    │
+ │  [white]and Mitel Phones in your network into csv files[/white]    │
  │  [white]that you can easily import into a spreadsheet[/white]      │
  └─────────────────────────────────────────────────────┘
 [/bright_blue]''')
