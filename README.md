@@ -30,7 +30,7 @@ Table of Contents:
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Example of the output: </br></br>
-![program_output1](https://user-images.githubusercontent.com/48565067/156947568-60770c6b-f270-4087-abbc-7c7c40043439.png)
+![image](https://user-images.githubusercontent.com/48565067/164487358-c98e0014-4d3e-4df2-b688-fee58f5b9221.png)
 ![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
 ![image](https://user-images.githubusercontent.com/48565067/159778884-924f1c9c-ecf6-46ea-88aa-c4529eb741c3.png)
 
@@ -46,6 +46,7 @@ Table of Contents:
 * Puts all the ```*.txt``` files created into the ```text_files``` folder 
 
 ## To Do / Updates
+- [x] Added a banner and info box (see output section of readme, 04/21/22)
 - [x] Fixed issue if text / CSV files already exist (04/07/2022)
 - [x] Added a timeout to the Vendor lookup, and *significantly* improved company lookup time (04/06/2022)
 - [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/23/2022)
