@@ -103,6 +103,30 @@ vlan_list = []
 vlan_list_final = []
 word_list = []
 
+print('''[yellow]
+888888ba             dP   dP     dP                         dP                   
+88    `8b            88   88     88                         88                   
+88     88 .d8888b. d8888P 88    .8P .d8888b. 88d888b. .d888b88 .d8888b. 88d888b. 
+88     88 88ooood8   88   88    d8' 88ooood8 88'  `88 88'  `88 88'  `88 88'  `88 
+88     88 88.  ...   88   88  .d8P  88.  ... 88    88 88.  .88 88.  .88 88       
+dP     dP `88888P'   dP   888888'   `88888P' dP    dP `88888P8 `88888P' dP       
+[/yellow]''')
+
+
+print('''[bright_blue]
+ ┌─────────────────────────────────────────────────────┐
+ │  [white]This app takes the output of a MAC Address Table[/white]   │
+ │  [white]or IP ARP and finds all the vendors.[/white]               │
+ │                                                     │
+ │  [bright_red]Plus:[/bright_red]                                              │
+ │  [white]It also collects the Apples, Ciscos,Dells,HPs, and[/white] │
+ │  [white]Mitel Phones in your network into csv files[/white]        │
+ │  [white]that you can easily import into a spreadsheet[/white]      │
+ └─────────────────────────────────────────────────────┘
+[/bright_blue]''')
+
+
+
 #Get the current working directory and store it in a variable called "cwd"
 cwd = os.getcwd()
 
