@@ -30,7 +30,7 @@ Table of Contents:
  ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
 ## Output
 * Example of the output: </br></br>
-![image](https://user-images.githubusercontent.com/48565067/164487358-c98e0014-4d3e-4df2-b688-fee58f5b9221.png)
+![image](https://user-images.githubusercontent.com/48565067/164489106-50b4310c-8a42-4715-824c-beba926dfcba.png)
 ![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
 ![image](https://user-images.githubusercontent.com/48565067/159778884-924f1c9c-ecf6-46ea-88aa-c4529eb741c3.png)
 
