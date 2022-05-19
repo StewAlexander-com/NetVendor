@@ -46,6 +46,7 @@ Table of Contents:
 * Puts all the ```*.txt``` files created into the ```text_files``` folder 
 
 ## To Do / Updates
+- [x] Automatically attempts to upgrade required libraries (05/22/2022)
 - [x] Added a banner and info box (see output section of readme, 04/21/22)
 - [x] Fixed issue if text / CSV files already exist (04/07/2022)
 - [x] Added a timeout to the Vendor lookup, and *significantly* improved company lookup time (04/06/2022)
