@@ -28,6 +28,12 @@ except ImportError:
     time.sleep(3)
     sys.exit()
 
+#Try to upgrade the rich module to the latest version
+try:
+    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "rich"])
+except:
+    pass
+
 #check if the tqdm module exists, if not install it
 try :
     from tqdm import tqdm
@@ -39,6 +45,12 @@ except ImportError:
     print("Please restart the program")
     time.sleep(3)
     sys.exit()
+
+#Try to upgrade the tqdm module to the latest version
+try:
+    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "tqdm"])
+except:
+    pass
 
 #check if the plotly module exists, if not install it
 try :
@@ -54,6 +66,11 @@ except ImportError:
     print("Please restart the program")
     time.sleep(3)
 
+#try to upgrade the tqdm module to the latest version
+try:
+    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "tqdm"])
+except:
+    pass
 
 #if the library requests is not installed, install it via pip
 try:
@@ -68,6 +85,12 @@ except ImportError:
     print("Please restart the program")
     time.sleep(3)
     sys.exit()
+
+#Try to upgrade the requests module to the latest version
+try:
+    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "requests"])
+except:
+    pass
 
 #if the csv library is not installed, install it via pip
 try:
@@ -94,6 +117,7 @@ except ImportError:
     print("Please restart the program")
     time.sleep(3)
     sys.exit()
+
 
 OUI_list = [] 
 OUI_list_final = []
