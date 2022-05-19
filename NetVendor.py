@@ -58,7 +58,7 @@ try :
     import plotly.graph_objs as go
 except ImportError:
     print("[!] Plotly library not installed, Installing...")
-    os.system("pip3 install plotly")
+    os.system("pip install plotly")
     time.sleep(1)
      #tell the user the library is installed
     print("[!] Plotly library is now installed")
@@ -66,9 +66,10 @@ except ImportError:
     print("Please restart the program")
     time.sleep(3)
 
-#try to upgrade the tqdm module to the latest version
+#try to upgrade the plotly module to the latest version
 try:
-    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "tqdm"])
+    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "plotly"])
+    time.sleep(10)
 except:
     pass
 
