@@ -12,113 +12,54 @@ import sys
 import csv
 import time
 import subprocess
-import json
+import shutil
 
-#check if the rich module exists, if not, install it
-try:
-    from rich import print
-    from rich import pretty
-except ImportError:
-    subprocess.call([sys.executable, "-m", "pip", "install", "rich"])
-    import rich
-    time.sleep (1)
-     #tell the user the library is installed
-    print("[!] Rich module is now installed")
-    print("Please restart the program")
-    time.sleep(3)
-    sys.exit()
+# Function to install or upgrade a package using pip
+def install_or_upgrade(package_name, upgrade=False):
+    command = [sys.executable, "-m", "pip", "install"]
+    if upgrade:
+        command.append("--upgrade")
+    command.append(package_name)
+    
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.returncode == 0:
+        print(f"[+] {package_name} {'upgraded' if upgrade else 'installed'} successfully.")
+        return True
+    else:
+        print(f"[!] Failed to {'upgrade' if upgrade else 'install'} {package_name}. Error:")
+        print(result.stderr)
+        return False
 
-#Try to upgrade the rich module to the latest version
-try:
-    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "rich"])
-except:
-    pass
+# Function to handle importing a module, or installing/upgrading it if necessary
+def import_or_handle(module_name, package_name=None):
+    if package_name is None:
+        package_name = module_name
 
-#check if the tqdm module exists, if not install it
-try :
-    from tqdm import tqdm
-except ImportError:
-    subprocess.call([sys.executable, "-m", "pip", "install", "tqdm"])
-     #tell the user the library is installed
-    print("[!] The tqdm library is now installed")
-    #tell the user to please restart the program
-    print("Please restart the program")
-    time.sleep(3)
-    sys.exit()
+    try:
+        return __import__(module_name)
+    except ImportError:
+        print(f"[!] {module_name} module not found. Attempting to install...")
+        if install_or_upgrade(package_name):
+            return __import__(module_name)
+        else:
+            print(f"[!] Please install the {module_name} module manually.")
+            sys.exit(1)
 
-#Try to upgrade the tqdm module to the latest version
-try:
-    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "tqdm"])
-except:
-    pass
+# Importing  and/or installing  the necessary modules
+rich = import_or_handle('rich')
+tqdm = import_or_handle('tqdm')
+requests = import_or_handle('requests')
+plotly = import_or_handle('plotly')
 
-#check if the plotly module exists, if not install it
-try :
-    import plotly
-    import plotly.graph_objs as go
-except ImportError:
-    print("[!] Plotly library not installed, Installing...")
-    os.system("pip install plotly")
-    time.sleep(1)
-     #tell the user the library is installed
-    print("[!] Plotly library is now installed")
-    #tell the user to please restart the program
-    print("Please restart the program")
-    time.sleep(3)
+# Upgrading  the necessary modules
+install_or_upgrade('rich', upgrade=True)
+install_or_upgrade('tqdm', upgrade=True)
+install_or_upgrade('requests', upgrade=True)
+install_or_upgrade('plotly', upgrade=True)
 
-#try to upgrade the plotly module to the latest version
-try:
-    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "plotly"])
-    time.sleep(10)
-except:
-    pass
-
-#if the library requests is not installed, install it via pip
-try:
-    import requests
-except ImportError:
-    print("[!] The requests library is not installed. Installing...")
-    os.system("pip install requests")
-    time.sleep(1)
-    #tell the user the library is installed
-    print("[!] The requests library is now installed")
-    #tell the user to please restart the program
-    print("Please restart the program")
-    time.sleep(3)
-    sys.exit()
-
-#Try to upgrade the requests module to the latest version
-try:
-    subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "requests"])
-except:
-    pass
-
-#if the csv library is not installed, install it via pip
-try:
-    import csv
-except ImportError:
-    print("[!] The csv library is not installed. Installing...")
-    os.system("pip install csv")
-    print("[!] The csv library has been installed.")
-    time.sleep(1)
-    #tell the user to please restart the program
-    print("Please restart the program")
-    time.sleep(3)
-    sys.exit()
-   
-
-#if the shutil library is not installed, install it via pip
-try:
-    import shutil
-except ImportError:
-    print("[!] The shutil library is not installed. Installing...")
-    os.system("pip install shutil")
-    print("[+] The shutil library has been installed.")
-    #tell the user to please restart the program
-    print("Please restart the program")
-    time.sleep(3)
-    sys.exit()
-
+# After handling installations and upgrades, we should now safely be able to use the imported modules
+# For example, using plotly now
+import plotly.graph_objs as go
 
 OUI_list = [] 
 OUI_list_final = []
@@ -152,14 +93,14 @@ print('''[bright_blue]
 
 
 
-#Get the current working directory and store it in a variable called "cwd"
+# Get the current working directory and store it in a variable called "cwd"
 cwd = os.getcwd()
 
-#Show the contents of the current directory
+# Show the contents of the current directory
 print("\nPlease select the [italic green]ARP[/italic green] or [italic green]MAC[/italic green] Data text file from [cyan]"+cwd+"[/cyan] \n")
 print(os.listdir(), "\n")
 
-#while the file name is not valid, ask the user to input the file name again
+# while the file name is not valid, ask the user to input the file name again
 while True:
     ip_arp_file = input("Please enter the file name: ")
     if os.path.isfile(ip_arp_file):
@@ -200,19 +141,12 @@ with open(ip_arp_file, 'r') as f:
 #sort OUI_list
 OUI_list.sort()
 
-#compare each element to the previous element, if the element is different, save the element
-for i in range(len(OUI_list)):
-    if OUI_list[i] != OUI_list[i-1]:
-        #save each different element to a new list called OUI_list_final
-        OUI_list_final.append(OUI_list[i])
+# Deduplicate the list by leveraging set properties if the list is unordered.
+OUI_list_final = [OUI_list[i] for i in range(len(OUI_list)) if i == 0 or OUI_list[i] != OUI_list[i-1]]
 
-#save oui list final to a file called oui_list_final.txt
+# Write the final list to a file, each element on a new line.
 with open('oui_list_final.txt', 'w') as f:
-    for i in range(len(OUI_list_final)):
-        f.write(OUI_list_final[i][0] + '\n')
-
-#close the file
-f.close()
+    f.writelines(f'{item}\n' for item in OUI_list_final)
 
 #Check each line of the file oui_list_final.txt if it is 'MAC' delete it
 with open('oui_list_final.txt', 'r') as f:
@@ -221,8 +155,6 @@ with open('oui_list_final.txt', 'w') as f:
     for line in lines:
         if line.strip("\n") != 'MAC':
             f.write(line)
-#close the file
-f.close()
 
 #Check each line of the file oui_list_final.txt if it is 'INCOMPL' delete it
 with open('oui_list_final.txt', 'r') as f:
@@ -291,25 +223,25 @@ f.close()
 #sort company_list
 company_list.sort()
 
-#compare each element to the previous element, if the element is different, print the element
-for i in range(len(company_list)):
-    if company_list[i] != company_list[i-1]:
-        #save each different element to a new list called company_list_final
-        company_list_final.append(company_list[i])
+# Initialize the final list with the first element if the list is not empty
+company_list_final = [company_list[0]] if company_list else []
 
-print("\n\nThe companies seen in the [italic green]"+ ip_arp_file + "[/italic green] data file are:\n")
+# Iterate over the company list starting from the second element
+for current_company, previous_company in zip(company_list[1:], company_list[:-1]):
+    if current_company != previous_company:
+        company_list_final.append(current_company)
 
-#save the company list final to a file called company_list.txt
+print(f"\n\nThe companies seen in the [italic green]{ip_arp_file}[/italic green] data file are:\n")
+
+# Save the deduplicated company list to a file
 with open('company_list.txt', 'w') as f:
-    for i in range(len(company_list_final)):
-        f.write(company_list_final[i])
+    for company in company_list_final:
+        f.write(company)
 
-#print the list company_list one element a t time
-for i in range(len(company_list_final)):
-    #remove the new line character from the end of the line
-    company_list_final[i] = company_list_final[i].rstrip()
-    #print the element in cyan
-    print("[cyan]" + company_list_final[i] + "[/cyan]")
+# Print the list of companies with formatting
+for company in company_list_final:
+    # Using .rstrip() to remove the newline character
+    print(f"[cyan]{company.rstrip()}[/cyan]")
 
 #Collecting the output of the command sh ip arp
 print ("\n\n[italic yellow]Please be patient, while information is being retrieved[/italic yellow]\n")
@@ -325,18 +257,19 @@ else :
     pass
 
 print ("\nFinding any [cyan]Apple[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
+
 #For every line in the file check the MAC address, if it is an Apple Address, add it the Apple-Devices.txt
-with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f, colour="cyan"):
-       #split the line into words
+
+# Define Apple OUIs
+apple_ouis = {"0c4d.e9", "109a.dd", "10dd.b1", "28ff.3c", "38c9.86", 
+              "3c7d.0a", "501f.c6", "685b.35", "7cd1.c3", "8866.5a", 
+              "9c20.7b", "a860.b6", "d081.7a", "cc29.f5"}
+
+with open(ip_arp_file, 'r') as input_file, open('Apple-Devices.txt', 'a') as output_file:
+    for line in tqdm(input_file, colour="cyan"):
         words = line.split()
-        #if words[mac_word] starts with Apple OUI add it to the Apple-Devices.txt file 
-        if words[mac_word].startswith("0c4d.e9") or words[mac_word].startswith("109a.dd") or words[mac_word].startswith("10dd.b1") or words[mac_word].startswith("28ff.3c") or words[mac_word].startswith("38c9.86") or words[mac_word].startswith("3c7d.0a") or words[mac_word].startswith("501f.c6")or words[mac_word].startswith("685b.35") or words[mac_word].startswith("7cd1.c")or words[mac_word].startswith("8866.5a") or words[mac_word].startswith("9c20.7b") or words[mac_word].startswith("a860.b6") or words[mac_word].startswith("d081.7a") or words[mac_word].startswith("cc29.f5"):
-            with open('Apple-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
-#close the files
-f.close()
+        if any(words[mac_word].startswith(oui) for oui in apple_ouis):
+            output_file.write(line)
 
 if os.path.exists('Apple-Devices.txt'):
 #read the file Apple-Devices.txt and store the total number of lines in a variable called Apple-count
@@ -360,16 +293,34 @@ else :
 
 print ("\nFinding any [cyan]Dell[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
 
-#For every line in the file check the MAC address, if it is a Dell Address, add it the Dell-Devices.txt
-with open(ip_arp_file, 'r') as f:
+from tqdm import tqdm
+
+# Define the list of Dell OUIs (Organizationally Unique Identifiers)
+dell_ouis = {
+    "001a.a0", "004e.01", "14b3.1f", "14fe.b5", "1866.da", "28f1.0e", "484d.7e", "509a.4c",
+    "5448.10", "54bf.64", "6400.6a", "6c2b.59", "782b.cb", "8cec.4b", "a41f.72", "a4bb.6d",
+    "b083.fe", "b885.84", "b8ca.3a", "bc30.5b", "c81f.66", "d4be.d9", "d89e.f3", "e454.e8",
+    "e4f0.04", "f04d.a2", "f402.70", "f48e.38", "f8bc.12", "0006.5b", "0008.74", "000b.db",
+    "000d.56", "000f.1f", "0011.43", "0012.3f", "0013.72", "0014.22", "0015.c5", "0016.f0",
+    "0018.8b", "0019.b9", "001c.23", "001d.09", "001e.4f", "001e.c9", "0021.70", "0021.9b",
+    "0022.19", "0023.ae", "0024.e8", "0025.64", "0026.b9", "00b0.d0", "00be.43", "00c0.4f",
+    "0892.04", "0c29.ef", "1065.30", "107d.1a", "1098.36", "1418.77", "149e.cf", "1803.73",
+    "185a.58", "18a9.9b", "18db.f2", "18fb.7b", "1c40.24", "1c72.1d", "2004.0f", "2047.47",
+    "246e.96", "2471.52", "24b6.fd", "2cea.7f", "30d0.42", "3417.eb", "3473.5a", "448e.db"
+}
+
+# Function to check if a MAC address belongs to Dell
+def is_dell_mac(mac):
+    return any(mac.lower().startswith(oui) for oui in dell_ouis)
+
+# Read the file and write Dell MAC addresses to the output file
+with open(ip_arp_file, 'r') as f, open('Dell-Devices.txt', 'a') as dell_file:
     for line in tqdm(f, colour="cyan"):
-       #split the line into words
         words = line.split()
-        #if words[mac_word] starts with a Dell OUI add the line to the Dell-Devices.txt file 
-        if words[mac_word].startswith("001a.a0") or words[mac_word].startswith("004e.01") or words[mac_word].startswith("14b3.1f") or words[mac_word].startswith("14fe.b5") or words[mac_word].startswith("1866.da") or words[mac_word].startswith("28f1.0e") or words[mac_word].startswith("484d.7e")or words[mac_word].startswith("509a.4c") or words[mac_word].startswith("5448.10")or words[mac_word].startswith("54bf.64") or words[mac_word].startswith("6400.6a") or words[mac_word].startswith("6c2b.59") or words[mac_word].startswith("782b.cb") or words[mac_word].startswith("8cec.4b") or words[mac_word].startswith("a41f.72") or words[mac_word].startswith("a4bb.6d") or words[mac_word].startswith("b083.fe") or words[mac_word].startswith("b885.84") or words[mac_word].startswith("b8ca.3a") or words[mac_word].startswith("bc30.5b") or words[mac_word].startswith("c81f.66") or words[mac_word].startswith("d4be.d9") or words[mac_word].startswith("d89e.f3") or words[mac_word].startswith("e454.e8") or words[mac_word].startswith("e4f0.04") or words[mac_word].startswith("f04d.a2") or words[mac_word].startswith("f402.70") or words[mac_word].startswith("f48e.38") or words[mac_word].startswith("f8bc.12") or words[mac_word].startswith("0006.5b") or words[mac_word].startswith("0008.74") or words[mac_word].startswith("000b.db") or words[mac_word].startswith("000d.56") or words[mac_word].startswith("000f.1f") or words[mac_word].startswith("0011.43")  or words[mac_word].startswith("0012.3f") or words[mac_word].startswith("0013.72") or words[mac_word].startswith("0014.22") or words[mac_word].startswith("0015.c5") or words[mac_word].startswith("0016.f0") or words[mac_word].startswith("0018.8b") or words[mac_word].startswith("0019.b9") or words[mac_word].startswith("01c2.3") or words[mac_word].startswith("001d.09") or words[mac_word].startswith("001e.4f")  or words[mac_word].startswith("001e.c9") or words[mac_word].startswith("0021.70") or words[mac_word].startswith("0021.9b") or words[mac_word].startswith("0022.19")  or words[mac_word].startswith("0023.ae") or words[mac_word].startswith("0024.e8") or words[mac_word].startswith("0025.64") or words[mac_word].startswith("0026.b9") or words[mac_word].startswith("00b0.d0") or words[mac_word].startswith("00be.43") or words[mac_word].startswith("00c0.4f") or words[mac_word].startswith("0892.04") or words[mac_word].startswith("0c29.ef") or words[mac_word].startswith("1065.30") or words[mac_word].startswith("107d.1a") or words[mac_word].startswith("1098.36") or words[mac_word].startswith("1418.77") or words[mac_word].startswith("149e.cf") or words[mac_word].startswith("1803.73") or words[mac_word].startswith("185a.58") or words[mac_word].startswith("18a9.9b") or words[mac_word].startswith("18db.f2") or words[mac_word].startswith("18fb.7b") or words[mac_word].startswith("1c40.24") or words[mac_word].startswith("1c72.1d")  or words[mac_word].startswith("2004.0f") or words[mac_word].startswith("246e.96") or words[mac_word].startswith("2471.52") or words[mac_word].startswith("24b6.fd") or words[mac_word].startswith("2cea.7f") or words[mac_word].startswith("30d0.42") or words[mac_word].startswith("3417.eb") or words[mac_word].startswith("448e.db") or words[mac_word].startswith("3473.5a") or words[mac_word].startswith("18db.f2") or words[mac_word].startswith("18fb.7b") or words[mac_word].startswith("1c40.24") or words[mac_word].startswith("1c72.1d") or words[mac_word].startswith("2004.0f") or words[mac_word].startswith("2047.47") or words[mac_word].startswith("246e.96") or words[mac_word].startswith("2471.52") or words[mac_word].startswith("24b6.fd") or words[mac_word].startswith("2cea.7f") or words[mac_word].startswith("30d0.42") or words[mac_word].startswith("3417.eb")  :
-            with open('Dell-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
+        if is_dell_mac(words[mac_word]):
+            dell_file.write(line)
+
+
 #close the files
 f.close()
 
@@ -394,18 +345,22 @@ else :
 
 print ("\nFinding any [cyan]Cisco Meraki[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
 
-#For every line in the file check the MAC address, if it is an Cisco-Meraki Address, add it the Cisco-Meraki-Devices.txt
-with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f,colour='cyan'):
-       #split the line into words
+from tqdm import tqdm
+
+# Define the list of Cisco-Meraki OUIs
+meraki_ouis = {"ac17.c8", "f89e.28"}
+
+# Function to check if a MAC address belongs to Cisco-Meraki
+def is_meraki_mac(mac):
+    return any(mac.lower().startswith(oui) for oui in meraki_ouis)
+
+# Read the input file and write Cisco-Meraki MAC addresses to the output file
+with open(ip_arp_file, 'r') as f, open('Cisco-Meraki-Devices.txt', 'a') as meraki_file:
+    for line in tqdm(f, colour='cyan'):
         words = line.split()
-        #if words[mac_word] starts with a Cisco-Meraki OUI add the line to the Cisco-Meraki-Devices.txt file 
-        if words[mac_word].startswith("ac17.c8") or words[mac_word].startswith("f89e.28"):
-            with open('Cisco-Meraki-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
-#close the files
-f.close()
+        if is_meraki_mac(words[mac_word]):
+            meraki_file.write(line)
+            # Removed the time.sleep(0.1) to improve efficiency
 
 if os.path.exists('Cisco-Meraki-Devices.txt'):
 #read the file Cisco-Meraki-Devices.txt and store the total number of lines in a variable called Cisco-Meraki-count
@@ -428,18 +383,29 @@ else :
 
 print ("\nFinding any other [cyan]Cisco[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
 
-#For every line in the file check the MAC address, if it is an Other-Cisco Address, add it the Other-Cisco-Devices.txt
-with open(ip_arp_file, 'r') as f:
+
+# Define the list of Other-Cisco OUIs
+other_cisco_ouis = {
+    "0007.7d", "0008.2f", "0021.a0", "0022.bd", "0023.5e",
+    "003a.99", "005f.86", "00aa.6e", "0cf5.a4", "1833.9d",
+    "1ce8.5d", "30e4.db", "40f4.ec", "4403.a7", "4c4e.35",
+    "544a.00", "5486.bc", "588d.09", "58bf.ea", "6400.f1",
+    "7c21.0d", "84b5.17", "8cb6.4f", "ac17.c8", "ac7e.8a",
+    "bc67.1c", "c4b3.6a", "d4ad.71", "e0d1.73", "e8b7.48",
+    "f09e.63", "f866.f2", "0025.45", "002a.6a"
+}
+
+# Function to check if a MAC address belongs to Other-Cisco
+def is_other_cisco_mac(mac):
+    return any(mac.lower().startswith(oui) for oui in other_cisco_ouis)
+
+# Read the input file and write Other-Cisco MAC addresses to the output file
+with open(ip_arp_file, 'r') as f, open('Other-Cisco-Devices.txt', 'a') as cisco_file:
     for line in tqdm(f, colour='cyan'):
-       #split the line into words
         words = line.split()
-        #if words[mac_word] starts with a Other-Cisco OUI add the line to the Other-Cisco-Devices.txt file 
-        if words[mac_word].startswith("0007.7d") or words[mac_word].startswith("0008.2f") or words[mac_word].startswith("0021.a0") or words[mac_word].startswith("0022.bd") or words[mac_word].startswith("0023.5e") or words[mac_word].startswith("003a.99") or words[mac_word].startswith("005f.86") or words[mac_word].startswith("00aa.6e") or words[mac_word].startswith("0cf5.a4") or words[mac_word].startswith("1833.9d") or words[mac_word].startswith("1ce8.5d") or words[mac_word].startswith("30e4.db") or words[mac_word].startswith("40f4.ec") or words[mac_word].startswith("4403.a7") or words[mac_word].startswith("4c4e.35") or words[mac_word].startswith("544a.00") or words[mac_word].startswith("5486.bc") or words[mac_word].startswith("588d.09") or words[mac_word].startswith("58bf.ea") or words[mac_word].startswith("6400.f1") or words[mac_word].startswith("7c21.0d") or words[mac_word].startswith("84b5.17") or words[mac_word].startswith("8cb6.4f") or words[mac_word].startswith("ac17.c8") or words[mac_word].startswith("ac7e.8a") or words[mac_word].startswith("bc67.1c") or words[mac_word].startswith("c4b3.6a") or words[mac_word].startswith("d4ad.71") or words[mac_word].startswith("e0d1.73") or words[mac_word].startswith("e8b7.48") or words[mac_word].startswith("f09e.63") or words[mac_word].startswith("f866.f2") or words[mac_word].startswith("0025.45") or words[mac_word].startswith("002a.6a") :
-            with open('Other-Cisco-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
-#close the files
-f.close()
+        if is_other_cisco_mac(words[mac_word]):
+            cisco_file.write(line)
+            # Removed the time.sleep(0.1) to improve efficiency
 
 if os.path.exists('Other-Cisco-Devices.txt'):
 #read the file Other-Cisco-Devices.txt and store the total number of lines in a variable called Other-Cisco-count
@@ -466,18 +432,18 @@ else :
 
 print ("\nFinding any [cyan]Mitel[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
 
-#For every line in the file check the MAC address, if it is an Mitel Address, add it the Mitel-Devices.txt
-with open(ip_arp_file, 'r') as f:
+
+# Function to check if a MAC address belongs to Mitel
+def is_mitel_mac(mac):
+    return mac.lower().startswith("0800.0f")
+
+# Read the input file and write Mitel MAC addresses to the output file
+with open(ip_arp_file, 'r') as f, open('Mitel-Devices.txt', 'a') as mitel_file:
     for line in tqdm(f, colour='cyan'):
-       #split the line into words
         words = line.split()
-        #if words[mac_word] starts with a Mitel OUI add the line to the Mitel-Devices.txt file 
-        if words[mac_word].startswith("0800.0f") :
-            with open('Mitel-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
-#close the files
-f.close()
+        if is_mitel_mac(words[mac_word]):
+            mitel_file.write(line)
+            # Removed the time.sleep(0.1) to improve efficiency
 
 if os.path.exists('Mitel-Devices.txt'):
 #read the file Mitel-Devices.txt and store the total number of lines in a variable called Mitel-count
@@ -501,18 +467,27 @@ else :
 
 print ("\nFinding any [cyan]HP[/cyan] devices in the [italic green]" + ip_arp_file + "[/italic green] file....")
 
-#For every line in the file check the MAC address, if it is an HP OUI Address, add it the HP-Devices.txt
-with open(ip_arp_file, 'r') as f:
-    for line in tqdm(f, colour='cyan'):
-       #split the line into words
+
+# A set of HP OUIs for faster membership testing
+hp_ouis = {
+    "0017.a4", "001b.78", "0023.7d", "0030.6e", "009c.02", "1062.e5",
+    "3024.a9", "308d.99", "30e1.71", "3822.e2", "38ea.a7", "40b0.34",
+    "68b5.99", "6cc2.17", "80ce.62", "80e8.2c", "8434.97", "98e7.f4",
+    "9cb6.54", "a08c.fd", "a0d3.c1", "a45d.36", "b00c.d1", "e4e7.49",
+    "ec8e.b5", "f092.1c", "f430.b9", "fc15.b4"
+}
+
+# Function to check if a MAC address belongs to HP
+def is_hp_mac(mac):
+    return any(mac.startswith(oui) for oui in hp_ouis)
+
+# Read the input file and write HP MAC addresses to the output file
+with open(ip_arp_file, 'r') as source_file, open('HP-Devices.txt', 'a') as hp_file:
+    for line in tqdm(source_file, colour='cyan'):
         words = line.split()
-        #if words[mac_word] starts with a HP OUI add the line to the HP-Devices.txt file 
-        if words[mac_word].startswith("0017.a4") or words[mac_word].startswith("001b.78") or words[mac_word].startswith("0023.7d") or words[mac_word].startswith("0030.6e") or words[mac_word].startswith("009c.02") or words[mac_word].startswith("1062.e5") or words[mac_word].startswith("3024.a9") or words[mac_word].startswith("308d.99") or words[mac_word].startswith("30e1.71") or words[mac_word].startswith("3822.e2") or words[mac_word].startswith("38ea.a7") or words[mac_word].startswith("40b0.34") or words[mac_word].startswith("68b5.99") or words[mac_word].startswith("6cc2.17") or words[mac_word].startswith("80ce.62") or words[mac_word].startswith("80e8.2c") or words[mac_word].startswith("8434.97") or words[mac_word].startswith("98e7.f4") or words[mac_word].startswith("9cb6.54") or words[mac_word].startswith("a08c.fd") or words[mac_word].startswith("a0d3.c1") or words[mac_word].startswith("a45d.36") or words[mac_word].startswith("b00c.d1") or words[mac_word].startswith("e4e7.49") or words[mac_word].startswith("ec8e.b5") or words[mac_word].startswith("f092.1c") or words[mac_word].startswith("f430.b9") or words[mac_word].startswith("fc15.b4") :
-            with open('HP-Devices.txt', 'a') as f:
-                f.write(line)
-                time.sleep(0.1)
-#close the files
-f.close()
+        if is_hp_mac(words[mac_word]):
+            hp_file.write(line)
+            # Removed the time.sleep(0.1) to improve efficiency
 
 if os.path.exists('HP-Devices.txt'):
 #read the file HP-Devices.txt and store the total number of lines in a variable called HP-count
@@ -542,19 +517,18 @@ with open(ip_arp_file, 'r') as f:
 #sort the vlan_list
 vlan_list.sort()
 
-#compare each element to the previous element, if the element is different, save the element
-for i in range(len(vlan_list)):
-    if vlan_list[i] != vlan_list[i-1]:
-        #save each different element to a new list called vlan_list_final
-        vlan_list_final.append(vlan_list[i])
+# Initialize the final list with the first element from the original list if it's not empty
+vlan_list_final = [vlan_list[0]] if vlan_list else []
 
-#save oui list final to a file called vlan_list_final.txt
-with open('vlan_list.txt', 'w') as f:
-    for i in range(len(vlan_list_final)):
-        f.write(vlan_list_final[i][0] + '\n')
+# Compare each element to the previous one and save if different
+for current, previous in zip(vlan_list[1:], vlan_list[:-1]):
+    if current != previous:
+        vlan_list_final.append(current)
 
-#close the files
-f.close()
+# Save the final list to a file
+with open('vlan_list_final.txt', 'w') as f:
+    for vlan in vlan_list_final:
+        f.write(vlan[0] + '\n')
 
 #Check each line of the file vlan_list.txt if it is "Interface" delete it
 with open('vlan_list.txt', 'r') as f:
