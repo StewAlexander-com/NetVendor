@@ -46,6 +46,8 @@ Table of Contents:
 * Puts all the ```*.txt``` files created into the ```text_files``` folder 
 
 ## To Do / Updates
+- [ ] Bug checking after refractoring (to do) 
+- [x] Refractored code for general efficiency, readability and resiliency (11/09/2023)
 - [x] Automatically attempts to upgrade required libraries (05/22/2022)
 - [x] Added a banner and info box (see output section of readme, 04/21/22)
 - [x] Fixed issue if text / CSV files already exist (04/07/2022)
