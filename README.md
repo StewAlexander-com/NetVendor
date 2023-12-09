@@ -44,8 +44,9 @@ Table of Contents:
   ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
 * Creates a list of CSV "spreadsheet" device files and puts them in a new ```csv_files``` folder
 * Puts all the ```*.txt``` files created into the ```text_files``` folder 
+-----
 
-## To Do / Updates
+## Updates
 - [ ] Bug checking after refractoring (to do) 
 - [x] Refractored code for general efficiency, readability and resiliency (11/09/2023)
 - [x] Automatically attempts to upgrade required libraries (05/22/2022)
