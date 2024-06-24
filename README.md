@@ -64,9 +64,9 @@ Table of Contents:
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
 -----
 ## To-Do's
-- [ ] MAC OUIs are hard coaded, instead grab from IEEE via the requests library 
-- [ ] Check date of last MAC OUI pull, ask user if they wish to refresh
-- [ ] Consider calling a single dictionary of OUIs with company names as keys
+- [ ] MAC OUIs are hard coaded, instead grab from IEEE and put into a local database
+- [ ] Check date of last MAC OUI pull, ask user if they wish to refresh if older than 3 months
+- [ ] Consider calling the local database for vendor OUIs
 - [ ] Get rid of superflous file close operations 
 - [ ] Add more vendor checks
 
