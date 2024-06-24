@@ -64,7 +64,9 @@ Table of Contents:
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
 -----
 ## To-Do's
-- [ ] Modify code to check if necessary modules exists, if not ask user if installation is needed
+- [ ] MAC OUIs are hard coaded, instead grab from IEEE via the requests library 
+- [ ] Check date of last MAC OUI pull, ask user if they wish to refresh
+- [ ] Consider calling a single dictionary of OUIs with company names as keys
 - [ ] Get rid of superflous file close operations 
 - [ ] Add more vendor checks
 
