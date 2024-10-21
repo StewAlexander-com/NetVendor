@@ -20,6 +20,8 @@ def check_module_installed(module_name):
         print(f"The module '{module_name}' is installed.")
     except ImportError:
         print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
+        #Tell the user to that NetVendor will exit, as the module is not installed. 
+        print("\n[bold red]NetVendor will now exit[/bold red]")
         #end the program
         sys.exit()
 
