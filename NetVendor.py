@@ -14,52 +14,25 @@ import time
 import subprocess
 import shutil
 
-# Function to install or upgrade a package using pip
-def install_or_upgrade(package_name, upgrade=False):
-    command = [sys.executable, "-m", "pip", "install"]
-    if upgrade:
-        command.append("--upgrade")
-    command.append(package_name)
-    
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    if result.returncode == 0:
-        print(f"[+] {package_name} {'upgraded' if upgrade else 'installed'} successfully.")
-        return True
-    else:
-        print(f"[!] Failed to {'upgrade' if upgrade else 'install'} {package_name}. Error:")
-        print(result.stderr)
-        return False
-
-# Function to handle importing a module, or installing/upgrading it if necessary
-def import_or_handle(module_name, package_name=None):
-    if package_name is None:
-        package_name = module_name
-
+def check_module_installed(module_name):
     try:
-        return __import__(module_name)
+        __import__(module_name)
+        print(f"The module '{module_name}' is installed.")
     except ImportError:
-        print(f"[!] {module_name} module not found. Attempting to install...")
-        if install_or_upgrade(package_name):
-            return __import__(module_name)
-        else:
-            print(f"[!] Please install the {module_name} module manually.")
-            sys.exit(1)
+        print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
+        #end the program
+        sys.exit()
 
-# Importing  and/or installing  the necessary modules
-rich = import_or_handle('rich')
-tqdm = import_or_handle('tqdm')
-requests = import_or_handle('requests')
-plotly = import_or_handle('plotly')
+# List of modules to check
+modules_to_check = ["requests", "plotly", "tqdm", "rich"]
 
-# Upgrading  the necessary modules
-install_or_upgrade('rich', upgrade=True)
-install_or_upgrade('tqdm', upgrade=True)
-install_or_upgrade('requests', upgrade=True)
-install_or_upgrade('plotly', upgrade=True)
+# Check each module in the list
+for module in modules_to_check:
+    check_module_installed(module)
 
-# After handling installations and upgrades, we should now safely be able to use the imported modules
-# For example, using plotly now
+# After handling modules should now safely be able to use the imported modules
 import plotly.graph_objs as go
+from rich import print
 
 OUI_list = [] 
 OUI_list_final = []
