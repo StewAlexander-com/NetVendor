@@ -1,5 +1,71 @@
 # NetVendor
 
+A Python tool for analyzing network device vendors from MAC address tables or IP ARP data.
+
+## Features
+
+- Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
+- Creates vendor-specific device lists
+- Generates pie charts of vendor distribution
+- Converts results to CSV format
+- Maintains an up-to-date OUI database from IEEE
+
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Usage
+
+Run the script:
+```bash
+python NetVendor.py
+```
+
+The script will:
+1. Check for required dependencies
+2. Update the OUI database if needed
+3. Prompt for input file and column information
+4. Process devices and generate reports
+
+## File Structure
+
+```
+NetVendor/
+├── NetVendor.py          # Main application
+├── oui_manager.py        # OUI database manager
+├── requirements.txt      # Python dependencies
+└── output/              # Generated at runtime
+    ├── data/            # OUI database storage
+    ├── text_files/      # Vendor device text files
+    ├── csv_files/       # Converted CSV files
+    └── plots/           # Generated charts
+```
+
+## Output Files
+
+The script generates several types of output files in the `output` directory:
+
+- `data/oui_database.json`: Cached OUI database
+- `text_files/*.txt`: Vendor-specific device lists
+- `csv_files/*.csv`: CSV versions of device lists
+- `plots/vendor_distribution.png`: Pie chart of vendor distribution
+
+## Dependencies
+
+- requests: For downloading OUI database
+- rich: For progress bars and colored output
+- matplotlib: For pie chart generation
+- plotly: For interactive visualizations
+- pandas: For data processing
+
+## Author
+
+Created by Stew Alexander (2021)
+
 ## What vendors are lurking on your network? 
 
 *This software figures this out!* 
@@ -60,7 +126,7 @@ Table of Contents:
 - [x] Style Improvements [on-going, started 03/06/2022]
 - [x] Added lookup for Mitel Corperation Phones (02/11/2022)
 - [x] Streamlined API call, add support for Apple Macs (supporting Windows, Linux or Mac computers (Added 02/10/2022)
-- [x] Added a progress bar for collecting oui info via “tqdm” (added 12/22/2021)
+- [x] Added a progress bar for collecting oui info via "tqdm" (added 12/22/2021)
 - [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
 -----
 ## To-Do's

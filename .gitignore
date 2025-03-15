@@ -1,4 +1,44 @@
-IP-ARP.txt
+# Output directory containing generated files
+output/
+
+# Network data files
+*[Aa][Rr][Pp]*.txt    # Matches any ARP data files
+*[Mm][Aa][Cc]*.txt    # Matches any MAC address table files
+*-Devices.txt         # Matches vendor device files
+*.csv                 # Matches converted CSV files
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS generated files
 .DS_Store
-IP-ARP-2.txt
-IP-ARP-3-23-22
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sqlite
+
+# Local development settings
+.env
+.env.local

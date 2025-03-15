@@ -1,0 +1,5 @@
+requests>=2.31.0
+rich>=13.7.0
+matplotlib>=3.8.0
+plotly>=5.18.0
+pandas>=2.1.0 
