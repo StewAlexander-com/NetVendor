@@ -42,13 +42,13 @@ def check_dependencies() -> None:
     modules_to_check = ["requests", "plotly", "tqdm", "rich"]
     
     for module_name in modules_to_check:
-        try:
-            __import__(module_name)
-            print(f"The module '{module_name}' is installed.")
-        except ImportError:
-            print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
-            print("\n[bold red]NetVendor will now exit[/bold red]")
-            sys.exit()
+    try:
+        __import__(module_name)
+        print(f"The module '{module_name}' is installed.")
+    except ImportError:
+        print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
+        print("\n[bold red]NetVendor will now exit[/bold red]")
+        sys.exit()
 
 def get_input_file() -> Tuple[str, int, int]:
     """
@@ -186,7 +186,7 @@ def make_csv(file: str) -> None:
             total_lines = sum(1 for _ in f)
         
         # Read and process the file
-        word_list = []
+word_list = []
         read_task = progress.add_task("[cyan]Reading file...", total=total_lines)
         with open(file, 'r') as f:
             for line in f:
@@ -228,7 +228,7 @@ def make_csv(file: str) -> None:
 def main():
     """Main function that orchestrates the NetVendor workflow."""
     # Print banner
-    print('''[yellow]
+print('''[yellow]
 888888ba             dP   dP     dP                         dP                   
 88    `8b            88   88     88                         88                   
 88     88 .d8888b. d8888P 88    .8P .d8888b. 88d888b. .d888b88 .d8888b. 88d888b. 
@@ -237,7 +237,7 @@ def main():
 dP     dP `88888P'   dP   888888'   `88888P' dP    dP `88888P8 `88888P' dP       
 [/yellow]''')
 
-    print('''[bright_blue]
+print('''[bright_blue]
  ┌─────────────────────────────────────────────────────┐
  │  [white]This app takes the output of a MAC Address Table[/white]   │
  │  [white]or IP ARP and finds all the vendors.[/white]               │
@@ -283,7 +283,7 @@ dP     dP `88888P'   dP   888888'   `88888P' dP    dP `88888P8 `88888P' dP
     print("\n[bold yellow]Device Counts in the [italic green]" + ip_arp_file + "[/italic green] file:[/bold yellow]\n")
     for vendor, count in device_counts.items():
         print(f"[bright_green]#[/bright_green] [bright_red]{count}[/bright_red] [cyan]{vendor} devices[/cyan]")
-    print("\n")
+print("\n")
 
     # Create pie chart
     create_pie_chart(device_counts)
@@ -297,16 +297,16 @@ dP     dP `88888P'   dP   888888'   `88888P' dP    dP `88888P8 `88888P' dP
             make_csv(vendor_file)
 
     # Clean up and organize files
-    for file in os.listdir():
-        if file.endswith(".txt"):
+for file in os.listdir():
+    if file.endswith(".txt"):
             if not (text_dir / file).exists():
                 shutil.move(file, text_dir / file)
-            else:
+        else:
                 print(f"[bold red]##[/bold red] The [cyan]{file}[/cyan] file already exists in the [cyan]text_files[/cyan] folder")
 
     # Exit message
-    input("\nPress enter to quit: ")
-    time.sleep(3)
+input("\nPress enter to quit: ")
+time.sleep(3)
 
 if __name__ == "__main__":
     main()

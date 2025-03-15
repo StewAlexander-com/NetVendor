@@ -1,25 +1,97 @@
 # NetVendor
 
-A Python tool for analyzing network device vendors from MAC address tables or IP ARP data.
+## Contents
+- [NetVendor](#netvendor)
+  - [Contents](#contents)
+  - [Overview](#overview)
+    - [Why Use NetVendor?](#why-use-netvendor)
+    - [How It Works](#how-it-works)
+  - [Getting Started](#getting-started)
+    - [Installation](#installation)
+    - [Dependencies](#dependencies)
+  - [Usage](#usage)
+    - [Input](#input)
+    - [Output](#output)
+  - [Features](#features)
+    - [File Structure](#file-structure)
+  - [Project Status](#project-status)
+    - [Updates and Changes](#updates-and-changes)
+    - [Future Enhancements](#future-enhancements)
+  - [About](#about)
+    - [Author](#author)
 
-## Features
+---
 
-- Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
-- Creates vendor-specific device lists
-- Generates pie charts of vendor distribution
-- Converts results to CSV format
-- Maintains an up-to-date OUI database from IEEE
+[Rest of the file remains unchanged...]
 
-## Installation
+---
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+A Python tool for analyzing network device vendors from MAC address tables or IP ARP data. NetVendor helps network administrators identify and track devices on their network by vendor, providing organized output and visual analytics.
+
+*What vendors are lurking on your network? This software figures this out!*
+
+**Quick Navigation:**
+- 🚀 [Installation](#installation) - Get started in minutes
+- 📋 [Features](#features) - What NetVendor can do
+- 📖 [Usage Guide](#usage) - How to use the tool
+- 📥 [Input/Output](#input) - File formats and results
+- 📈 [Latest Updates](#updates-and-changes) - Recent improvements
+- 🔮 [Future Plans](#future-enhancements) - What's coming next
+
+## Overview
+
+### Why Use NetVendor?
+- **Security**: Understanding what exists in your network is essential for security
+- **Asset Management**: Easy identification of vendor devices
+- **Network Visibility**: Clear visualization of device distribution
+- **Change Tracking**: Benchmark your network to easily see changes
+- **Efficiency**: Fast processing with progress tracking
+- **Organization**: All output files are neatly organized
+
+### How It Works
+1. **Device Discovery**
+   - Downloads the latest IEEE OUI database
+   - Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
+   - Shows real-time progress for each operation
+
+2. **Data Organization**
+   - Creates vendor-specific device lists in text format
+   - Converts all results to CSV for spreadsheet analysis
+   - Organizes files in a clean directory structure
+
+3. **Visualization**
+   - Generates pie charts showing vendor distribution
+   - Provides detailed device counts
+   - Shows percentage breakdowns
+
+4. **Analysis**
+   - Identifies hidden VLANs
+   - Maps devices to IP addresses
+   - Tracks network composition changes
+
+## Getting Started
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/StewAlexander-com/NetVendor.git
+cd NetVendor
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the program
+python NetVendor.py
+```
+
+### Dependencies 
+Required for operation:
+- Working internet connection (for IEEE OUI database updates)
+- Input file containing MAC addresses
+- Python 3.6 or higher
+- Required Python packages (installed via `pip install -r requirements.txt`)
 
 ## Usage
-
 Run the script:
 ```bash
 python NetVendor.py
@@ -27,12 +99,55 @@ python NetVendor.py
 
 The script will:
 1. Check for required dependencies
-2. Update the OUI database if needed
+2. Update the OUI database if needed (downloads from IEEE)
 3. Prompt for input file and column information
-4. Process devices and generate reports
+4. Process devices and generate reports with progress visualization
+5. Create pie charts and CSV files
+6. Organize all output files in the `output` directory
 
-## File Structure
+### Input
+The program accepts ARP or MAC address tables as input, such as:
+- Cisco IOS `show ip arp`
+- Cisco IOS `show mac address-table`
+- Any text file containing MAC addresses in a column
 
+Example input format:
+```
+Internet  10.0.0.1   1   0123.4567.89ab  ARPA   Vlan100
+Internet  10.0.0.2   1   abcd.ef01.2345  ARPA   Vlan100
+```
+
+### Output
+The program generates an organized structure of output files under the `output/` directory:
+
+1. **Vendor Device Files** (`output/text_files/`)
+   - Individual text files for Apple, Cisco, Dell, HP, and Mitel devices
+   - Original data format preserved
+
+2. **CSV Files** (`output/csv_files/`)
+   - Spreadsheet-ready versions of all device files
+   - Easy to import into Excel or other tools
+
+3. **Visualization** (`output/plots/`)
+   - Pie chart showing vendor distribution
+   - Percentage breakdown of all vendors
+   - "Other" category for unidentified devices
+
+4. **OUI Database** (`output/data/`)
+   - Cached IEEE OUI database
+   - Vendor mappings and timestamps
+   - Regular updates from IEEE
+
+## Features
+- Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
+- Creates vendor-specific device lists with progress tracking
+- Generates pie charts of vendor distribution
+- Converts results to CSV format
+- Maintains an up-to-date OUI database from IEEE
+- Rich progress visualization for all operations
+- Organized output file structure
+
+### File Structure
 ```
 NetVendor/
 ├── NetVendor.py          # Main application
@@ -45,96 +160,40 @@ NetVendor/
     └── plots/           # Generated charts
 ```
 
-## Output Files
+## Project Status
 
-The script generates several types of output files in the `output` directory:
+### Updates and Changes
+Latest updates (March 15, 2024):
+- Added OUI manager for dynamic vendor identification
+- Improved progress visualization with rich library
+- Consolidated output files under organized directory structure
+- Added proper .gitignore for sensitive data protection
+- Added requirements.txt for dependency management
+- Removed browser dependency for pie charts
+- Improved documentation and code organization
 
-- `data/oui_database.json`: Cached OUI database
-- `text_files/*.txt`: Vendor-specific device lists
-- `csv_files/*.csv`: CSV versions of device lists
-- `plots/vendor_distribution.png`: Pie chart of vendor distribution
+For previous updates, see our [Updates History](#updates-and-changes).
 
-## Dependencies
+### Future Enhancements
+High Priority:
+- Add more vendor checks and OUI patterns
+- Add command line arguments for automation
+- Add error handling for network connectivity issues
+- Add logging for troubleshooting
 
-- requests: For downloading OUI database
-- rich: For progress bars and colored output
-- matplotlib: For pie chart generation
-- plotly: For interactive visualizations
-- pandas: For data processing
+Medium Priority:
+- Add configuration file for customizable settings
+- Add unit tests and integration tests
+- Add historical data comparison
+- Add export to additional formats
 
-## Author
+Low Priority:
+- Add web interface for easier use
+- Add network scanning capabilities
+- Add detailed vendor statistics
+- Add report generation
 
+## About
+
+### Author
 Created by Stew Alexander (2021)
-
-## What vendors are lurking on your network? 
-
-*This software figures this out!* 
-
-## How?
-This program reviews an ARP or MAC Address table (Such as a Cisco IOS ```sh ip arp``` or ```sh mac add``` output), and produces information on your network like:
-* How many different vendors (as in companies) exist within your network?
-* How many different types of hardware (MAC OUIs) exist within your network?
-* Where are all these things, and what are their IPs?
-* A list (and total) of all the Apple, Cisco, Dell, HP, and Mitel products that exist on your network
-* Are there any hidden VLANs lurking within your network? *This answers this too!*
-
-Table of Contents:
-  - [Why?](#why)
-  - [Dependencies](#dependencies)
-  - [Input](#input)
-  - [Output](#output)
-
-## Why?
-* Understanding what *exactly* is in your network is **_essential_** for security reasons... <br>
-* Benchmarks your network so you can easily see changes
-
-## Dependencies 
-* This uses a restful API to search for the vendors, so it needs a working internet connection
-* This needs the output of an ARP or MAC Address table as a text file (such as the Cisco IOS ```#sh ip arp ``` format seen below), as it is using this to do the lookup
-## Input
-* Contents of an ARP or MAC Address table as a text file (such as a Cisco ```#sh ip arp``` output, like below):</br></br>
- ![image](https://user-images.githubusercontent.com/48565067/144638643-f26b64fe-e992-4163-a0a9-a1c90b0b6028.png)
-## Output
-* Example of the output: </br></br>
-![image](https://user-images.githubusercontent.com/48565067/164489106-50b4310c-8a42-4715-824c-beba926dfcba.png)
-![program_output2](https://user-images.githubusercontent.com/48565067/156942018-807a5762-dcb8-49b0-b8df-fc33dec61433.png)
-![image](https://user-images.githubusercontent.com/48565067/159778884-924f1c9c-ecf6-46ea-88aa-c4529eb741c3.png)
-
- - If Chrome or Firefox is available (on a Windows, Mac or Linux system), it will create an interactive web-based pie chart and display it in the browser:
- ![2022-03-06 18 43 25](https://user-images.githubusercontent.com/48565067/156947443-4510c608-b49f-4f3c-a8c9-60da13627ba6.png)
- * Created text file "company_list.txt" output:</br></br>
- ![image](https://user-images.githubusercontent.com/48565067/144633574-5bc13c04-a712-490d-b186-a30b4d9d8a73.png)
-* Created text file "oui_final_list.txt" output:</br></br>
- ![image](https://user-images.githubusercontent.com/48565067/144633706-24bbe2ef-6965-4847-b3a9-0f22242ff95f.png)
-* Created Vendor-Devices.txt file:</br></br>
-  ![image](https://user-images.githubusercontent.com/48565067/144880526-74cc7658-ae97-4841-812e-24f4f274525d.png)
-* Creates a list of CSV "spreadsheet" device files and puts them in a new ```csv_files``` folder
-* Puts all the ```*.txt``` files created into the ```text_files``` folder 
------
-
-## Updates
-- [ ] Bug checking after refractoring (to do) 
-- [x] Refractored code for general efficiency, readability and resiliency (11/09/2023)
-- [x] Automatically attempts to upgrade required libraries (05/22/2022)
-- [x] Added a banner and info box (see output section of readme, 04/21/22)
-- [x] Fixed issue if text / CSV files already exist (04/07/2022)
-- [x] Added a timeout to the Vendor lookup, and *significantly* improved company lookup time (04/06/2022)
-- [x] Created CSV files for every created device text file in a separate ```csv_files``` folder, for easy review by any spreadsheet app like [visidata](https://www.visidata.org) (added 03/23/2022)
-- [x] Added code to move all the ```*.txt``` files to a created ```text_files``` folder (added 03/23/2022)
-- [x] Fixed a bug where a created csv file may have contents from more than one device file in it (resolved 03/23/2022)
-- [x] Used the [rich](https://github.com/Textualize/rich) library to colorize cli output (added 03/06/2022)
-- [x] Style Improvements [on-going, started 03/06/2022]
-- [x] Added lookup for Mitel Corperation Phones (02/11/2022)
-- [x] Streamlined API call, add support for Apple Macs (supporting Windows, Linux or Mac computers (Added 02/10/2022)
-- [x] Added a progress bar for collecting oui info via "tqdm" (added 12/22/2021)
-- [ ] Use the sanitized OUI list [here](https://linuxnet.ca/ieee/oui/), to increase filtering (on-going)
------
-## To-Do's
-- [ ] MAC OUIs are hard coaded, instead grab from IEEE and put into a local database
-- [ ] Check date of last MAC OUI pull, ask user if they wish to refresh if older than 3 months
-- [ ] Consider calling the local database for vendor OUIs
-- [ ] Get rid of superflous file close operations 
-- [ ] Add more vendor checks
-
-<br>
------
