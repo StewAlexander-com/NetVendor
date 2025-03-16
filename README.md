@@ -93,39 +93,41 @@ Internet  10.0.0.1   1   0123.4567.89ab  ARPA   Vlan100
 Internet  10.0.0.2   1   abcd.ef01.2345  ARPA   Vlan100
 ```
 
-### Output Structure
-The program generates an organized structure of output files under the `output/` directory:
+### Output
+NetVendor generates three types of output:
 
+1. **Console Output**
+   - Real-time dependency checks
+   - Progress bars for MAC address processing
+   - Summary table showing vendor distribution with:
+     - Vendor names
+     - Device counts
+     - Percentage of total devices
+
+2. **Interactive HTML Visualization** (`output/vendor_distribution.html`)
+   - Interactive pie chart showing vendor distribution
+   - Hover tooltips with detailed information
+   - Legend for easy vendor identification
+   - Ability to show/hide vendors
+   - Download chart as PNG option
+
+3. **CSV Report** (`output/[input-filename]-Devices.csv`)
+   - Detailed device information in spreadsheet format
+   - Columns include:
+     - IP Address
+     - MAC Address
+     - VLAN
+     - Vendor
+
+### Output Directory Structure
 ```
 NetVendor/
 ├── NetVendor.py          # Main application
-├── oui_manager.py        # OUI database manager
-├── requirements.txt      # Python dependencies
+├── oui_cache.json        # Cached vendor lookups
 └── output/              # Generated at runtime
-    ├── data/            # OUI database storage
-    ├── text_files/      # Vendor device text files
-    ├── csv_files/       # Converted CSV files
-    └── plots/           # Generated charts
+    ├── vendor_distribution.html    # Interactive pie chart
+    └── [input-filename]-Devices.csv  # Detailed device list
 ```
-
-#### Output Files
-1. **Vendor Device Files** (`output/text_files/`)
-   - Individual text files for Apple, Cisco, Dell, HP, and Mitel devices
-   - Original data format preserved
-
-2. **CSV Files** (`output/csv_files/`)
-   - Spreadsheet-ready versions of all device files
-   - Easy to import into Excel or other tools
-
-3. **Visualization** (`output/plots/`)
-   - Pie chart showing vendor distribution
-   - Percentage breakdown of all vendors
-   - "Other" category for unidentified devices
-
-4. **OUI Database** (`output/data/`)
-   - Cached IEEE OUI database
-   - Vendor mappings and timestamps
-   - Regular updates from IEEE
 
 ## Project Status
 
