@@ -1,44 +1,25 @@
 # NetVendor
 
-## Contents
-- [NetVendor](#netvendor)
-  - [Contents](#contents)
-  - [Overview](#overview)
-    - [Why Use NetVendor?](#why-use-netvendor)
-    - [How It Works](#how-it-works)
-  - [Getting Started](#getting-started)
-    - [Installation](#installation)
-    - [Dependencies](#dependencies)
-  - [Usage](#usage)
-    - [Input](#input)
-    - [Output](#output)
-  - [Features](#features)
-    - [File Structure](#file-structure)
-  - [Project Status](#project-status)
-    - [Updates and Changes](#updates-and-changes)
-    - [Future Enhancements](#future-enhancements)
-  - [About](#about)
-    - [Author](#author)
-
----
-
-[Rest of the file remains unchanged...]
-
----
-
-A Python tool for analyzing network device vendors from MAC address tables or IP ARP data. NetVendor helps network administrators identify and track devices on their network by vendor, providing organized output and visual analytics.
-
+## Introduction
 *What vendors are lurking on your network? This software figures this out!*
 
-**Quick Navigation:**
-- 🚀 [Installation](#installation) - Get started in minutes
+NetVendor is a Python tool for analyzing network device vendors from MAC address tables or IP ARP data. It helps network administrators identify and track devices on their network by vendor, providing organized output and visual analytics.
+
+## Quick Navigation
+- 🚀 [Getting Started](#getting-started) - Installation and setup
 - 📋 [Features](#features) - What NetVendor can do
 - 📖 [Usage Guide](#usage) - How to use the tool
 - 📥 [Input/Output](#input) - File formats and results
-- 📈 [Latest Updates](#updates-and-changes) - Recent improvements
-- 🔮 [Future Plans](#future-enhancements) - What's coming next
+- 📈 [Project Status](#project-status) - Updates and future plans
 
-## Overview
+## Features
+- Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
+- Creates vendor-specific device lists with progress tracking
+- Generates pie charts of vendor distribution
+- Converts results to CSV format
+- Maintains an up-to-date OUI database from IEEE
+- Rich progress visualization for all operations
+- Organized output file structure
 
 ### Why Use NetVendor?
 - **Security**: Understanding what exists in your network is essential for security
@@ -71,6 +52,11 @@ A Python tool for analyzing network device vendors from MAC address tables or IP
 
 ## Getting Started
 
+### Prerequisites
+- Working internet connection (for IEEE OUI database updates)
+- Input file containing MAC addresses
+- Python 3.6 or higher
+
 ### Installation
 ```bash
 # Clone the repository
@@ -79,17 +65,7 @@ cd NetVendor
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Run the program
-python NetVendor.py
 ```
-
-### Dependencies 
-Required for operation:
-- Working internet connection (for IEEE OUI database updates)
-- Input file containing MAC addresses
-- Python 3.6 or higher
-- Required Python packages (installed via `pip install -r requirements.txt`)
 
 ## Usage
 Run the script:
@@ -117,9 +93,22 @@ Internet  10.0.0.1   1   0123.4567.89ab  ARPA   Vlan100
 Internet  10.0.0.2   1   abcd.ef01.2345  ARPA   Vlan100
 ```
 
-### Output
+### Output Structure
 The program generates an organized structure of output files under the `output/` directory:
 
+```
+NetVendor/
+├── NetVendor.py          # Main application
+├── oui_manager.py        # OUI database manager
+├── requirements.txt      # Python dependencies
+└── output/              # Generated at runtime
+    ├── data/            # OUI database storage
+    ├── text_files/      # Vendor device text files
+    ├── csv_files/       # Converted CSV files
+    └── plots/           # Generated charts
+```
+
+#### Output Files
 1. **Vendor Device Files** (`output/text_files/`)
    - Individual text files for Apple, Cisco, Dell, HP, and Mitel devices
    - Original data format preserved
@@ -138,32 +127,9 @@ The program generates an organized structure of output files under the `output/`
    - Vendor mappings and timestamps
    - Regular updates from IEEE
 
-## Features
-- Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
-- Creates vendor-specific device lists with progress tracking
-- Generates pie charts of vendor distribution
-- Converts results to CSV format
-- Maintains an up-to-date OUI database from IEEE
-- Rich progress visualization for all operations
-- Organized output file structure
-
-### File Structure
-```
-NetVendor/
-├── NetVendor.py          # Main application
-├── oui_manager.py        # OUI database manager
-├── requirements.txt      # Python dependencies
-└── output/              # Generated at runtime
-    ├── data/            # OUI database storage
-    ├── text_files/      # Vendor device text files
-    ├── csv_files/       # Converted CSV files
-    └── plots/           # Generated charts
-```
-
 ## Project Status
 
-### Updates and Changes
-Latest updates (March 15, 2024):
+### Latest Updates (March 15, 2024)
 - Added OUI manager for dynamic vendor identification
 - Improved progress visualization with rich library
 - Consolidated output files under organized directory structure
@@ -172,28 +138,24 @@ Latest updates (March 15, 2024):
 - Removed browser dependency for pie charts
 - Improved documentation and code organization
 
-For previous updates, see our [Updates History](#updates-and-changes).
-
 ### Future Enhancements
-High Priority:
+**High Priority:**
 - Add more vendor checks and OUI patterns
 - Add command line arguments for automation
 - Add error handling for network connectivity issues
 - Add logging for troubleshooting
 
-Medium Priority:
+**Medium Priority:**
 - Add configuration file for customizable settings
 - Add unit tests and integration tests
 - Add historical data comparison
 - Add export to additional formats
 
-Low Priority:
+**Low Priority:**
 - Add web interface for easier use
 - Add network scanning capabilities
 - Add detailed vendor statistics
 - Add report generation
-
-## About
 
 ### Author
 Created by Stew Alexander (2021)
