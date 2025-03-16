@@ -1,11 +1,17 @@
 # Output directory containing generated files
 output/
+vendor_distribution.html
+*-Devices.csv
 
 # Network data files
 *[Aa][Rr][Pp]*.txt    # Matches any ARP data files
 *[Mm][Aa][Cc]*.txt    # Matches any MAC address table files
 *-Devices.txt         # Matches vendor device files
 *.csv                 # Matches converted CSV files
+
+# Cache files
+oui_cache.json
+*.cache
 
 # Python cache files
 __pycache__/
