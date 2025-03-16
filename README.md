@@ -76,7 +76,7 @@ python NetVendor.py
 The script will:
 1. Check for required dependencies
 2. Update the OUI database if needed (downloads from IEEE)
-3. Prompt for input file and column information
+3. Prompt for Mac Address input file and column information
 4. Process devices and generate reports with progress visualization
 5. Create pie charts and CSV files
 6. Organize all output files in the `output` directory
