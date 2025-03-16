@@ -8,6 +8,7 @@ vendor_distribution.html
 *[Mm][Aa][Cc]*.txt    # Matches any MAC address table files
 *-Devices.txt         # Matches vendor device files
 *.csv                 # Matches converted CSV files
+ip-arp.txt           # Specific test data file
 
 # Cache files
 oui_cache.json
