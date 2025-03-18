@@ -114,23 +114,41 @@ NetVendor generates four types of output:
    - Summary table showing vendor distribution
 
 2. **Interactive HTML Dashboard** (`output/vendor_distribution.html`)
-   
-<img src="https://github.com/user-attachments/assets/10d52e0e-b7c9-48e1-8cb6-527a0cd72e48" 
-     width="67%" 
-     alt="Project Screenshot">
-<img src="https://github.com/user-attachments/assets/7f78a827-3778-4423-a7ba-092ab02e81d8" 
-     width="67%" 
-     alt="Interface Preview">
 
+<img src="https://github.com/user-attachments/assets/f6bd4671-81c2-4317-9344-08e6dd65d9ec" 
+     alt="Screenshot 2025-03-18 at 3 29 24 PM" 
+     style="width: 67%; height: auto">
+
+<img src="https://github.com/user-attachments/assets/42877728-d2df-4ef4-a9db-b5c80a008be2" 
+     alt="Screenshot 2025-03-18 at 3 30 59 PM" 
+     style="width: 67%; height: auto">
  
    - Page 1: Vendor Distribution
-     - Interactive pie chart with vendor distribution
-     - Detailed hover information (device count, percentage, VLANs)
-     - Customizable legend
+     - Large, centered interactive pie chart showing vendor distribution
+     - Comprehensive hover information for each vendor:
+       - Total device count with thousands separators
+       - Percentage of network devices
+       - Number of VLANs the vendor appears in
+       - Most commonly used VLAN
+       - Maximum devices in any single VLAN
+     - Detailed vendor list with device counts
+     - Clean, modern layout with optimized spacing
    - Page 2: VLAN Analysis
-     - VLAN device count bar chart
-     - VLAN distribution per vendor heatmap
+     - Four well-spaced analysis graphs:
+       - Top VLANs by total device count
+       - Vendor presence across VLANs
+       - VLAN distribution patterns
+       - Device concentration heatmap
      - Interactive tooltips and zoom capabilities
+     - Responsive layout that adapts to window size
+     - Clear visualization of VLAN relationships
+
+   Features:
+   - Easy navigation between pages via fixed top-right menu
+   - Responsive design that adjusts to browser window size
+   - Optimized spacing and centering for better readability
+   - Professional styling with consistent fonts and colors
+   - Interactive elements for detailed data exploration
 
 4. **Plain Text Summary** (`output/vendor_summary.txt`)
    - Clean, ASCII-formatted table
