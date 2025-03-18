@@ -118,6 +118,7 @@ NetVendor generates four types of output:
 <img src="https://github.com/user-attachments/assets/f6bd4671-81c2-4317-9344-08e6dd65d9ec" 
      alt="Screenshot 2025-03-18 at 3 29 24 PM" 
      style="width: 67%; height: auto">
+---     
 
 <img src="https://github.com/user-attachments/assets/42877728-d2df-4ef4-a9db-b5c80a008be2" 
      alt="Screenshot 2025-03-18 at 3 30 59 PM" 
