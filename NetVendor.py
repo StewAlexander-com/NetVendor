@@ -116,9 +116,98 @@ class OUIManager:
         except:
             return "Unknown"
 
-def process_vendor_devices(ip_arp_file: str, mac_word: int, vendor_word: int, oui_manager: OUIManager) -> Dict[str, int]:
-    """Process the input file and return vendor counts."""
+def create_visualizations(vendor_counts: Dict[str, int], vlan_data: List[str]) -> None:
+    """Create interactive visualizations of vendor and VLAN distributions."""
+    # Create subplots with 1 row and 2 columns
+    fig = go.Figure()
+    
+    # Vendor Distribution Pie Chart
+    labels = list(vendor_counts.keys())
+    values = list(vendor_counts.values())
+    total_devices = sum(values)
+    
+    # Create hover text with detailed information
+    hover_text = [
+        f"Vendor: {label}<br>" +
+        f"Count: {value} devices<br>" +
+        f"Percentage: {(value/total_devices)*100:.1f}%"
+        for label, value in zip(labels, values)
+    ]
+    
+    fig.add_trace(go.Pie(
+        labels=labels,
+        values=values,
+        hovertemplate="%{customdata}<br><extra></extra>",
+        customdata=hover_text,
+        name="Vendor Distribution"
+    ))
+    
+    # Update layout for better visualization
+    fig.update_layout(
+        title="Network Device Vendor Distribution",
+        showlegend=True,
+        legend=dict(
+            x=1.1,
+            y=0.5,
+            xanchor='left',
+            yanchor='middle',
+            font=dict(size=12),
+            title=dict(text='Vendors (hover for details)')
+        ),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=14,
+            font_family="Arial"
+        ),
+        margin=dict(r=200)  # Add margin for legend
+    )
+    
+    # Create VLAN distribution subplot
+    vlan_counts = {}
+    for entry in vlan_data:
+        if "Vlan" in entry:
+            vlan = entry.split("Vlan")[1].strip()
+            vlan_counts[vlan] = vlan_counts.get(vlan, 0) + 1
+    
+    # Sort VLANs numerically
+    sorted_vlans = sorted(vlan_counts.items(), key=lambda x: int(x[0]))
+    vlan_labels = [f"VLAN {v[0]}" for v in sorted_vlans]
+    vlan_values = [v[1] for v in sorted_vlans]
+    
+    # Create second figure for VLAN distribution
+    fig2 = go.Figure()
+    
+    fig2.add_trace(go.Bar(
+        x=vlan_labels,
+        y=vlan_values,
+        hovertemplate="VLAN: %{x}<br>Devices: %{y}<br><extra></extra>",
+        marker_color='rgb(55, 83, 109)'
+    ))
+    
+    fig2.update_layout(
+        title="VLAN Distribution",
+        xaxis_title="VLAN",
+        yaxis_title="Number of Devices",
+        bargap=0.2,
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=14,
+            font_family="Arial"
+        )
+    )
+    
+    # Save both visualizations
+    output_dir = "output"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    fig.write_html(os.path.join(output_dir, "vendor_distribution.html"))
+    fig2.write_html(os.path.join(output_dir, "vlan_distribution.html"))
+
+def process_vendor_devices(ip_arp_file: str, mac_word: int, vendor_word: int, oui_manager: OUIManager) -> Tuple[Dict[str, int], List[str]]:
+    """Process the input file and return vendor counts and VLAN data."""
     vendor_counts = Counter()
+    vlan_data = []
     total_lines = sum(1 for _ in open(ip_arp_file))
     
     with Progress(
@@ -142,25 +231,9 @@ def process_vendor_devices(ip_arp_file: str, mac_word: int, vendor_word: int, ou
                     mac = parts[mac_word].replace('.', ':')
                     vendor = oui_manager.lookup_vendor(mac)
                     vendor_counts[vendor] += 1
+                    vlan_data.append(line)
     
-    return vendor_counts
-
-def create_pie_chart(vendor_counts: Dict[str, int]) -> None:
-    """Create a pie chart of vendor distribution."""
-    labels = list(vendor_counts.keys())
-    values = list(vendor_counts.values())
-    
-    fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
-    fig.update_layout(
-        title="Network Device Vendor Distribution",
-        showlegend=True
-    )
-    
-    output_dir = "output"
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    
-    fig.write_html(os.path.join(output_dir, "vendor_distribution.html"))
+    return vendor_counts, vlan_data
 
 def make_csv(file: str) -> None:
     """Create a CSV file with device information."""
@@ -198,7 +271,7 @@ def main():
     input_file, mac_word, vendor_word = get_input_file()
     oui_manager = OUIManager()
     
-    vendor_counts = process_vendor_devices(input_file, mac_word, vendor_word, oui_manager)
+    vendor_counts, vlan_data = process_vendor_devices(input_file, mac_word, vendor_word, oui_manager)
     
     # Create and display results table
     table = Table(title="Network Device Vendor Summary")
@@ -213,8 +286,8 @@ def main():
     
     console.print(table)
     
-    # Create pie chart
-    create_pie_chart(vendor_counts)
+    # Create visualizations
+    create_visualizations(vendor_counts, vlan_data)
     
     # Create CSV file
     make_csv(input_file)
@@ -222,7 +295,8 @@ def main():
     console.print("\n[green]Analysis complete![/green]")
     console.print(f"[cyan]Total devices analyzed: {total_devices}[/cyan]")
     console.print("\n[yellow]Output files have been created in the 'output' directory:[/yellow]")
-    console.print("  • vendor_distribution.html (Interactive pie chart)")
+    console.print("  • vendor_distribution.html (Interactive vendor pie chart)")
+    console.print("  • vlan_distribution.html (Interactive VLAN distribution)")
     console.print(f"  • {os.path.splitext(os.path.basename(input_file))[0]}-Devices.csv (Detailed device list)")
 
 if __name__ == "__main__":
