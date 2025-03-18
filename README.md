@@ -158,13 +158,24 @@ NetVendor/
 ## Project Status
 
 ### Latest Updates (March 2024)
+- Enhanced performance and reliability:
+  - Smarter rate limiting with 250ms intervals and retry logic
+  - Efficient cache management (saves every 50 entries)
+  - Optimized memory usage with batch processing
+  - Improved progress tracking with separate progress bars
+- Improved visualization dashboard:
+  - Responsive design that adapts to window size
+  - Enhanced pie chart with better spacing and readability
+  - Improved VLAN analysis graphs with proper spacing
+  - Better navigation between visualization pages
+  - Centered layout with optimized dimensions
+  - Enhanced vendor list formatting
 - Added interactive dashboard with multiple visualizations
 - Implemented VLAN analysis with device count tracking
 - Added VLAN distribution per vendor heatmap
 - Created plain text summary output
 - Enhanced pie chart with detailed hover information
 - Improved legend formatting and positioning
-- Added navigation between different visualization pages
 - Enhanced documentation and usage instructions
 
 ### Future Enhancements
