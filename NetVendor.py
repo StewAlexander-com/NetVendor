@@ -33,6 +33,7 @@ from rich.console import Console
 from rich.table import Table
 from rich import print as rprint
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def check_dependencies() -> None:
     """
@@ -142,10 +143,12 @@ def create_visualizations(vendor_counts: Dict[str, int], vlan_data: List[str]) -
                 vendor_vlan_data[vendor] = Counter()
             vendor_vlan_data[vendor][vlan] += 1
     
-    # Create the figure with subplots
-    fig = go.Figure()
+    # Create two figures for the two pages
     
-    # 1. Vendor Distribution Pie Chart
+    # Page 1: Vendor Distribution
+    fig1 = go.Figure()
+    
+    # Vendor Distribution Pie Chart
     labels = list(vendor_counts.keys())
     values = list(vendor_counts.values())
     total_devices = sum(values)
@@ -158,33 +161,87 @@ def create_visualizations(vendor_counts: Dict[str, int], vlan_data: List[str]) -
         f"VLANs: {len(vendor_vlan_data.get(label, []))}"
         for label, value in zip(labels, values)
     ]
+
+    # Create labels with device counts for the legend
+    legend_labels = [f"{label} ({value} devices)" for label, value in zip(labels, values)]
     
-    fig.add_trace(go.Pie(
-        labels=labels,
-        values=values,
-        domain={'x': [0, 0.45], 'y': [0.5, 1]},
-        hovertemplate="%{customdata}<br><extra></extra>",
-        customdata=hover_text,
-        name="Vendor Distribution",
-        title="Vendor Distribution"
-    ))
+    fig1.add_trace(
+        go.Pie(
+            labels=legend_labels,  # Use labels with counts for the legend
+            values=values,
+            hovertemplate="%{customdata}<br><extra></extra>",
+            customdata=hover_text,
+            name="Vendor Distribution",
+            domain={'x': [0.05, 0.45], 'y': [0.1, 0.9]},  # Moved right boundary of pie chart left
+            legendgroup="vendor_dist",
+            showlegend=True,
+            textinfo='text',  # Show only the text we specify
+            textposition='auto',
+            text=labels,  # Just show vendor names on the segments
+            legendgrouptitle_text="Vendor Distribution",
+            textfont=dict(
+                size=10,  # Slightly smaller font for the smaller pie
+                color='black'
+            )
+        )
+    )
     
-    # 2. VLAN Distribution Bar Chart
+    # Update layout for page 1
+    fig1.update_layout(
+        title="Network Device Vendor Distribution",
+        showlegend=True,
+        height=900,  # Increased height
+        width=1600,
+        legend=dict(
+            x=0.7,  # Moved legend further right
+            y=0.5,
+            xanchor='left',
+            yanchor='middle',
+            font=dict(size=12),
+            itemsizing='constant',
+            itemwidth=40,
+            bgcolor='rgba(255, 255, 255, 0.8)',
+            bordercolor='rgba(0, 0, 0, 0.2)',
+            borderwidth=1,
+            traceorder='normal'  # Maintain the order of items
+        ),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=14,
+            font_family="Arial"
+        ),
+        margin=dict(l=50, r=50, t=50, b=50)  # Reduced margins to give more space to pie
+    )
+
+    # Page 2: VLAN Analysis
+    fig2 = make_subplots(
+        rows=2, cols=1,
+        subplot_titles=(
+            "VLAN Device Count",
+            "VLAN Distribution per Vendor"
+        ),
+        vertical_spacing=0.15,
+        row_heights=[0.3, 0.7]
+    )
+    
+    # VLAN Distribution Bar Chart
     sorted_vlans = sorted(vlan_vendor_data.keys(), key=int)
     vlan_total_counts = [sum(vlan_vendor_data[vlan].values()) for vlan in sorted_vlans]
     vlan_vendor_counts = [len(vlan_vendor_data[vlan]) for vlan in sorted_vlans]
     
-    fig.add_trace(go.Bar(
-        x=[f"VLAN {v}" for v in sorted_vlans],
-        y=vlan_total_counts,
-        name="Total Devices",
-        domain={'x': [0.55, 1], 'y': [0.5, 1]},
-        hovertemplate="VLAN: %{x}<br>Total Devices: %{y}<br>Unique Vendors: %{customdata}<extra></extra>",
-        customdata=vlan_vendor_counts,
-        marker_color='rgb(55, 83, 109)'
-    ))
+    fig2.add_trace(
+        go.Bar(
+            x=[f"VLAN {v}" for v in sorted_vlans],
+            y=vlan_total_counts,
+            name="Total Devices",
+            hovertemplate="VLAN: %{x}<br>Total Devices: %{y}<br>Unique Vendors: %{customdata}<extra></extra>",
+            customdata=vlan_vendor_counts,
+            marker_color='rgb(55, 83, 109)'
+        ),
+        row=1, col=1
+    )
     
-    # 3. VLAN Distribution per Vendor Heatmap
+    # VLAN Distribution per Vendor Heatmap
     vendors_sorted = sorted(vendor_counts.keys(), key=lambda x: vendor_counts[x], reverse=True)
     vlans_sorted = sorted(sorted_vlans, key=int)
     
@@ -196,67 +253,101 @@ def create_visualizations(vendor_counts: Dict[str, int], vlan_data: List[str]) -
             row.append(count)
         heatmap_data.append(row)
     
-    fig.add_trace(go.Heatmap(
-        z=heatmap_data,
-        x=[f"VLAN {v}" for v in vlans_sorted],
-        y=vendors_sorted,
-        domain={'x': [0, 1], 'y': [0, 0.4]},
-        colorscale='Viridis',
-        name="VLAN per Vendor",
-        hoverongaps=False,
-        hovertemplate="Vendor: %{y}<br>%{x}<br>Devices: %{z}<extra></extra>"
-    ))
-    
-    # Update layout for better visualization
-    fig.update_layout(
-        title="Network Device Analysis Dashboard",
-        showlegend=True,
-        grid={'rows': 2, 'columns': 2, 'pattern': 'independent'},
-        legend=dict(
-            x=1.1,
-            y=0.5,
-            xanchor='left',
-            yanchor='middle',
-            font=dict(size=12)
+    fig2.add_trace(
+        go.Heatmap(
+            z=heatmap_data,
+            x=[f"VLAN {v}" for v in vlans_sorted],
+            y=vendors_sorted,
+            colorscale='Viridis',
+            name="VLAN per Vendor",
+            hoverongaps=False,
+            hovertemplate="Vendor: %{y}<br>%{x}<br>Devices: %{z}<extra></extra>"
         ),
+        row=2, col=1
+    )
+    
+    # Update layout for page 2
+    fig2.update_layout(
+        title="VLAN Analysis Dashboard",
+        showlegend=True,
+        height=1200,
+        width=1600,
         hoverlabel=dict(
             bgcolor="white",
             font_size=14,
             font_family="Arial"
         ),
-        margin=dict(r=200, t=50, b=50),
-        height=1000,  # Increased height for better visibility
-        annotations=[
-            dict(
-                text="Vendor Distribution",
-                x=0.225,
-                y=1,
-                showarrow=False,
-                font=dict(size=16)
-            ),
-            dict(
-                text="VLAN Device Count",
-                x=0.775,
-                y=1,
-                showarrow=False,
-                font=dict(size=16)
-            ),
-            dict(
-                text="VLAN Distribution per Vendor (Heatmap)",
-                x=0.5,
-                y=0.45,
-                showarrow=False,
-                font=dict(size=16)
-            )
-        ]
+        margin=dict(l=150, r=100, t=100, b=50)
     )
     
-    # Save visualization
+    # Update axes labels for page 2
+    fig2.update_xaxes(title_text="VLAN", row=1, col=1)
+    fig2.update_yaxes(title_text="Number of Devices", row=1, col=1)
+    
+    # Save visualizations
     output_dir = "output"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
-    fig.write_html(os.path.join(output_dir, "vendor_distribution.html"))
+    # Combine both figures into one HTML file with two pages
+    with open(os.path.join(output_dir, "vendor_distribution.html"), 'w') as f:
+        f.write("""
+        <html>
+        <head>
+            <style>
+                body {
+                    max-width: 1800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .page-nav {
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    background: white;
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    z-index: 1000;
+                }
+                .page-nav a {
+                    margin: 0 10px;
+                    text-decoration: none;
+                    color: #333;
+                    font-weight: bold;
+                }
+                .page {
+                    display: none;
+                    width: 100%;
+                }
+                .page.active {
+                    display: block;
+                }
+                .js-plotly-plot {
+                    margin: 0 auto;
+                }
+            </style>
+            <script>
+                function showPage(pageNum) {
+                    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                    document.getElementById('page' + pageNum).classList.add('active');
+                }
+                window.onload = function() {
+                    showPage(1);
+                }
+            </script>
+        </head>
+        <body>
+            <div class="page-nav">
+                <a href="#" onclick="showPage(1); return false;">Vendor Distribution</a>
+                <a href="#" onclick="showPage(2); return false;">VLAN Analysis</a>
+            </div>
+            <div id="page1" class="page">
+        """)
+        f.write(fig1.to_html(full_html=False))
+        f.write('</div><div id="page2" class="page">')
+        f.write(fig2.to_html(full_html=False))
+        f.write('</div></body></html>')
 
 def process_vendor_devices(ip_arp_file: str, mac_word: int, vendor_word: int, oui_manager: OUIManager) -> Tuple[Dict[str, int], List[str]]:
     """Process the input file and return vendor counts and VLAN data."""
@@ -314,6 +405,38 @@ def make_csv(file: str) -> None:
                 vendor = OUIManager().lookup_vendor(mac)
                 writer.writerow([ip, mac, vlan, vendor])
 
+def create_text_summary(vendor_counts: Dict[str, int], output_dir: str) -> None:
+    """Create a plain text summary of vendor distribution."""
+    total_devices = sum(vendor_counts.values())
+    
+    # Calculate the width needed for the vendor column
+    max_vendor_length = max(len(vendor) for vendor in vendor_counts.keys())
+    vendor_width = max(max_vendor_length, 6)  # minimum width of 6 for "Vendor"
+    
+    # Create the header
+    header = "Network Device Vendor Summary\n"
+    separator = "+{:-<{vendor_width}}+-------+------------+\n".format("", vendor_width=vendor_width)
+    column_header = "| {:<{vendor_width}} | Count | Percentage |\n".format("Vendor", vendor_width=vendor_width)
+    
+    # Create the rows
+    rows = []
+    for vendor, count in sorted(vendor_counts.items(), key=lambda x: x[1], reverse=True):
+        percentage = (count / total_devices) * 100
+        row = "| {:<{vendor_width}} | {:<5} | {:<10.1f}% |\n".format(
+            vendor, count, percentage, vendor_width=vendor_width
+        )
+        rows.append(row)
+    
+    # Write to file
+    with open(os.path.join(output_dir, "vendor_summary.txt"), 'w') as f:
+        f.write(header)
+        f.write(separator)
+        f.write(column_header)
+        f.write(separator.replace('-', '='))  # Double separator under headers
+        for row in rows:
+            f.write(row)
+        f.write(separator)
+
 def main():
     """Main function."""
     check_dependencies()
@@ -326,6 +449,11 @@ def main():
     oui_manager = OUIManager()
     
     vendor_counts, vlan_data = process_vendor_devices(input_file, mac_word, vendor_word, oui_manager)
+    
+    # Create output directory if it doesn't exist
+    output_dir = "output"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     
     # Create and display results table
     table = Table(title="Network Device Vendor Summary")
@@ -340,6 +468,9 @@ def main():
     
     console.print(table)
     
+    # Create text summary
+    create_text_summary(vendor_counts, output_dir)
+    
     # Create visualizations
     create_visualizations(vendor_counts, vlan_data)
     
@@ -351,6 +482,7 @@ def main():
     console.print("\n[yellow]Output files have been created in the 'output' directory:[/yellow]")
     console.print("  • vendor_distribution.html (Interactive dashboard with vendor and VLAN analysis)")
     console.print(f"  • {os.path.splitext(os.path.basename(input_file))[0]}-Devices.csv (Detailed device list)")
+    console.print("  • vendor_summary.txt (Plain text summary of vendor distribution)")
 
 if __name__ == "__main__":
     main()

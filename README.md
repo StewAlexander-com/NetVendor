@@ -15,11 +15,15 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
 ## Features
 - Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
 - Creates vendor-specific device lists with progress tracking
-- Generates pie charts of vendor distribution
+- Generates interactive visualizations:
+  - Vendor distribution pie chart with hover details
+  - VLAN device count analysis
+  - VLAN distribution per vendor heatmap
 - Converts results to CSV format
 - Maintains an up-to-date OUI database from IEEE
 - Rich progress visualization for all operations
 - Organized output file structure
+- Plain text summaries for easy sharing
 
 ### Why Use NetVendor?
 - **Security**: Understanding what exists in your network is essential for security
@@ -41,14 +45,18 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
    - Organizes files in a clean directory structure
 
 3. **Visualization**
-   - Generates pie charts showing vendor distribution
-   - Provides detailed device counts
-   - Shows percentage breakdowns
+   - Interactive dashboard with multiple views:
+     - Vendor distribution pie chart with detailed hover information
+     - VLAN device count analysis
+     - VLAN distribution per vendor heatmap
+   - Easy navigation between different visualizations
+   - Downloadable charts and data
 
 4. **Analysis**
    - Identifies hidden VLANs
    - Maps devices to IP addresses
    - Tracks network composition changes
+   - Provides plain text summaries for easy sharing
 
 ## Getting Started
 
@@ -56,6 +64,11 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
 - Working internet connection (for IEEE OUI database updates)
 - Input file containing MAC addresses
 - Python 3.6 or higher
+- Required Python packages:
+  - requests
+  - plotly
+  - rich
+  - tqdm
 
 ### Installation
 ```bash
@@ -70,16 +83,15 @@ pip install -r requirements.txt
 ## Usage
 Run the script:
 ```bash
-python NetVendor.py
+python NetVendor.py <input_file>
 ```
 
 The script will:
 1. Check for required dependencies
-2. Update the OUI database if needed (downloads from IEEE)
-3. Prompt for Mac Address input file and column information
-4. Process devices and generate reports with progress visualization
-5. Create pie charts and CSV files (for spreadsheets like Excel / Google Sheets etc)
-6. Organize all output files in the `output` directory
+2. Process devices with progress visualization
+3. Generate an interactive dashboard with multiple visualizations
+4. Create a plain text summary and CSV report
+5. Organize all output files in the `output` directory
 
 ### Input
 The program accepts ARP or MAC address tables as input, such as:
@@ -94,26 +106,30 @@ Internet  10.0.0.2   1   abcd.ef01.2345  ARPA   Vlan100
 ```
 
 ### Output
-NetVendor generates three types of output:
+NetVendor generates four types of output:
 
 1. **Console Output**
    - Real-time dependency checks
    - Progress bars for MAC address processing
-   - Summary table showing vendor distribution with:
-     - Vendor names
-     - Device counts
-     - Percentage of total devices
+   - Summary table showing vendor distribution
 
-2. **Interactive HTML Visualization** (`output/vendor_distribution.html`)
-   - Interactive pie chart showing vendor distribution
-   - Hover tooltips with detailed information
-   - Legend for easy vendor identification
-   - Ability to show/hide vendors
-   - Download chart as PNG option
+2. **Interactive HTML Dashboard** (`output/vendor_distribution.html`)
+   - Page 1: Vendor Distribution
+     - Interactive pie chart with vendor distribution
+     - Detailed hover information (device count, percentage, VLANs)
+     - Customizable legend
+   - Page 2: VLAN Analysis
+     - VLAN device count bar chart
+     - VLAN distribution per vendor heatmap
+     - Interactive tooltips and zoom capabilities
 
-3. **CSV Report** (`output/[input-filename]-Devices.csv`)
-   - Detailed device information in spreadsheet format
-   - Columns include:
+3. **Plain Text Summary** (`output/vendor_summary.txt`)
+   - Clean, ASCII-formatted table
+   - Vendor names, device counts, and percentages
+   - Easy to share in emails or documents
+
+4. **CSV Report** (`output/[input-filename]-Devices.csv`)
+   - Detailed device information including:
      - IP Address
      - MAC Address
      - VLAN
@@ -124,21 +140,23 @@ NetVendor generates three types of output:
 NetVendor/
 ├── NetVendor.py          # Main application
 ├── oui_cache.json        # Cached vendor lookups
-└── output/              # Generated at runtime
-    ├── vendor_distribution.html    # Interactive pie chart
+└── output/               # Generated at runtime
+    ├── vendor_distribution.html    # Interactive dashboard
+    ├── vendor_summary.txt          # Plain text summary
     └── [input-filename]-Devices.csv  # Detailed device list
 ```
 
 ## Project Status
 
-### Latest Updates (March 15, 2024)
-- Added OUI manager for dynamic vendor identification
-- Improved progress visualization with rich library
-- Consolidated output files under organized directory structure
-- Added proper .gitignore for sensitive data protection
-- Added requirements.txt for dependency management
-- Removed browser dependency for pie charts
-- Improved documentation and code organization
+### Latest Updates (March 2024)
+- Added interactive dashboard with multiple visualizations
+- Implemented VLAN analysis with device count tracking
+- Added VLAN distribution per vendor heatmap
+- Created plain text summary output
+- Enhanced pie chart with detailed hover information
+- Improved legend formatting and positioning
+- Added navigation between different visualization pages
+- Enhanced documentation and usage instructions
 
 ### Future Enhancements
 **High Priority:**
