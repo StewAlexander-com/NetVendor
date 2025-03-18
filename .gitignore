@@ -2,18 +2,36 @@
 output/
 vendor_distribution.html
 *-Devices.csv
+vendor_summary.txt
 
-# Network data files
-*[Aa][Rr][Pp]*.txt    # Matches any ARP data files
-*[Mm][Aa][Cc]*.txt    # Matches any MAC address table files
-*-Devices.txt         # Matches vendor device files
-*.csv                 # Matches converted CSV files
-ip-arp.txt           # Specific test data file
-ip-arp-test.txt      # Generated test data file
+# Network data files (case insensitive)
+*[Aa][Rr][Pp]*.txt      # ARP data files
+*[Mm][Aa][Cc]*.txt      # MAC address table files
+*[Vv][Ll][Aa][Nn]*.txt  # VLAN data files
+*[Cc][Dd][Pp]*.txt      # CDP neighbor data
+*[Ll][Ll][Dd][Pp]*.txt  # LLDP neighbor data
+*[Cc][Oo][Nn][Ff]*.txt  # Config files
+*-Devices.txt           # Device files
+*.pcap                  # Packet captures
+*.cap                   # Packet captures
+*.dump                  # Network dumps
+*.log                   # Log files
 
-# Cache files
-oui_cache.json
-*.cache
+# Data and cache files
+*.csv                   # All CSV files
+oui_cache.json         # OUI cache
+failed_lookups.json    # Failed lookups cache
+processed_files.json   # Processed files cache
+oui_database.json      # OUI database
+data/                  # Data directory
+
+# Test files
+test/
+tests/
+*test*.txt
+*sample*.txt
+example*.txt
+mock*.txt
 
 # Python cache files
 __pycache__/
@@ -46,10 +64,18 @@ build/
 venv/
 env/
 .env/
+.venv/
+ENV/
 
 # IDE settings
 .vscode/
 .idea/
+*.sublime-*
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
 
 # OS generated files
 .DS_Store
@@ -59,14 +85,31 @@ env/
 .Trashes
 ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # Logs and databases
 *.log
 *.sqlite
+*.db
 
 # Local development settings
 .env
 .env.local
+.env.*
+!.env.example
 
-# Project specific
-test_data.txt
+# Sensitive information files
+*password*
+*secret*
+*credential*
+*token*
+*key*
+*auth*
+*config.json
+*settings.json
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
