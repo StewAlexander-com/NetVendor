@@ -114,9 +114,13 @@ NetVendor generates four types of output:
    - Summary table showing vendor distribution
 
 2. **Interactive HTML Dashboard** (`output/vendor_distribution.html`)
-![Screenshot 2025-03-18 at 6 47 03 PM](https://github.com/user-attachments/assets/10d52e0e-b7c9-48e1-8cb6-527a0cd72e48)
-![Screenshot 2025-03-18 at 6 48 55 PM](https://github.com/user-attachments/assets/7f78a827-3778-4423-a7ba-092ab02e81d8)
-
+   
+<img src="https://github.com/user-attachments/assets/10d52e0e-b7c9-48e1-8cb6-527a0cd72e48" 
+     width="67%" 
+     alt="Project Screenshot">
+<img src="https://github.com/user-attachments/assets/7f78a827-3778-4423-a7ba-092ab02e81d8" 
+     width="67%" 
+     alt="Interface Preview">
 
  
    - Page 1: Vendor Distribution
