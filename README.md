@@ -114,6 +114,15 @@ NetVendor generates four types of output:
    - Summary table showing vendor distribution
 
 2. **Interactive HTML Dashboard** (`output/vendor_distribution.html`)
+
+<img src="https://github.com/user-attachments/assets/f6bd4671-81c2-4317-9344-08e6dd65d9ec" 
+     alt="Screenshot 2025-03-18 at 3 29 24 PM" 
+     style="width: 67%; height: auto">
+
+<img src="https://github.com/user-attachments/assets/42877728-d2df-4ef4-a9db-b5c80a008be2" 
+     alt="Screenshot 2025-03-18 at 3 30 59 PM" 
+     style="width: 67%; height: auto">
+ 
    - Page 1: Vendor Distribution
      - Interactive pie chart with vendor distribution
      - Detailed hover information (device count, percentage, VLANs)
@@ -123,12 +132,12 @@ NetVendor generates four types of output:
      - VLAN distribution per vendor heatmap
      - Interactive tooltips and zoom capabilities
 
-3. **Plain Text Summary** (`output/vendor_summary.txt`)
+4. **Plain Text Summary** (`output/vendor_summary.txt`)
    - Clean, ASCII-formatted table
    - Vendor names, device counts, and percentages
    - Easy to share in emails or documents
 
-4. **CSV Report** (`output/[input-filename]-Devices.csv`)
+5. **CSV Report** (`output/[input-filename]-Devices.csv`)
    - Detailed device information including:
      - IP Address
      - MAC Address
