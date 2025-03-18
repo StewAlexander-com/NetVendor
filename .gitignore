@@ -9,6 +9,7 @@ vendor_distribution.html
 *-Devices.txt         # Matches vendor device files
 *.csv                 # Matches converted CSV files
 ip-arp.txt           # Specific test data file
+ip-arp-test.txt      # Generated test data file
 
 # Cache files
 oui_cache.json

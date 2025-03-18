@@ -57,9 +57,10 @@ def main():
     # Shuffle entries to mix vendors
     random.shuffle(entries)
     
-    # Print entries without comments or empty lines
-    for entry in entries:
-        print(entry)
+    # Write entries to file
+    with open('ip-arp-test.txt', 'w') as f:
+        for entry in entries:
+            f.write(f"{entry}\n")
 
 if __name__ == "__main__":
     main() 
