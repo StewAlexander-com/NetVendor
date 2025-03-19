@@ -70,10 +70,10 @@ def check_dependencies() -> None:
     modules_to_check = ["requests", "plotly", "tqdm", "rich"]
     
     for module_name in modules_to_check:
-    try:
-        __import__(module_name)
+        try:
+            __import__(module_name)
             console.print(f"The module '{module_name}' is installed.")
-    except ImportError:
+        except ImportError:
             console.print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
             console.print("\n[bold red]NetVendor will now exit[/bold red]")
             sys.exit(1)
@@ -1172,19 +1172,18 @@ def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager: 
         
         # Sort VLANs numerically
         sorted_vlans = sorted(vlan_vendor_data.keys(), key=lambda x: str(x))
-        
-        # 1. VLAN Device Count Bar Chart
-        vlan_total_counts = [vlan_total_devices[vlan] for vlan in sorted_vlans]
         fig2.add_trace(
             go.Bar(
                 x=[f"VLAN {v}" for v in sorted_vlans],
-                y=vlan_total_counts,
+                y=[vlan_total_devices[vlan] for vlan in sorted_vlans],
                 name="Total Devices",
                 hovertemplate="VLAN: %{x}<br>Devices: %{y}<extra></extra>",
                 marker_color='rgb(55, 83, 109)'
             ),
             row=1, col=1
         )
+        
+        progress.update(chart2_task, completed=40)
         
         # 2. Unique Vendors per VLAN
         unique_vendor_counts = [vlan_unique_vendors[vlan] for vlan in sorted_vlans]
@@ -1199,7 +1198,7 @@ def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager: 
             row=1, col=2
         )
         
-        progress.update(chart2_task, completed=40)
+        progress.update(chart2_task, completed=60)
         
         # 3. Vendor Distribution Heatmap
         # Get top vendors for better visualization
@@ -1224,7 +1223,7 @@ def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager: 
             row=2, col=1
         )
         
-        progress.update(chart2_task, completed=60)
+        progress.update(chart2_task, completed=80)
         
         # 4. Top Vendors per VLAN Stacked Bar Chart
         top_5_vendors = [v[0] for v in sorted_vendors[:5]]
@@ -1248,7 +1247,7 @@ def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager: 
         for trace in stacked_data:
             fig2.add_trace(trace, row=2, col=2)
         
-        progress.update(chart2_task, completed=80)
+        progress.update(chart2_task, completed=100)
         
         # Update layout for all subplots
         fig2.update_layout(
