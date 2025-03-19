@@ -456,15 +456,18 @@ class OUIManager:
         """Clean up the OUI cache for efficiency."""
         console.print("\n[yellow]Starting OUI cache cleanup...[/yellow]")
         original_count = len(self.cache)
+        cleaned_count = 0
+        duplicates_removed = 0
+        result = (0, 0)
         
         # Create progress bar
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
-    ) as progress:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+        ) as progress:
             cleanup_task = progress.add_task("[cyan]Cleaning up cache...", total=100)
             
             # Step 1: Normalize MAC addresses
@@ -499,24 +502,13 @@ class OUIManager:
             
             # Complete progress
             progress.update(cleanup_task, completed=100)
-        
-        # Print summary
-        cleaned_count = len(self.cache)
-        duplicates_removed = original_count - cleaned_count
-        
-        if original_count > 0:
-            console.print("\n[green]Cache cleanup completed![/green]")
-            console.print(f"\n[yellow]Cleanup Summary:[/yellow]")
-            console.print(f"• Original entries: {original_count}")
-            console.print(f"• Cleaned entries: {cleaned_count}")
-            console.print(f"• Duplicates removed: {duplicates_removed}")
-            console.print("\n[yellow]Vendor Distribution:[/yellow]")
-            for vendor, count in sorted(vendor_counts.items(), key=lambda x: x[1], reverse=True)[:10]:
-                console.print(f"• {vendor}: {count} entries")
-        else:
-            console.print("\n[yellow]Starting with fresh cache - no cleanup needed[/yellow]")
-        
-        return original_count, cleaned_count
+            
+            # Calculate results
+            cleaned_count = len(self.cache)
+            duplicates_removed = original_count - cleaned_count
+            result = (cleaned_count, duplicates_removed)
+            
+        return result
 
 @dataclass
 class PortInfo:
@@ -1000,45 +992,64 @@ def generate_port_report(input_file: Path, devices: Dict[str, Dict[str, str]], o
         devices: Dictionary of device information
         oui_manager: OUI manager instance for vendor lookups
     """
-    # Group devices by port
-    port_data = defaultdict(list)
+    # Only generate port report for MAC address tables
+    with open(input_file, 'r') as f:
+        first_line = f.readline().strip()
+        if not is_mac_address_table(first_line):
+            return
+
+    # Initialize port data structure
+    ports: Dict[str, PortInfo] = {}
+    
+    # Process each device and organize by port
     for mac, info in devices.items():
-        port = info.get('port', 'N/A')
-        if port != 'N/A':
-            port_data[port].append({
-                'mac': mac,
-                'vendor': oui_manager.get_vendor(mac),
-                'vlan': info.get('vlan', 'N/A')
-            })
+        port = info.get('port')
+        if not port:
+            continue
+            
+        vlan = info.get('vlan', 'Unknown')
+        vendor = oui_manager.get_vendor(mac)
+        
+        if port not in ports:
+            ports[port] = PortInfo(
+                port=port,
+                devices=[],
+                vlan_count=Counter(),
+                vendor_count=Counter()
+            )
+            
+        ports[port].devices.append((mac, vendor, vlan))
+        ports[port].vlan_count[vlan] += 1
+        ports[port].vendor_count[vendor] += 1
     
-    # Only create the ports file if we found ports
-    if not port_data:
-        return
+    # Create output file
+    output_file = input_file.stem + '-Ports.csv'
+    output_path = Path('output') / output_file
     
-    output_file = Path("output") / f"{input_file.stem}-Ports.csv"
-    
-    with open(output_file, 'w', newline='') as f:
+    with open(output_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['Port', 'Total Devices', 'VLANs', 'Vendors', 'Device Details'])
         
-        for port in sorted(port_data.keys()):
-            devices_on_port = port_data[port]
-            vlans = sorted(set(d['vlan'] for d in devices_on_port))
-            vendors = sorted(set(d['vendor'] for d in devices_on_port))
+        # Sort ports for consistent output
+        for port_name in sorted(ports.keys()):
+            port_info = ports[port_name]
             
+            # Sort VLANs and vendors for readability
+            vlans = sorted(port_info.vlan_count.keys())
+            vendors = sorted(port_info.vendor_count.keys())
+            
+            # Create detailed device list
             device_details = []
-            for d in devices_on_port:
-                device_details.append(f"{d['mac']} ({d['vendor']}, VLAN {d['vlan']})")
+            for mac, vendor, vlan in sorted(port_info.devices):
+                device_details.append(f"{mac} ({vendor}, VLAN {vlan})")
             
             writer.writerow([
-                port,
-                len(devices_on_port),
-                ','.join(str(v) for v in vlans),
+                port_name,
+                port_info.total_devices,
+                ','.join(vlans),
                 ','.join(vendors),
                 ' / '.join(device_details)
             ])
-    
-    console.print(f"\nPort analysis written to {output_file}")
 
 def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager: OUIManager, input_file: Path) -> None:
     """
