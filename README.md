@@ -19,6 +19,12 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
   - Vendor distribution pie chart with hover details
   - VLAN device count analysis
   - VLAN distribution per vendor heatmap
+  - Port-based device analysis (for MAC address tables)
+- Creates detailed port analysis reports showing:
+  - Devices per port
+  - VLANs per port
+  - Vendors per port
+  - Detailed device information per port
 - Converts results to CSV format
 - Maintains an up-to-date OUI database from IEEE
 - Rich progress visualization for all operations
@@ -106,7 +112,7 @@ Internet  10.0.0.2   1   abcd.ef01.2345  ARPA   Vlan100
 ```
 
 ### Output
-NetVendor generates four types of output:
+NetVendor generates five types of output:
 
 1. **Console Output**
    - Real-time dependency checks
@@ -163,6 +169,14 @@ NetVendor generates four types of output:
      - VLAN
      - Vendor
 
+6. **Port Analysis** (`output/[input-filename]-Ports.csv`, MAC address tables only)
+   - Comprehensive port-based analysis including:
+     - Port identifier
+     - Total devices on port
+     - VLANs present on port (comma-separated)
+     - Vendors present on port (comma-separated)
+     - Detailed device information per port (MAC, vendor, VLAN)
+
 ### Output Directory Structure
 ```
 NetVendor/
@@ -171,12 +185,17 @@ NetVendor/
 └── output/               # Generated at runtime
     ├── vendor_distribution.html    # Interactive dashboard
     ├── vendor_summary.txt          # Plain text summary
-    └── [input-filename]-Devices.csv  # Detailed device list
+    ├── [input-filename]-Devices.csv  # Detailed device list
+    └── [input-filename]-Ports.csv    # Port analysis (MAC tables only)
 ```
 
 ## Project Status
 
 ### Latest Updates (March 2024)
+- Added port-based analysis for MAC address tables:
+  - Detailed per-port device tracking
+  - VLAN and vendor distribution per port
+  - Comprehensive port analysis CSV report
 - Enhanced performance and reliability:
   - Smarter rate limiting with 250ms intervals and retry logic
   - Efficient cache management (saves every 50 entries)

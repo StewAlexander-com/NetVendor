@@ -11,6 +11,9 @@ Processes network device data through several stages:
    - Processes raw data into vendor counts
    - Creates interactive charts with plotly
    - Combines charts into a responsive HTML dashboard
+5. For MAC address tables with port information:
+   - Creates port-based device analysis
+   - Generates per-port VLAN and device statistics
 
 The script adapts to different input formats by analyzing the first line
 and adjusts its parsing strategy accordingly.
@@ -30,7 +33,7 @@ import time
 import subprocess
 import shutil
 from pathlib import Path
-from typing import List, Set, Dict, Tuple
+from typing import List, Set, Dict, Tuple, Optional
 from dataclasses import dataclass
 import json
 from collections import Counter
@@ -52,6 +55,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import re
 import hashlib
+from collections import defaultdict
 
 console = Console()
 
@@ -74,12 +78,79 @@ def check_dependencies() -> None:
             console.print("\n[bold red]NetVendor will now exit[/bold red]")
             sys.exit(1)
 
+def is_mac_address(mac: str) -> bool:
+    """
+    Check if a string is a valid MAC address.
+    Supports formats: 
+    - 1234.5678.9abc
+    - 12:34:56:78:9a:bc
+    - 12-34-56-78-9a-bc
+    """
+    # Remove separators and convert to lowercase
+    mac = mac.lower().replace(':', '').replace('.', '').replace('-', '')
+    
+    # Check if it's a 12-character hex string
+    if len(mac) != 12:
+        return False
+    
+    try:
+        int(mac, 16)  # Try to convert to hex
+        return True
+    except ValueError:
+        return False
+
+def is_mac_address_table(line: str) -> bool:
+    """
+    Check if a line is from a MAC address table.
+    Returns True if the line contains a VLAN number followed by a MAC address.
+    """
+    words = line.strip().split()
+    if len(words) < 2:
+        return False
+    
+    # Check if first word is a VLAN number
+    try:
+        vlan = int(words[0])
+        if not (1 <= vlan <= 4094):  # Valid VLAN range
+            return False
+    except ValueError:
+        return False
+    
+    # Check if second word is a MAC address
+    return is_mac_address(words[1])
+
+def parse_port_info(line: str) -> Optional[str]:
+    """
+    Extract port information from a line.
+    Returns the port identifier if found, None otherwise.
+    
+    Handles:
+    - MAC address table format (e.g., Gi1/0/1, Fa1/0/1)
+    - ARP table format (no port information)
+    """
+    # Skip ARP table format (contains "Internet" and "ARPA")
+    if "Internet" in line and "ARPA" in line:
+        return None
+    
+    words = line.strip().split()
+    if len(words) < 4:
+        return None
+    
+    # Port is typically the last field
+    port = words[-1]
+    
+    # Common port formats: Gi1/0/1, Fa1/0/1, Te1/1, Eth1/1, etc.
+    if any(port.startswith(prefix) for prefix in ['Gi', 'Fa', 'Te', 'Eth']):
+        return port
+    
+    return None
+
 def get_input_file() -> Tuple[str, int, int]:
     """
     Determines input file format and column positions dynamically.
     
     Analyzes the first line of input to detect file type:
-    - "Internet" -> ARP table (MAC in col 3, vendor in col 4)
+    - "Internet" -> ARP table (MAC in col 4, vendor in col 5)
     - "Mac Address" -> MAC table (MAC in col 2, vendor in col 3)
     - Other -> Default format (MAC in col 1, vendor in col 2)
     
@@ -100,8 +171,8 @@ def get_input_file() -> Tuple[str, int, int]:
     
     # Determine file type based on content
     if "Internet" in first_line:
-        mac_word = 3  # ARP table format
-        vendor_word = 4
+        mac_word = 4  # ARP table format (MAC is in 4th column)
+        vendor_word = 5
     elif "Mac Address" in first_line:
         mac_word = 2  # MAC address table format
         vendor_word = 3
@@ -286,7 +357,7 @@ class OUIManager:
             time.sleep(sleep_time)
         service['last_call'] = time.time()
 
-    def lookup_vendor(self, mac: str) -> str:
+    def get_vendor(self, mac: str) -> str:
         """Look up vendor for MAC address using multiple services."""
         if not self._validate_mac(mac):
             return "Unknown"
@@ -376,7 +447,7 @@ class OUIManager:
             
             # Look up unknown MACs one at a time
             for mac in unknown_macs:
-                results[mac] = self.lookup_vendor(mac)
+                results[mac] = self.get_vendor(mac)
                 progress.advance(task_id)
         
         return results
@@ -446,6 +517,44 @@ class OUIManager:
             console.print("\n[yellow]Starting with fresh cache - no cleanup needed[/yellow]")
         
         return original_count, cleaned_count
+
+@dataclass
+class PortInfo:
+    """
+    Tracks device and VLAN information for each network port.
+    
+    Attributes:
+        port: Physical port identifier (e.g., "Gi1/0/1")
+        devices: List of (MAC, vendor, vlan) tuples
+        vlan_count: Counter for VLANs seen on this port
+        vendor_count: Counter for vendors seen on this port
+    """
+    port: str
+    devices: List[Tuple[str, str, str]]  # (MAC, vendor, vlan)
+    vlan_count: Counter
+    vendor_count: Counter
+
+    @property
+    def total_devices(self) -> int:
+        return len(self.devices)
+
+    @property
+    def total_vlans(self) -> int:
+        return len(self.vlan_count)
+
+def get_format_type(first_line: str) -> str:
+    """
+    Determines the specific format type of the input file.
+    
+    Returns:
+        str: Format type ('cisco', 'hp', or 'generic')
+    """
+    line = first_line.lower()
+    if "vlan" in line and "mac address" in line and "ports" in line:
+        return "cisco"
+    elif "mac address" in line:
+        return "hp"
+    return "generic"
 
 def create_visualizations(vendor_counts: Dict[str, int], vlan_data: List[str]) -> None:
     """Create interactive visualizations of vendor and VLAN distributions."""
@@ -701,21 +810,476 @@ def create_visualizations(vendor_counts: Dict[str, int], vlan_data: List[str]) -
         # Update axes for better readability
         for i in range(1, 5):
             fig2.update_xaxes(tickangle=45, row=(i+1)//2, col=(i-1)%2+1)
+
+def process_vendor_devices(ip_arp_file: str, mac_word: int, vendor_word: int, oui_manager: OUIManager) -> Tuple[Dict[str, int], List[str]]:
+    """Process the input file and count devices per vendor."""
+    vendor_counts = {}
+    vlan_data = []
+    mac_batch = []
+    mac_to_vlan = {}
+    batch_size = 10
+    chunk_size = 1024 * 1024  # 1MB chunks for memory efficiency
+    
+    # Check if file has changed since last processing
+    file_changed = oui_manager.has_file_changed(ip_arp_file)
+    if not file_changed:
+        console.print("[green]File hasn't changed since last run. Using cached results...[/green]")
+    
+    # Pre-compile patterns
+    cisco_mac_pattern = re.compile(r'([0-9a-fA-F]{4}\.){2}[0-9a-fA-F]{4}')
+    standard_mac_pattern = re.compile(r'([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}')
+    
+    with open(ip_arp_file, 'r') as f:
+        # Get file size for progress tracking
+        f.seek(0, 2)
+        file_size = f.tell()
+        f.seek(0)
         
-        progress.update(chart2_task, completed=100)
+        # Determine file type from first line
+        first_line = f.readline().strip()
+        is_mac_table = "Mac Address" in first_line
+        start_line = 2 if is_mac_table else 0
+        
+        # Skip header lines if needed
+        if start_line > 0:
+            f.readline()
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
+        ) as progress:
+            read_task = progress.add_task("[cyan]Reading MAC addresses...", total=file_size)
+            
+            while True:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                
+                lines = chunk.splitlines()
+                
+                if not chunk.endswith('\n') and len(lines) > 1:
+                    f.seek(f.tell() - len(lines[-1]))
+                    lines = lines[:-1]
+                
+                for line in lines:
+                    if not line.strip():
+                        continue
+                    
+                    parts = line.split()
+                    if len(parts) < max(mac_word, vendor_word):
+                        continue
+                    
+                    if is_mac_table:
+                        if len(parts) >= 4:
+                            mac = parts[1].replace('.', ':')
+                            vlan = parts[0].strip()
+                            normalized_mac = oui_manager._normalize_mac(mac)
+                            
+                            if normalized_mac in oui_manager.cache:
+                                vendor = oui_manager.cache[normalized_mac]
+                                if vendor != "Unknown":
+                                    vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
+                                vlan_data.append(f"{mac} {vendor} {vlan}")
+                            elif file_changed:
+                                mac_batch.append(mac)
+                                mac_to_vlan[mac] = vlan
+                    else:
+                        mac = parts[mac_word].replace('.', ':')
+                        vlan = parts[-1].replace('Vlan', '') if 'Vlan' in parts[-1] else 'Unknown'
+                        normalized_mac = oui_manager._normalize_mac(mac)
+                        
+                        if normalized_mac in oui_manager.cache:
+                            vendor = oui_manager.cache[normalized_mac]
+                            if vendor != "Unknown":
+                                vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
+                            vlan_data.append(f"{mac} {vendor} {vlan}")
+                        elif file_changed:
+                            mac_batch.append(mac)
+                            mac_to_vlan[mac] = vlan
+                    
+                    # Process batch if it's full and file has changed
+                    if file_changed and len(mac_batch) >= batch_size:
+                        vendor_results = oui_manager.batch_lookup_vendors(mac_batch, progress)
+                        for mac, vendor in vendor_results.items():
+                            if vendor != "Unknown":
+                                vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
+                            vlan = mac_to_vlan[mac]
+                            vlan_data.append(f"{mac} {vendor} {vlan}")
+                        mac_batch = []
+                        mac_to_vlan = {}
+                
+                progress.advance(read_task, len(chunk))
+            
+            # Process any remaining MACs in the last batch
+            if file_changed and mac_batch:
+                vendor_results = oui_manager.batch_lookup_vendors(mac_batch, progress)
+                for mac, vendor in vendor_results.items():
+                    if vendor != "Unknown":
+                        vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
+                    vlan = mac_to_vlan[mac]
+                    vlan_data.append(f"{mac} {vendor} {vlan}")
+    
+    # Update file metadata after successful processing
+    if file_changed:
+        oui_manager.update_file_metadata(ip_arp_file)
+    
+    return vendor_counts, vlan_data
+
+def create_text_summary(vendor_counts: Dict[str, int], output_dir: str) -> None:
+    """Create a plain text summary of vendor distribution."""
+    total_devices = sum(vendor_counts.values())
+    
+    # Calculate the width needed for the vendor column
+    max_vendor_length = max(len(vendor) for vendor in vendor_counts.keys())
+    vendor_width = max(max_vendor_length, 6)  # minimum width of 6 for "Vendor"
+    
+    # Create the header
+    header = "Network Device Vendor Summary\n"
+    separator = "+{:-<{vendor_width}}+-------+------------+\n".format("", vendor_width=vendor_width)
+    column_header = "| {:<{vendor_width}} | Count | Percentage |\n".format("Vendor", vendor_width=vendor_width)
+    
+    # Create the rows
+    rows = []
+    for vendor, count in sorted(vendor_counts.items(), key=lambda x: x[1], reverse=True):
+        percentage = (count / total_devices) * 100
+        row = "| {:<{vendor_width}} | {:<5} | {:<10.1f}% |\n".format(
+            vendor, count, percentage, vendor_width=vendor_width
+        )
+        rows.append(row)
+    
+    # Write to file
+    with open(os.path.join(output_dir, "vendor_summary.txt"), 'w') as f:
+        f.write(header)
+        f.write(separator)
+        f.write(column_header)
+        f.write(separator.replace('-', '='))  # Double separator under headers
+        for row in rows:
+            f.write(row)
+        f.write(separator)
+
+def make_csv(input_file: Path, devices: Dict[str, Dict[str, str]], oui_manager: OUIManager) -> None:
+    """
+    Creates a CSV file with device information.
+    
+    Args:
+        input_file: Path to the input file
+        devices: Dictionary of device information
+        oui_manager: OUI manager instance for vendor lookups
+    """
+    output_file = Path("output") / f"{input_file.stem}-Devices.csv"
+    
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['MAC', 'Vendor', 'VLAN', 'Port'])
+        
+        for mac, info in devices.items():
+            vendor = oui_manager.get_vendor(mac)
+            vlan = info.get('vlan', 'N/A')
+            port = info.get('port', 'N/A')
+            writer.writerow([mac, vendor, vlan, port])
+    
+    console.print(f"\nDevice information written to {output_file}")
+
+def generate_port_report(input_file: Path, devices: Dict[str, Dict[str, str]], oui_manager: OUIManager) -> None:
+    """
+    Creates a CSV report with port-based device information.
+    
+    For each port, includes:
+    - Port identifier
+    - Total devices
+    - VLANs present (comma-separated)
+    - Vendors present (comma-separated)
+    - Device details (MAC, vendor, VLAN)
+    
+    Args:
+        input_file: Path to the input file
+        devices: Dictionary of device information
+        oui_manager: OUI manager instance for vendor lookups
+    """
+    # Group devices by port
+    port_data = defaultdict(list)
+    for mac, info in devices.items():
+        port = info.get('port', 'N/A')
+        if port != 'N/A':
+            port_data[port].append({
+                'mac': mac,
+                'vendor': oui_manager.get_vendor(mac),
+                'vlan': info.get('vlan', 'N/A')
+            })
+    
+    # Only create the ports file if we found ports
+    if not port_data:
+        return
+    
+    output_file = Path("output") / f"{input_file.stem}-Ports.csv"
+    
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Port', 'Total Devices', 'VLANs', 'Vendors', 'Device Details'])
+        
+        for port in sorted(port_data.keys()):
+            devices_on_port = port_data[port]
+            vlans = sorted(set(d['vlan'] for d in devices_on_port))
+            vendors = sorted(set(d['vendor'] for d in devices_on_port))
+            
+            device_details = []
+            for d in devices_on_port:
+                device_details.append(f"{d['mac']} ({d['vendor']}, VLAN {d['vlan']})")
+            
+            writer.writerow([
+                port,
+                len(devices_on_port),
+                ','.join(str(v) for v in vlans),
+                ','.join(vendors),
+                ' / '.join(device_details)
+            ])
+    
+    console.print(f"\nPort analysis written to {output_file}")
+
+def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager: OUIManager, input_file: Path) -> None:
+    """
+    Creates interactive visualizations of vendor and VLAN distributions.
+    
+    Args:
+        devices: Dictionary of device information
+        oui_manager: OUI manager instance for vendor lookups
+        input_file: Path to the input file
+    """
+    console.print("[cyan]Creating visualizations...[/cyan]")
+    
+    # Process data for visualization
+    vendor_counts = Counter()
+    vlan_vendor_data = defaultdict(Counter)  # VLAN -> {vendor: count}
+    vendor_vlan_data = defaultdict(Counter)  # Vendor -> {vlan: count}
+    vlan_total_devices = Counter()  # Total devices per VLAN
+    vlan_unique_vendors = Counter()  # Unique vendors per VLAN
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeElapsedColumn(),
+    ) as progress:
+        # Step 1: Process device data
+        data_task = progress.add_task("[cyan]Processing device data...", total=len(devices))
+        
+        for mac, info in devices.items():
+            vendor = oui_manager.get_vendor(mac)
+            vlan = info.get('vlan', 'N/A')
+            
+            # Update counters
+            vendor_counts[vendor] += 1
+            vlan_vendor_data[vlan][vendor] += 1
+            vendor_vlan_data[vendor][vlan] += 1
+            vlan_total_devices[vlan] += 1
+            vlan_unique_vendors[vlan] = len(vlan_vendor_data[vlan])
+            
+            progress.advance(data_task)
+        
+        # Step 2: Create vendor distribution chart
+        chart1_task = progress.add_task("[cyan]Creating vendor distribution chart...", total=100)
+        
+        # Create pie chart for overall vendor distribution
+        fig1 = go.Figure()
+        sorted_vendors = sorted(vendor_counts.items(), key=lambda x: x[1], reverse=True)
+        labels = [v[0] for v in sorted_vendors]
+        values = [v[1] for v in sorted_vendors]
+        total_devices = sum(vendor_counts.values())
+        
+        # Enhanced hover text with more details
+        hover_text = [
+            f"Vendor: {label}<br>" +
+            f"Device Count: {value:,} devices<br>" +
+            f"Percentage: {(value/total_devices)*100:.1f}%<br>" +
+            f"Present in {len(vendor_vlan_data[label])} VLANs<br>" +
+            f"Most Common VLAN: {max(vendor_vlan_data[label].items(), key=lambda x: x[1])[0] if vendor_vlan_data[label] else 'N/A'}<br>" +
+            f"Max Devices in a VLAN: {max(vendor_vlan_data[label].values()) if vendor_vlan_data[label] else 0}"
+            for label, value in zip(labels, values)
+        ]
+        
+        legend_labels = [f"{label} ({value:,})" for label, value in zip(labels, values)]
+        
+        fig1.add_trace(
+            go.Pie(
+                labels=legend_labels,
+                values=values,
+                hovertemplate="%{customdata}<br><extra></extra>",
+                customdata=hover_text,
+                textinfo='label',
+                textposition='outside',
+                hole=0.3
+            )
+        )
+        
+        # Update fig1 layout for pie chart
+        fig1.update_layout(
+            title=None,
+            showlegend=True,
+            autosize=True,
+            legend=dict(
+                yanchor="middle",
+                y=0.5,
+                xanchor="left",
+                x=1.15,
+                font=dict(size=12),
+                itemsizing='constant'
+            ),
+            margin=dict(
+                l=50,
+                r=300,
+                t=50,
+                b=50,
+                autoexpand=True
+            )
+        )
+        
+        progress.update(chart1_task, completed=100)
+        
+        # Step 3: Create enhanced VLAN analysis charts
+        chart2_task = progress.add_task("[cyan]Creating VLAN analysis charts...", total=100)
+        
+        # Create subplot figure with 2x2 layout
+        fig2 = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=(
+                "VLAN Device Count",
+                "Unique Vendors per VLAN",
+                "Vendor Distribution per VLAN",
+                "Top Vendors per VLAN"
+            ),
+            vertical_spacing=0.12,
+            horizontal_spacing=0.1,
+            row_heights=[0.4, 0.6]
+        )
+        
+        progress.update(chart2_task, completed=20)
+        
+        # Sort VLANs numerically
+        sorted_vlans = sorted(vlan_vendor_data.keys(), key=lambda x: str(x))
+        
+        # 1. VLAN Device Count Bar Chart
+        vlan_total_counts = [vlan_total_devices[vlan] for vlan in sorted_vlans]
+        fig2.add_trace(
+            go.Bar(
+                x=[f"VLAN {v}" for v in sorted_vlans],
+                y=vlan_total_counts,
+                name="Total Devices",
+                hovertemplate="VLAN: %{x}<br>Devices: %{y}<extra></extra>",
+                marker_color='rgb(55, 83, 109)'
+            ),
+            row=1, col=1
+        )
+        
+        # 2. Unique Vendors per VLAN
+        unique_vendor_counts = [vlan_unique_vendors[vlan] for vlan in sorted_vlans]
+        fig2.add_trace(
+            go.Bar(
+                x=[f"VLAN {v}" for v in sorted_vlans],
+                y=unique_vendor_counts,
+                name="Unique Vendors",
+                hovertemplate="VLAN: %{x}<br>Unique Vendors: %{y}<extra></extra>",
+                marker_color='rgb(26, 118, 255)'
+            ),
+            row=1, col=2
+        )
+        
+        progress.update(chart2_task, completed=40)
+        
+        # 3. Vendor Distribution Heatmap
+        # Get top vendors for better visualization
+        top_vendors = [v[0] for v in sorted_vendors[:20]]  # Show top 20 vendors
+        heatmap_data = []
+        for vendor in top_vendors:
+            row = []
+            for vlan in sorted_vlans:
+                count = vendor_vlan_data[vendor][vlan]
+                row.append(count)
+            heatmap_data.append(row)
+        
+        fig2.add_trace(
+            go.Heatmap(
+                z=heatmap_data,
+                x=[f"VLAN {v}" for v in sorted_vlans],
+                y=top_vendors,
+                colorscale='Viridis',
+                showscale=True,
+                hovertemplate="VLAN: %{x}<br>Vendor: %{y}<br>Devices: %{z}<extra></extra>"
+            ),
+            row=2, col=1
+        )
+        
+        progress.update(chart2_task, completed=60)
+        
+        # 4. Top Vendors per VLAN Stacked Bar Chart
+        top_5_vendors = [v[0] for v in sorted_vendors[:5]]
+        stacked_data = []
+        
+        for vendor in top_5_vendors:
+            vendor_counts = []
+            for vlan in sorted_vlans:
+                count = vendor_vlan_data[vendor][vlan]
+                vendor_counts.append(count)
+            
+            stacked_data.append(
+                go.Bar(
+                    name=vendor,
+                    x=[f"VLAN {v}" for v in sorted_vlans],
+                    y=vendor_counts,
+                    hovertemplate="VLAN: %{x}<br>Vendor: " + vendor + "<br>Devices: %{y}<extra></extra>"
+                )
+            )
+        
+        for trace in stacked_data:
+            fig2.add_trace(trace, row=2, col=2)
+        
+        progress.update(chart2_task, completed=80)
+        
+        # Update layout for all subplots
+        fig2.update_layout(
+            autosize=True,
+            showlegend=True,
+            barmode='stack',
+            height=1000,
+            grid=dict(
+                rows=2,
+                columns=2,
+                pattern='independent',
+                roworder='top to bottom',
+                ygap=0.2,
+                xgap=0.1
+            ),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.2,
+                xanchor="center",
+                x=0.5
+            ),
+            template="plotly_white",
+            margin=dict(
+                l=80,
+                r=80,
+                t=100,
+                b=150,
+                autoexpand=True
+            )
+        )
+        
+        # Update axes for better readability
+        for i in range(1, 5):
+            fig2.update_xaxes(tickangle=45, row=(i+1)//2, col=(i-1)%2+1)
         
         # Step 4: Save visualizations
         save_task = progress.add_task("[cyan]Saving visualizations...", total=100)
         
-        # Create output directory
-        output_dir = "output"
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        
-        progress.update(save_task, completed=20)
-        
         # Write HTML file with enhanced styling
-        with open(os.path.join(output_dir, "vendor_distribution.html"), 'w') as f:
+        output_file = Path("output") / "vendor_distribution.html"
+        with open(output_file, 'w') as f:
             f.write("""
             <html>
             <head>
@@ -889,127 +1453,24 @@ def create_visualizations(vendor_counts: Dict[str, int], vlan_data: List[str]) -
             f.write('</div></div></body></html>')
             
             progress.update(save_task, completed=100)
-
-def process_vendor_devices(ip_arp_file: str, mac_word: int, vendor_word: int, oui_manager: OUIManager) -> Tuple[Dict[str, int], List[str]]:
-    """Process the input file and count devices per vendor."""
-    vendor_counts = {}
-    vlan_data = []
-    mac_batch = []
-    mac_to_vlan = {}
-    batch_size = 10
-    chunk_size = 1024 * 1024  # 1MB chunks for memory efficiency
-    
-    # Check if file has changed since last processing
-    file_changed = oui_manager.has_file_changed(ip_arp_file)
-    if not file_changed:
-        console.print("[green]File hasn't changed since last run. Using cached results...[/green]")
-    
-    # Pre-compile patterns
-    cisco_mac_pattern = re.compile(r'([0-9a-fA-F]{4}\.){2}[0-9a-fA-F]{4}')
-    standard_mac_pattern = re.compile(r'([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}')
-    
-    with open(ip_arp_file, 'r') as f:
-        # Get file size for progress tracking
-        f.seek(0, 2)
-        file_size = f.tell()
-        f.seek(0)
-        
-        # Determine file type from first line
-        first_line = f.readline().strip()
-        is_mac_table = "Mac Address" in first_line
-        start_line = 2 if is_mac_table else 0
-        
-        # Skip header lines if needed
-        if start_line > 0:
-            f.readline()
-        
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            TimeElapsedColumn(),
-            TimeRemainingColumn(),
-        ) as progress:
-            read_task = progress.add_task("[cyan]Reading MAC addresses...", total=file_size)
             
-            while True:
-                chunk = f.read(chunk_size)
-                if not chunk:
-                    break
-                
-                lines = chunk.splitlines()
-                
-                if not chunk.endswith('\n') and len(lines) > 1:
-                    f.seek(f.tell() - len(lines[-1]))
-                    lines = lines[:-1]
-                
-                for line in lines:
-                    if not line.strip():
-                        continue
-                    
-                    parts = line.split()
-                    if len(parts) < max(mac_word, vendor_word):
-                        continue
-                    
-                    if is_mac_table:
-                        if len(parts) >= 4:
-                            mac = parts[1].replace('.', ':')
-                            vlan = parts[0].strip()
-                            normalized_mac = oui_manager._normalize_mac(mac)
-                            
-                            if normalized_mac in oui_manager.cache:
-                                vendor = oui_manager.cache[normalized_mac]
-                                if vendor != "Unknown":
-                                    vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
-                                vlan_data.append(f"{mac} {vendor} {vlan}")
-                            elif file_changed:
-                                mac_batch.append(mac)
-                                mac_to_vlan[mac] = vlan
-                    else:
-                        mac = parts[mac_word].replace('.', ':')
-                        vlan = parts[-1].replace('Vlan', '') if 'Vlan' in parts[-1] else 'Unknown'
-                        normalized_mac = oui_manager._normalize_mac(mac)
-                        
-                        if normalized_mac in oui_manager.cache:
-                            vendor = oui_manager.cache[normalized_mac]
-                            if vendor != "Unknown":
-                                vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
-                            vlan_data.append(f"{mac} {vendor} {vlan}")
-                        elif file_changed:
-                            mac_batch.append(mac)
-                            mac_to_vlan[mac] = vlan
-                    
-                    # Process batch if it's full and file has changed
-                    if file_changed and len(mac_batch) >= batch_size:
-                        vendor_results = oui_manager.batch_lookup_vendors(mac_batch, progress)
-                        for mac, vendor in vendor_results.items():
-                            if vendor != "Unknown":
-                                vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
-                            vlan = mac_to_vlan[mac]
-                            vlan_data.append(f"{mac} {vendor} {vlan}")
-                        mac_batch = []
-                        mac_to_vlan = {}
-                
-                progress.advance(read_task, len(chunk))
-            
-            # Process any remaining MACs in the last batch
-            if file_changed and mac_batch:
-                vendor_results = oui_manager.batch_lookup_vendors(mac_batch, progress)
-                for mac, vendor in vendor_results.items():
-                    if vendor != "Unknown":
-                        vendor_counts[vendor] = vendor_counts.get(vendor, 0) + 1
-                    vlan = mac_to_vlan[mac]
-                    vlan_data.append(f"{mac} {vendor} {vlan}")
-    
-    # Update file metadata after successful processing
-    if file_changed:
-        oui_manager.update_file_metadata(ip_arp_file)
-    
-    return vendor_counts, vlan_data
+        console.print(f"\nVisualizations written to {output_file}")
 
-def create_text_summary(vendor_counts: Dict[str, int], output_dir: str) -> None:
-    """Create a plain text summary of vendor distribution."""
+def save_vendor_summary(devices: Dict[str, Dict[str, str]], oui_manager: OUIManager, input_file: Path) -> None:
+    """
+    Create a plain text summary of vendor distribution.
+    
+    Args:
+        devices: Dictionary of device information
+        oui_manager: OUI manager instance for vendor lookups
+        input_file: Path to the input file
+    """
+    # Count vendors
+    vendor_counts = Counter()
+    for mac in devices:
+        vendor = oui_manager.get_vendor(mac)
+        vendor_counts[vendor] += 1
+    
     total_devices = sum(vendor_counts.values())
     
     # Calculate the width needed for the vendor column
@@ -1031,7 +1492,8 @@ def create_text_summary(vendor_counts: Dict[str, int], output_dir: str) -> None:
         rows.append(row)
     
     # Write to file
-    with open(os.path.join(output_dir, "vendor_summary.txt"), 'w') as f:
+    output_file = Path("output") / "vendor_summary.txt"
+    with open(output_file, 'w') as f:
         f.write(header)
         f.write(separator)
         f.write(column_header)
@@ -1039,223 +1501,78 @@ def create_text_summary(vendor_counts: Dict[str, int], output_dir: str) -> None:
         for row in rows:
             f.write(row)
         f.write(separator)
-
-def make_csv(file: str, oui_manager: OUIManager) -> None:
-    """Create a CSV file with device information."""
-    output_dir = "output"
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
     
-    base_name = os.path.splitext(os.path.basename(file))[0]
-    output_file = os.path.join(output_dir, f"{base_name}-Devices.csv")
-    
-    # Pre-compile patterns
-    cisco_mac_pattern = re.compile(r'([0-9a-fA-F]{4}\.){2}[0-9a-fA-F]{4}')
-    vlan_pattern = re.compile(r'Vlan(\d+)')
-    
-    # Process in chunks for memory efficiency
-    chunk_size = 1024 * 1024  # 1MB chunks
-    
-    # Check if file has changed since last processing
-    file_changed = oui_manager.has_file_changed(file)
-    
-    # Count total lines first for progress tracking
-    total_lines = sum(1 for _ in open(file, 'r'))
-    lines_processed = 0
-    
-    # Store MACs that need lookup
-    mac_batch = []
-    csv_rows = []
-    
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
-    ) as progress:
-        read_task = progress.add_task("[cyan]Reading device data...", total=total_lines)
-        
-        with open(file, 'r') as infile:
-            # Determine file format from first line
-            first_line = infile.readline().strip()
-            is_mac_table = "Mac Address" in first_line
-            lines_processed += 1
-            progress.update(read_task, completed=lines_processed)
-            
-            # Skip header line for MAC table format
-            if is_mac_table:
-                infile.readline()  # Skip separator line
-                lines_processed += 1
-                progress.update(read_task, completed=lines_processed)
-            
-            while True:
-                chunk = infile.read(chunk_size)
-                if not chunk:
-                    break
-                
-                lines = chunk.splitlines()
-                
-                # Handle partial last line
-                if not chunk.endswith('\n') and len(lines) > 1:
-                    infile.seek(infile.tell() - len(lines[-1]))
-                    lines = lines[:-1]
-                
-                for line in lines:
-                    if not line.strip() or line.startswith('#'):
-                        lines_processed += 1
-                        progress.update(read_task, completed=lines_processed)
-                        continue
-                    
-                    parts = line.split()
-                    
-                    if is_mac_table and len(parts) >= 4:
-                        # MAC table format: VLAN MAC TYPE PORT
-                        ip = "N/A"
-                        mac = parts[1].replace('.', ':')
-                        vlan = parts[0].strip()
-                        normalized_mac = oui_manager._normalize_mac(mac)
-                        
-                        if normalized_mac in oui_manager.cache:
-                            vendor = oui_manager.cache[normalized_mac]
-                        else:
-                            if file_changed:
-                                mac_batch.append(mac)
-                            vendor = "Unknown"  # Temporary value
-                        
-                        csv_rows.append([ip, mac, vlan, vendor])
-                        
-                    elif "Internet" in line and len(parts) >= 6:
-                        # ARP table format
-                        ip = parts[1]
-                        mac = parts[3].replace('.', ':')
-                        vlan_match = vlan_pattern.search(parts[5])
-                        vlan = vlan_match.group(1) if vlan_match else parts[5].replace('Vlan', '')
-                        normalized_mac = oui_manager._normalize_mac(mac)
-                        
-                        if normalized_mac in oui_manager.cache:
-                            vendor = oui_manager.cache[normalized_mac]
-                        else:
-                            if file_changed:
-                                mac_batch.append(mac)
-                            vendor = "Unknown"  # Temporary value
-                        
-                        csv_rows.append([ip, mac, vlan, vendor])
-                    
-                    lines_processed += 1
-                    progress.update(read_task, completed=min(lines_processed, total_lines))
-        
-        # Look up any new MACs in batch
-        if mac_batch and file_changed:
-            lookup_task = progress.add_task("[cyan]Looking up new vendors...", total=len(mac_batch))
-            vendor_results = oui_manager.batch_lookup_vendors(mac_batch, progress)
-            
-            # Update CSV rows with vendor results
-            mac_to_vendor = {mac: vendor for mac, vendor in vendor_results.items()}
-            for row in csv_rows:
-                mac = row[1]
-                if mac in mac_to_vendor:
-                    row[3] = mac_to_vendor[mac]
-            
-            progress.update(lookup_task, completed=len(mac_batch))
-        
-        # Write CSV file
-        write_task = progress.add_task("[cyan]Writing CSV file...", total=len(csv_rows))
-        with open(output_file, 'w', newline='') as outfile:
-            writer = csv.writer(outfile)
-            writer.writerow(['IP Address', 'MAC Address', 'VLAN', 'Vendor'])
-            for row in csv_rows:
-                writer.writerow(row)
-                progress.advance(write_task)
+    console.print(f"\nVendor summary written to {output_file}")
 
 def main():
-    """Main function."""
+    """
+    Main execution flow of the NetVendor tool.
+    
+    Process:
+    1. Validates dependencies and input
+    2. Determines input format and processing strategy
+    3. Processes device data with appropriate parser
+    4. Generates reports and visualizations
+    """
     check_dependencies()
-    console.print("\n[bold cyan]NetVendor - Network Device Vendor Analysis[/bold cyan]")
-    console.print("=" * 60)
-
-    # Initialize OUI manager and clean cache
+    
+    # Initialize OUI manager
     oui_manager = OUIManager()
-    console.print("\n[yellow]Initializing...[/yellow]")
+    console.print("\nInitializing...")
     original_count, cleaned_count = oui_manager.cleanup_cache()
     
-    # Get input file and process
-    input_file, mac_word, vendor_word = get_input_file()
-    if not input_file:
-        return
-    
-    console.print("\n[yellow]Processing network data...[/yellow]")
-    
-    # Process vendor devices with progress tracking
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
-        TimeRemainingColumn(),
-        console=console
-    ) as progress:
-        vendor_counts, vlan_data = process_vendor_devices(input_file, mac_word, vendor_word, oui_manager)
+    # Get input file and format information
+    input_file_str, mac_word, vendor_word = get_input_file()
+    input_file = Path(input_file_str)
     
     # Create output directory if it doesn't exist
-    output_dir = "output"
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True)
     
-    console.print("\n[yellow]Generating reports...[/yellow]")
+    # Process the input file
+    devices = {}
+    line_count = 0
+    port_count = 0
     
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
-        console=console
-    ) as progress:
-        # Create and display results table
-        table_task = progress.add_task("[cyan]Creating summary table...", total=100)
+    with open(input_file, 'r') as f:
+        first_line = f.readline().strip()
+        is_arp_table = "Internet" in first_line
+        f.seek(0)  # Reset to start of file
         
-        table = Table(
-            title="Network Device Vendor Summary",
-            show_header=True,
-            header_style="bold cyan",
-            border_style="blue"
-        )
-        table.add_column("Vendor", style="cyan", no_wrap=True)
-        table.add_column("Count", style="magenta", justify="right")
-        table.add_column("Percentage", style="green", justify="right")
-        
-        total_devices = sum(vendor_counts.values())
-        for vendor, count in sorted(vendor_counts.items(), key=lambda x: x[1], reverse=True):
-            percentage = (count / total_devices) * 100
-            table.add_row(vendor, str(count), f"{percentage:.1f}%")
-        
-        progress.update(table_task, completed=100)
-        console.print("\n")
-        console.print(table)
-        
-        # Create text summary
-        summary_task = progress.add_task("[cyan]Creating text summary...", total=100)
-        create_text_summary(vendor_counts, output_dir)
-        progress.update(summary_task, completed=100)
-        
-        # Create visualizations
-        viz_task = progress.add_task("[cyan]Creating visualizations...", total=100)
-        create_visualizations(vendor_counts, vlan_data)
-        progress.update(viz_task, completed=100)
-        
-        # Create CSV file
-        csv_task = progress.add_task("[cyan]Creating device CSV file...", total=100)
-        make_csv(input_file, oui_manager)
-        progress.update(csv_task, completed=100)
+        for line in f:
+            line_count += 1
+            words = line.strip().split()
+            if len(words) >= mac_word:
+                mac = words[mac_word - 1].lower()
+                if is_mac_address(mac):
+                    if is_arp_table:
+                        # Extract VLAN from "VlanXXX" format
+                        vlan = words[-1].replace('Vlan', '') if 'Vlan' in words[-1] else 'N/A'
+                        port = None  # ARP tables don't have port information
+                    else:
+                        vlan = words[0] if is_mac_address_table(line) else 'N/A'
+                        port = parse_port_info(line)
+                        if port:
+                            port_count += 1
+                    devices[mac] = {'vlan': vlan, 'port': port if port else 'N/A'}
     
-    console.print("\n[bold green]Analysis complete![/bold green]")
-    console.print(f"[cyan]Total devices analyzed: {total_devices:,}[/cyan]")
-    console.print("\n[yellow]Output files have been created in the 'output' directory:[/yellow]")
-    console.print("  • [blue]vendor_distribution.html[/blue] (Interactive dashboard)")
-    console.print(f"  • [blue]{os.path.splitext(os.path.basename(input_file))[0]}-Devices.csv[/blue] (Device list)")
-    console.print("  • [blue]vendor_summary.txt[/blue] (Text summary)")
+    console.print(f"\nProcessed {line_count} lines")
+    if not is_arp_table:
+        console.print(f"Found {port_count} port entries")
+        console.print(f"Found {len(set(d['port'] for d in devices.values() if d['port'] != 'N/A'))} unique ports")
+    
+    # Generate reports
+    make_csv(input_file, devices, oui_manager)
+    
+    # Only generate port report for MAC address tables
+    if not is_arp_table:
+        generate_port_report(input_file, devices, oui_manager)
+    
+    # Create vendor distribution visualization
+    create_vendor_distribution(devices, oui_manager, input_file)
+    
+    # Save vendor summary
+    save_vendor_summary(devices, oui_manager, input_file)
 
 if __name__ == "__main__":
     main()
