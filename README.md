@@ -19,7 +19,7 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
   - Vendor distribution pie chart with hover details
   - VLAN device count analysis
   - VLAN distribution per vendor heatmap
-  - Port-based device analysis (for MAC address tables)
+  - Port-based device analysis with detailed statistics
 - Converts results to CSV format
 - Maintains an up-to-date OUI database from IEEE
 - Rich progress visualization for all operations
@@ -30,6 +30,7 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
 - **Security**: Understanding what exists in your network is essential for security
 - **Asset Management**: Easy identification of vendor devices
 - **Network Visibility**: Clear visualization of device distribution
+- **Port Analysis**: Detailed insights into port utilization and device connections
 - **Change Tracking**: Benchmark your network to easily see changes
 - **Efficiency**: Fast processing with progress tracking
 - **Organization**: All output files are neatly organized
@@ -166,11 +167,20 @@ NetVendor generates five types of output:
 
 6. **Port Analysis Report** (`output/[input-filename]-Ports.csv`) - *For MAC address tables only*
    - Comprehensive port-based analysis including:
-     - Port identifier
-     - Total devices per port
-     - VLANs present on each port
-     - Vendors present on each port
-     - Detailed device information per port
+     - Port identifier (e.g., Gi1/0/1, Fa1/0/1)
+     - Total connected devices per port
+     - List of VLANs present on each port
+     - List of vendors present on each port
+     - Detailed device information including:
+       - MAC addresses with vendor names
+       - VLAN assignments per device
+       - Port-to-device mapping for network topology
+     - Useful for:
+       - Identifying heavily utilized ports
+       - Detecting unauthorized devices or VLANs
+       - Planning network segmentation
+       - Troubleshooting connectivity issues
+       - Auditing network access and security
 
 ### Output Directory Structure
 ```
