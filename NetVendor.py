@@ -70,10 +70,10 @@ def check_dependencies() -> None:
     modules_to_check = ["requests", "plotly", "tqdm", "rich"]
     
     for module_name in modules_to_check:
-        try:
-            __import__(module_name)
+    try:
+        __import__(module_name)
             console.print(f"The module '{module_name}' is installed.")
-        except ImportError:
+    except ImportError:
             console.print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
             console.print("\n[bold red]NetVendor will now exit[/bold red]")
             sys.exit(1)
@@ -458,13 +458,13 @@ class OUIManager:
         original_count = len(self.cache)
         
         # Create progress bar
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            TimeElapsedColumn(),
-        ) as progress:
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeElapsedColumn(),
+    ) as progress:
             cleanup_task = progress.add_task("[cyan]Cleaning up cache...", total=100)
             
             # Step 1: Normalize MAC addresses
@@ -1515,16 +1515,16 @@ def main():
     4. Generates reports and visualizations
     """
     check_dependencies()
-    
+
     # Initialize OUI manager
     oui_manager = OUIManager()
     console.print("\nInitializing...")
     original_count, cleaned_count = oui_manager.cleanup_cache()
-    
+
     # Get input file and format information
     input_file_str, mac_word, vendor_word = get_input_file()
     input_file = Path(input_file_str)
-    
+
     # Create output directory if it doesn't exist
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)

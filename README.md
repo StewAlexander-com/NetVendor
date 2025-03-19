@@ -20,11 +20,6 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
   - VLAN device count analysis
   - VLAN distribution per vendor heatmap
   - Port-based device analysis (for MAC address tables)
-- Creates detailed port analysis reports showing:
-  - Devices per port
-  - VLANs per port
-  - Vendors per port
-  - Detailed device information per port
 - Converts results to CSV format
 - Maintains an up-to-date OUI database from IEEE
 - Rich progress visualization for all operations
@@ -169,13 +164,13 @@ NetVendor generates five types of output:
      - VLAN
      - Vendor
 
-6. **Port Analysis** (`output/[input-filename]-Ports.csv`, MAC address tables only)
+6. **Port Analysis Report** (`output/[input-filename]-Ports.csv`) - *For MAC address tables only*
    - Comprehensive port-based analysis including:
      - Port identifier
-     - Total devices on port
-     - VLANs present on port (comma-separated)
-     - Vendors present on port (comma-separated)
-     - Detailed device information per port (MAC, vendor, VLAN)
+     - Total devices per port
+     - VLANs present on each port
+     - Vendors present on each port
+     - Detailed device information per port
 
 ### Output Directory Structure
 ```
@@ -193,9 +188,10 @@ NetVendor/
 
 ### Latest Updates (March 2024)
 - Added port-based analysis for MAC address tables:
-  - Detailed per-port device tracking
-  - VLAN and vendor distribution per port
-  - Comprehensive port analysis CSV report
+  - Detailed port-to-device mapping
+  - VLAN distribution per port
+  - Vendor distribution per port
+  - Comprehensive device details per port
 - Enhanced performance and reliability:
   - Smarter rate limiting with 250ms intervals and retry logic
   - Efficient cache management (saves every 50 entries)
