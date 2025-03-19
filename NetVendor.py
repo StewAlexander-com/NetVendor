@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 
+"""
+NetVendor - Network Device Analysis Tool
+
+Processes network device data through several stages:
+1. Reads MAC/ARP tables in chunks to handle large files efficiently
+2. Uses a caching system to avoid redundant vendor lookups
+3. Maintains file state to skip unchanged files
+4. Generates visualizations using a multi-step process:
+   - Processes raw data into vendor counts
+   - Creates interactive charts with plotly
+   - Combines charts into a responsive HTML dashboard
+
+The script adapts to different input formats by analyzing the first line
+and adjusts its parsing strategy accordingly.
+"""
+
 #####################################
 #                                   #
 #      Created by Stew Alexander    #
@@ -41,8 +57,11 @@ console = Console()
 
 def check_dependencies() -> None:
     """
-    Check if all required Python modules are installed.
-    Exits the program if any required module is missing.
+    Validates required modules before script execution to prevent runtime failures.
+    
+    Uses __import__ for dynamic module checking, allowing the script to fail early
+    if dependencies are missing. This prevents cryptic errors later in execution
+    when modules are actually needed.
     """
     modules_to_check = ["requests", "plotly", "tqdm", "rich"]
     
@@ -56,7 +75,17 @@ def check_dependencies() -> None:
             sys.exit(1)
 
 def get_input_file() -> Tuple[str, int, int]:
-    """Get the input file and determine its type."""
+    """
+    Determines input file format and column positions dynamically.
+    
+    Analyzes the first line of input to detect file type:
+    - "Internet" -> ARP table (MAC in col 3, vendor in col 4)
+    - "Mac Address" -> MAC table (MAC in col 2, vendor in col 3)
+    - Other -> Default format (MAC in col 1, vendor in col 2)
+    
+    This adaptive parsing allows the script to handle various network device
+    output formats without requiring user configuration.
+    """
     if len(sys.argv) != 2:
         console.print("Usage: python3 NetVendor.py <input_file>")
         sys.exit(1)
@@ -83,7 +112,22 @@ def get_input_file() -> Tuple[str, int, int]:
     return input_file, mac_word, vendor_word
 
 class OUIManager:
-    """Manages OUI lookups and caching."""
+    """
+    Manages vendor lookups with a multi-layered caching strategy:
+    
+    1. In-memory cache for fastest lookups
+    2. File-based JSON cache for persistence
+    3. Failed lookup tracking to avoid retrying bad MACs
+    4. File state tracking to skip reprocessing unchanged files
+    
+    Uses rate limiting and service rotation for API calls:
+    - Alternates between multiple vendor lookup services
+    - Implements exponential backoff on rate limits
+    - Batches lookups for efficiency
+    
+    The manager automatically creates required directories and maintains
+    cache integrity through atomic writes and periodic cleanup.
+    """
     def __init__(self):
         # Create output/data directory if it doesn't exist
         self.output_dir = Path("output")

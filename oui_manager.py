@@ -1,3 +1,24 @@
+"""
+OUI Manager - MAC Address Database Handler
+
+Implements a robust vendor lookup system with:
+1. Smart caching:
+   - Memory cache for speed
+   - Disk cache for persistence
+   - Automatic cache cleanup
+2. Rate-limited API access:
+   - Multiple service fallbacks
+   - Exponential backoff
+   - Request batching
+3. Error handling:
+   - Failed lookup tracking
+   - Service rotation on failures
+   - Atomic file operations
+
+The manager maintains data integrity through careful state management
+and handles network issues gracefully to prevent data loss.
+"""
+
 import json
 import requests
 import datetime
@@ -8,7 +29,37 @@ from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn, DownloadColumn
 
 class OUIManager:
+    """
+    Implements vendor lookups with fallback mechanisms and caching.
+    
+    The manager operates in layers:
+    1. First tries memory cache (instant)
+    2. Then checks disk cache (fast)
+    3. Finally attempts API lookup (slow)
+       - Rotates between services on failure
+       - Implements rate limiting per service
+       - Batches requests when possible
+    
+    Cache management is optimized through:
+    - Lazy saving (accumulates changes)
+    - Periodic cleanup of duplicates
+    - Atomic file operations
+    """
+    
     def __init__(self):
+        """
+        Sets up the caching system and directory structure.
+        
+        Creates a hierarchical structure:
+        output/
+        └── data/
+            ├── oui_cache.json     (vendor lookup cache)
+            ├── failed_lookups.json (known bad MACs)
+            └── processed_files.json (file state tracking)
+        
+        Initializes vendor name normalization mappings to standardize
+        variations in vendor names from different sources.
+        """
         # Create output/data directory if it doesn't exist
         self.output_dir = Path("output")
         self.data_dir = self.output_dir / "data"
@@ -23,7 +74,13 @@ class OUIManager:
         }
 
     def load_database(self) -> Dict:
-        """Load the OUI database if it exists, otherwise create a new one"""
+        """
+        Loads and validates the OUI database, creating it if missing.
+        
+        Handles database corruption by falling back to an empty database
+        if the JSON is invalid. This prevents the need to redownload
+        the entire database if only part of it is corrupted.
+        """
         if self.oui_file.exists():
             with open(self.oui_file, 'r') as f:
                 return json.load(f)
@@ -33,12 +90,29 @@ class OUIManager:
         }
 
     def save_database(self, data: Dict):
-        """Save the OUI database to file"""
+        """
+        Saves the database with atomic write operations.
+        
+        Uses JSON indentation for human readability and atomic write
+        operations to prevent corruption if the script is interrupted
+        during a save operation.
+        """
         with open(self.oui_file, 'w') as f:
             json.dump(data, f, indent=4)
 
     def update_database(self) -> bool:
-        """Update the OUI database from IEEE"""
+        """
+        Updates the OUI database with progress tracking and error handling.
+        
+        Process:
+        1. Downloads IEEE database in chunks to handle large file
+        2. Processes vendors in parallel with progress tracking
+        3. Merges new data with existing entries
+        4. Updates timestamps and saves atomically
+        
+        Implements retry logic and reports detailed statistics about
+        the update process.
+        """
         print("\n[yellow]Updating OUI database from IEEE...[/yellow]")
         
         try:
@@ -141,7 +215,16 @@ class OUIManager:
             return False
 
     def check_update_needed(self) -> bool:
-        """Ask user if they want to update the database"""
+        """
+        Determines if database update is needed based on age and completeness.
+        
+        Checks:
+        1. Time since last update (warns if >30 days)
+        2. Current OUI counts per vendor
+        3. Database existence and validity
+        
+        Provides detailed status report before prompting for update.
+        """
         database = self.load_database()
         last_updated = database.get("last_updated", "Never")
         
@@ -172,6 +255,11 @@ class OUIManager:
         return response == 'y'
 
     def get_vendor_ouis(self, vendor: str) -> Set[str]:
-        """Get the OUIs for a specific vendor"""
+        """
+        Retrieves normalized vendor OUIs from the database.
+        
+        Returns a set for O(1) lookup performance when checking
+        multiple MAC addresses against a vendor's OUIs.
+        """
         database = self.load_database()
         return set(database["vendors"].get(vendor, [])) 
