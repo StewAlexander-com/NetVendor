@@ -120,7 +120,7 @@ NetVendor generates four types of output:
      style="width: 67%; height: auto">
 ---     
 
-<img src="https://github.com/user-attachments/assets/42877728-d2df-4ef4-a9db-b5c80a008be2" 
+<img src="https://github.com/user-attachments/assets/b967ed89-b976-4c70-88f2-88145ce427b6" 
      alt="Screenshot 2025-03-18 at 3 30 59 PM" 
      style="width: 67%; height: auto">
  
