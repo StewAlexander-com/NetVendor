@@ -203,8 +203,13 @@ class OUIManager:
         # Create output/data directory if it doesn't exist
         self.output_dir = Path("output")
         self.data_dir = self.output_dir / "data"
-        self.data_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.data_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            console.print(f"[red]Error creating data directory: {e}[/red]")
+            raise
         self.cache_file = self.data_dir / "oui_cache.json"
+        self.cache_backup_file = self.data_dir / "oui_cache.json.bak"
         self.failed_lookups_file = self.data_dir / "failed_lookups.json"
         self.processed_files_file = self.data_dir / "processed_files.json"
         self.cache = {}
@@ -333,8 +338,31 @@ class OUIManager:
             if vendor not in unique_cache.values():
                 unique_cache[mac] = vendor
         
-        with open(self.cache_file, 'w') as f:
-            json.dump(unique_cache, f, sort_keys=True, indent=2)
+        try:
+            # Create backup of existing cache if it exists
+            if self.cache_file.exists():
+                import shutil
+                shutil.copy2(self.cache_file, self.cache_backup_file)
+            
+            # Use atomic write operation
+            temp_file = self.cache_file.with_suffix('.tmp')
+            with open(temp_file, 'w') as f:
+                json.dump(unique_cache, f, sort_keys=True, indent=2)
+            
+            # Atomic rename
+            temp_file.replace(self.cache_file)
+            
+            # Remove backup if save was successful
+            if self.cache_backup_file.exists():
+                self.cache_backup_file.unlink()
+                
+        except Exception as e:
+            console.print(f"[yellow]Warning: Error saving cache: {e}[/yellow]")
+            # Restore from backup if save failed
+            if self.cache_backup_file.exists():
+                import shutil
+                shutil.copy2(self.cache_backup_file, self.cache_file)
+                console.print("[green]Restored cache from backup[/green]")
     
     def _normalize_mac(self, mac: str) -> str:
         """Normalize MAC address format."""
@@ -507,7 +535,7 @@ class OUIManager:
             cleaned_count = len(self.cache)
             duplicates_removed = original_count - cleaned_count
             result = (cleaned_count, duplicates_removed)
-            
+        
         return result
 
 @dataclass
