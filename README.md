@@ -100,11 +100,14 @@ The script will:
 5. Organize all output files in the `output` directory
 
 ### Updating the OUI Cache
-The tool uses a pre-seeded OUI database from Wireshark's manufacturers database. You can update this cache using:
+
+The package includes a pre-seeded `oui_cache.json` file containing manufacturer information from Wireshark's database. This cache is automatically installed with the package and used by default. However, if you need to update the cache with the latest manufacturer information, you can run:
+
 ```bash
 update-oui-cache
 ```
-This will download the latest manufacturers database from Wireshark and update the local cache.
+
+This will fetch the latest manufacturer database from Wireshark and update your local cache.
 
 ### Input File Formats
 The tool supports several input file formats:
