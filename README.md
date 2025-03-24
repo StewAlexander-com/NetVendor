@@ -238,16 +238,16 @@ NetVendor/
 
 ## Project Status
 
-### Latest Updates (March 2024)
-- Refactored codebase for better maintainability:
+### Latest Updates (March 2025)
+- Refactored codebase for better maintainability [72fa9f4]:
   - Modularized output handling into separate module
   - Added comprehensive unit tests
   - Improved code organization and documentation
-- Enhanced OUI cache management:
+- Enhanced OUI cache management [31e53ed]:
   - Pre-seeded OUI cache from Wireshark's database
   - Added standalone update-oui-cache utility
   - Improved cache update reliability using system curl
-- Improved port analysis capabilities:
+- Improved port analysis capabilities [1c4de02]:
   - Detailed port-to-device mapping
   - VLAN distribution per port
   - Vendor distribution per port
