@@ -70,10 +70,10 @@ def check_dependencies() -> None:
     modules_to_check = ["requests", "plotly", "tqdm", "rich"]
     
     for module_name in modules_to_check:
-        try:
-            __import__(module_name)
+    try:
+        __import__(module_name)
             console.print(f"The module '{module_name}' is installed.")
-        except ImportError:
+    except ImportError:
             console.print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
             console.print("\n[bold red]NetVendor will now exit[/bold red]")
             sys.exit(1)
@@ -501,13 +501,13 @@ class OUIManager:
         result = (0, 0)
         
         # Create progress bar
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            TimeElapsedColumn(),
-        ) as progress:
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeElapsedColumn(),
+    ) as progress:
             cleanup_task = progress.add_task("[cyan]Cleaning up cache...", total=100)
             
             # Step 1: Normalize MAC addresses
