@@ -239,49 +239,45 @@ NetVendor/
 ## Project Status
 
 ### Latest Updates (March 2024)
-- Added port-based analysis for MAC address tables:
+- Refactored codebase for better maintainability:
+  - Modularized output handling into separate module
+  - Added comprehensive unit tests
+  - Improved code organization and documentation
+- Enhanced OUI cache management:
+  - Pre-seeded OUI cache from Wireshark's database
+  - Added standalone update-oui-cache utility
+  - Improved cache update reliability using system curl
+- Improved port analysis capabilities:
   - Detailed port-to-device mapping
   - VLAN distribution per port
   - Vendor distribution per port
   - Comprehensive device details per port
-- Enhanced performance and reliability:
-  - Smarter rate limiting with 250ms intervals and retry logic
-  - Efficient cache management (saves every 50 entries)
-  - Optimized memory usage with batch processing
-  - Improved progress tracking with separate progress bars
-- Improved visualization dashboard:
-  - Responsive design that adapts to window size
-  - Enhanced pie chart with better spacing and readability
-  - Improved VLAN analysis graphs with proper spacing
+- Enhanced visualization dashboard:
+  - Interactive vendor distribution pie charts
+  - VLAN analysis graphs with proper spacing
   - Better navigation between visualization pages
   - Centered layout with optimized dimensions
   - Enhanced vendor list formatting
-- Added interactive dashboard with multiple visualizations
-- Implemented VLAN analysis with device count tracking
-- Added VLAN distribution per vendor heatmap
-- Created plain text summary output
-- Enhanced pie chart with detailed hover information
-- Improved legend formatting and positioning
-- Enhanced documentation and usage instructions
+  - Detailed hover information for all charts
 
 ### Future Enhancements
 **High Priority:**
-- Add more vendor checks and OUI patterns
+- Add support for more network device output formats
+- Implement configuration file for customizable settings
 - Add command line arguments for automation
-- Add error handling for network connectivity issues
-- Add logging for troubleshooting
+- Expand test coverage
 
 **Medium Priority:**
-- Add configuration file for customizable settings
-- Add unit tests and integration tests
 - Add historical data comparison
+- Support for bulk file processing
+- Add network scanning capabilities
 - Add export to additional formats
 
 **Low Priority:**
-- Add web interface for easier use
-- Add network scanning capabilities
+- Create web interface for easier use
 - Add detailed vendor statistics
-- Add report generation
+- Add custom report templates
+- Support for real-time monitoring
 
 ### Author
 Created by Stew Alexander (2021)
