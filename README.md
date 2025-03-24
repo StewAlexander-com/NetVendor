@@ -13,18 +13,18 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
 - 📈 [Project Status](#project-status) - Updates and future plans
 
 ## Features
-- Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
-- Creates vendor-specific device lists with progress tracking
-- Generates interactive visualizations:
-  - Vendor distribution pie chart with hover details
-  - VLAN device count analysis
-  - VLAN distribution per vendor heatmap
-  - Port-based device analysis with detailed statistics
-- Converts results to CSV format
-- Maintains an up-to-date OUI database from IEEE
-- Rich progress visualization for all operations
-- Organized output file structure
-- Plain text summaries for easy sharing
+- Parses MAC address tables and ARP tables from various network devices
+- Identifies device vendors using MAC address OUI (Organizationally Unique Identifier) lookups
+- Generates detailed reports and visualizations
+- Supports multiple input formats:
+  - Cisco IOS/IOS-XE show mac address-table
+  - Cisco NX-OS show mac address-table
+  - Cisco IOS/IOS-XE show ip arp
+  - HP/Aruba show mac-address
+  - Generic MAC address lists
+- Pre-seeded OUI database from Wireshark's manufacturers database
+- Interactive HTML visualizations of vendor and VLAN distributions
+- CSV exports for detailed device information
 
 ### Why Use NetVendor?
 - **Security**: Understanding what exists in your network is essential for security
@@ -73,19 +73,23 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
   - tqdm
 
 ### Installation
+1. Clone the repository:
 ```bash
-# Clone the repository
 git clone https://github.com/StewAlexander-com/NetVendor.git
 cd NetVendor
+```
 
-# Install dependencies
-pip install -r requirements.txt
+2. Install the package:
+```bash
+pip install -e .
 ```
 
 ## Usage
+
+### Basic Usage
 Run the script:
 ```bash
-python NetVendor.py <input_file>
+netvendor input_file.txt
 ```
 
 The script will:
@@ -95,16 +99,51 @@ The script will:
 4. Create a plain text summary and CSV report
 5. Organize all output files in the `output` directory
 
-### Input
-The program accepts ARP or MAC address tables as input, such as:
-- Cisco IOS `show ip arp`
-- Cisco IOS `show mac address-table`
-- Any text file containing MAC addresses in a column
-
-Example input format:
+### Updating the OUI Cache
+The tool uses a pre-seeded OUI database from Wireshark's manufacturers database. You can update this cache using:
+```bash
+update-oui-cache
 ```
-Internet  10.0.0.1   1   0123.4567.89ab  ARPA   Vlan100
-Internet  10.0.0.2   1   abcd.ef01.2345  ARPA   Vlan100
+This will download the latest manufacturers database from Wireshark and update the local cache.
+
+### Input File Formats
+The tool supports several input file formats:
+
+1. Cisco IOS/IOS-XE show mac address-table:
+```
+          Mac Address Table
+-------------------------------------------
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+ 100    0001.0001.0001    DYNAMIC     Gi1/0/1
+```
+
+2. Cisco NX-OS show mac address-table:
+```
+* - primary entry, G - Gateway MAC, (R) - Routed MAC, O - Overlay MAC
+age - seconds since last seen,+ - primary entry using vPC Peer-Link, (T) - True, (E) - Egress
+   VLAN     MAC Address     Type      age     Secure NTFY Ports/SWID.SSID.LID
+---------+-----------------+--------+---------+------+----+------------------
+* 100     0001.0001.0001   dynamic  0         F     F  Eth1/1
+```
+
+3. Cisco IOS/IOS-XE show ip arp:
+```
+Protocol  Address          Age (min)  Hardware Addr   Type   Interface
+Internet  192.168.1.1            -   0001.0001.0001  ARPA   GigabitEthernet1/0/1
+```
+
+4. HP/Aruba show mac-address:
+```
+MAC Address         VLAN    Type    Port
+----------------    ----    ----    ----
+0001-0001-0001      100     DYNAMIC 1
+```
+
+5. Generic MAC address list:
+```
+0001.0001.0001
+0002.0002.0002
 ```
 
 ### Output
@@ -243,3 +282,16 @@ NetVendor/
 
 ### Author
 Created by Stew Alexander (2021)
+
+## Dependencies
+
+- Python 3.8 or higher
+- requests
+- plotly
+- tqdm
+- rich
+- curl (system command for OUI cache updates)
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
