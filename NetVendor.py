@@ -392,9 +392,21 @@ class OUIManager:
             
         oui = self._normalize_mac(mac)
         
-        # Check cache first
+        # Check in-memory cache first
         if oui in self.cache:
             return self.cache[oui]
+        
+        # Check oui_cache.json file
+        try:
+            if self.cache_file.exists():
+                with open(self.cache_file, 'r') as f:
+                    file_cache = json.load(f)
+                    if oui in file_cache:
+                        # Update in-memory cache
+                        self.cache[oui] = file_cache[oui]
+                        return file_cache[oui]
+        except (json.JSONDecodeError, IOError) as e:
+            console.print(f"[yellow]Warning: Could not read oui_cache.json ({e})[/yellow]")
         
         # Check if this OUI previously failed lookup
         if oui in self.failed_lookups:
