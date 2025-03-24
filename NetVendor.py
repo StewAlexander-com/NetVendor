@@ -166,7 +166,7 @@ def get_input_file() -> Tuple[str, int, int]:
         console.print(f"Error: File '{input_file}' not found.")
         sys.exit(1)
     
-    with open(input_file, 'r') as f:
+    with open(input_file, 'r', encoding='utf-8') as f:
         first_line = f.readline().strip()
     
     # Determine file type based on content
@@ -964,7 +964,7 @@ def make_csv(input_file: Path, devices: Dict[str, Dict[str, str]], oui_manager: 
     """
     output_file = Path("output") / f"{input_file.stem}-Devices.csv"
     
-    with open(output_file, 'w', newline='') as f:
+    with open(output_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['MAC', 'Vendor', 'VLAN', 'Port'])
         
@@ -993,7 +993,7 @@ def generate_port_report(input_file: Path, devices: Dict[str, Dict[str, str]], o
         oui_manager: OUI manager instance for vendor lookups
     """
     # Only generate port report for MAC address tables
-    with open(input_file, 'r') as f:
+    with open(input_file, 'r', encoding='utf-8') as f:
         first_line = f.readline().strip()
         if not is_mac_address_table(first_line):
             return
@@ -1026,7 +1026,7 @@ def generate_port_report(input_file: Path, devices: Dict[str, Dict[str, str]], o
     output_file = input_file.stem + '-Ports.csv'
     output_path = Path('output') / output_file
     
-    with open(output_path, 'w', newline='') as f:
+    with open(output_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['Port', 'Total Devices', 'VLANs', 'Vendors', 'Device Details'])
         
@@ -1503,7 +1503,7 @@ def save_vendor_summary(devices: Dict[str, Dict[str, str]], oui_manager: OUIMana
     
     # Write to file
     output_file = Path("output") / "vendor_summary.txt"
-    with open(output_file, 'w') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write(header)
         f.write(separator)
         f.write(column_header)
