@@ -23,8 +23,9 @@ import json
 import requests
 import datetime
 import os
+import hashlib
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, Set, Optional
 from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn, DownloadColumn
 
@@ -60,18 +61,87 @@ class OUIManager:
         Initializes vendor name normalization mappings to standardize
         variations in vendor names from different sources.
         """
-        # Create output/data directory if it doesn't exist
-        self.output_dir = Path("output")
-        self.data_dir = self.output_dir / "data"
+        # Use environment variable for data directory if set
+        data_dir = os.environ.get("NETVENDOR_DATA_DIR")
+        if data_dir:
+            self.output_dir = Path(data_dir)
+            self.data_dir = self.output_dir
+        else:
+            self.output_dir = Path("output")
+            self.data_dir = self.output_dir / "data"
+        
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        self.oui_file = self.data_dir / "oui_database.json"
-        self.vendors = {
-            "HP": ["Hewlett Packard", "HP Enterprise", "HP Inc"],
-            "Apple": ["Apple, Inc"],
-            "Dell": ["Dell Inc", "Dell Technologies"],
-            "Cisco": ["Cisco Systems", "Cisco SPVTG"],
-            "Mitel": ["Mitel Networks"],
+        
+        self.cache_file = self.data_dir / "oui_cache.json"
+        self.failed_lookups_file = self.data_dir / "failed_lookups.json"
+        self.processed_files_file = self.data_dir / "processed_files.json"
+        
+        # Initialize empty cache and metadata
+        self.cache = {}
+        self.failed_lookups = set()
+        self.processed_files = {}
+        
+        # Create empty cache files if they don't exist
+        if not self.cache_file.exists():
+            self.save_cache()
+        if not self.failed_lookups_file.exists():
+            self.save_failed_lookups()
+        if not self.processed_files_file.exists():
+            self.save_processed_files()
+        
+        # Load data from files
+        self.load_cache()
+        self.load_failed_lookups()
+        self.load_processed_files()
+
+    def load_cache(self):
+        """Load vendor cache from file."""
+        if self.cache_file.exists():
+            try:
+                with open(self.cache_file, 'r') as f:
+                    self.cache = json.load(f)
+            except json.JSONDecodeError:
+                self.cache = {}
+
+    def save_cache(self):
+        """Save vendor cache to file."""
+        with open(self.cache_file, 'w') as f:
+            json.dump(self.cache, f)
+
+    def load_failed_lookups(self):
+        """Load failed lookups from file."""
+        if self.failed_lookups_file.exists():
+            try:
+                with open(self.failed_lookups_file, 'r') as f:
+                    self.failed_lookups = set(json.load(f))
+            except json.JSONDecodeError:
+                self.failed_lookups = set()
+
+    def load_processed_files(self):
+        """Load processed files metadata."""
+        if self.processed_files_file.exists():
+            try:
+                with open(self.processed_files_file, 'r') as f:
+                    self.processed_files = json.load(f)
+            except json.JSONDecodeError:
+                self.processed_files = {}
+
+    def get_file_metadata(self, file_path: str) -> dict:
+        """Get metadata for a file."""
+        stats = os.stat(file_path)
+        return {
+            'size': stats.st_size,
+            'mtime': stats.st_mtime,
+            'hash': self._get_file_hash(file_path)
         }
+
+    def _get_file_hash(self, file_path: str) -> str:
+        """Calculate SHA-256 hash of a file."""
+        sha256_hash = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
 
     def load_database(self) -> Dict:
         """
@@ -261,5 +331,46 @@ class OUIManager:
         Returns a set for O(1) lookup performance when checking
         multiple MAC addresses against a vendor's OUIs.
         """
-        database = self.load_database()
-        return set(database["vendors"].get(vendor, [])) 
+        ouis = set()
+        for oui, v in self.cache.items():
+            if v.lower() == vendor.lower():
+                ouis.add(oui)
+        return ouis
+
+    def has_file_changed(self, file_path: str) -> bool:
+        """Check if a file has changed since last processing."""
+        if file_path not in self.processed_files:
+            return True
+        current_metadata = self.get_file_metadata(file_path)
+        stored_metadata = self.processed_files[file_path]
+        return (
+            current_metadata['size'] != stored_metadata['size'] or
+            current_metadata['mtime'] != stored_metadata['mtime'] or
+            current_metadata['hash'] != stored_metadata['hash']
+        )
+
+    def get_vendor(self, mac: str) -> Optional[str]:
+        """Get vendor for a MAC address."""
+        if mac in self.failed_lookups:
+            return None
+        oui = mac[:6].upper()
+        vendor = self.cache.get(oui)
+        if vendor is None:
+            self.failed_lookups.add(mac)
+            self.save_failed_lookups()
+        return vendor
+
+    def save_failed_lookups(self):
+        """Save failed lookups to file."""
+        with open(self.failed_lookups_file, 'w') as f:
+            json.dump(list(self.failed_lookups), f)
+
+    def update_file_metadata(self, file_path: str):
+        """Update metadata for a processed file."""
+        self.processed_files[file_path] = self.get_file_metadata(file_path)
+        self.save_processed_files()
+
+    def save_processed_files(self):
+        """Save processed files metadata."""
+        with open(self.processed_files_file, 'w') as f:
+            json.dump(self.processed_files, f) 

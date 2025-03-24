@@ -4,13 +4,19 @@ import os
 import tempfile
 from pathlib import Path
 import pytest
+from netvendor.core import check_dependencies, is_mac_address, is_mac_address_table, parse_port_info
 from netvendor.core.oui_manager import OUIManager
 from netvendor.utils.helpers import (
-    is_mac_address,
-    is_mac_address_table,
-    parse_port_info,
     get_format_type
 )
+
+@pytest.fixture
+def oui_manager():
+    """Create a temporary OUI manager for testing."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        os.environ["NETVENDOR_DATA_DIR"] = tmpdir
+        manager = OUIManager()
+        yield manager
 
 def test_is_mac_address():
     """Test MAC address validation."""
@@ -40,14 +46,6 @@ def test_get_format_type():
     assert get_format_type("VLAN ID  MAC Address      Port") == "hp"
     assert get_format_type("Some other format") == "generic"
 
-@pytest.fixture
-def oui_manager():
-    """Create a temporary OUI manager for testing."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        os.environ["NETVENDOR_DATA_DIR"] = tmpdir
-        manager = OUIManager()
-        yield manager
-
 def test_oui_manager_cache(oui_manager):
     """Test OUI manager caching functionality."""
     # Test cache initialization
@@ -62,7 +60,7 @@ def test_oui_manager_cache(oui_manager):
     assert vendor is None
     
     # Test cache saving and loading
-    oui_manager.save_cache(force=True)
+    oui_manager.save_cache()
     assert Path(oui_manager.cache_file).exists()
     
     # Create a new manager to test loading

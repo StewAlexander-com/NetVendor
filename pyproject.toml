@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netvendor"
+version = "1.0.0"
+description = "A tool for analyzing network device vendors from MAC addresses"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Stewart Alexander", email = "stewart@stewalexander.com"}
+]
+dependencies = [
+    "requests>=2.31.0",
+    "plotly>=5.18.0",
+    "tqdm>=4.66.1",
+    "rich>=13.7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/StewAlexander-com/NetVendor"
+Repository = "https://github.com/StewAlexander-com/NetVendor.git" 
