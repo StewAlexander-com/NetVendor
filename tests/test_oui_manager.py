@@ -5,7 +5,7 @@ import tempfile
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
-from oui_manager import OUIManager
+from netvendor.core.oui_manager import OUIManager
 
 @pytest.fixture
 def temp_data_dir():
@@ -140,30 +140,33 @@ def test_check_update_needed_old(oui_manager, monkeypatch):
 
 def test_get_vendor_ouis(oui_manager):
     """Test retrieving vendor OUIs."""
+    # Add test data to cache
     test_data = {
-        "last_updated": datetime.now().isoformat(),
-        "vendors": {
-            "HP": ["001122", "334455"],
-            "Apple": ["AABBCC"],
-            "Dell": [],
-            "Cisco": ["DDEEFF"],
-            "Mitel": []
-        }
+        "001122": "HP",
+        "334455": "HP",
+        "AABBCC": "Apple",
+        "DDEEFF": "Cisco"
     }
-    oui_manager.save_database(test_data)
+    oui_manager.cache = test_data
     
-    # Test existing vendor
+    # Test getting OUIs for existing vendors
     hp_ouis = oui_manager.get_vendor_ouis("HP")
     assert isinstance(hp_ouis, set)
+    assert len(hp_ouis) == 2
     assert "001122" in hp_ouis
     assert "334455" in hp_ouis
     
-    # Test empty vendor
+    apple_ouis = oui_manager.get_vendor_ouis("Apple")
+    assert len(apple_ouis) == 1
+    assert "AABBCC" in apple_ouis
+    
+    cisco_ouis = oui_manager.get_vendor_ouis("Cisco")
+    assert len(cisco_ouis) == 1
+    assert "DDEEFF" in cisco_ouis
+    
+    # Test getting OUIs for non-existent vendors
     dell_ouis = oui_manager.get_vendor_ouis("Dell")
-    assert isinstance(dell_ouis, set)
     assert len(dell_ouis) == 0
     
-    # Test non-existent vendor
     unknown_ouis = oui_manager.get_vendor_ouis("Unknown")
-    assert isinstance(unknown_ouis, set)
     assert len(unknown_ouis) == 0 
