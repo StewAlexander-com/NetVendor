@@ -56,6 +56,7 @@ from plotly.subplots import make_subplots
 import re
 import hashlib
 from collections import defaultdict
+import vendor_output_handler as output_handler
 
 console = Console()
 
@@ -70,10 +71,10 @@ def check_dependencies() -> None:
     modules_to_check = ["requests", "plotly", "tqdm", "rich"]
     
     for module_name in modules_to_check:
-    try:
-        __import__(module_name)
+        try:
+            __import__(module_name)
             console.print(f"The module '{module_name}' is installed.")
-    except ImportError:
+        except ImportError:
             console.print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
             console.print("\n[bold red]NetVendor will now exit[/bold red]")
             sys.exit(1)
@@ -501,13 +502,13 @@ class OUIManager:
         result = (0, 0)
         
         # Create progress bar
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
-    ) as progress:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+        ) as progress:
             cleanup_task = progress.add_task("[cyan]Cleaning up cache...", total=100)
             
             # Step 1: Normalize MAC addresses
@@ -547,8 +548,8 @@ class OUIManager:
             cleaned_count = len(self.cache)
             duplicates_removed = original_count - cleaned_count
             result = (cleaned_count, duplicates_removed)
-        
-        return result
+            
+            return result
 
 @dataclass
 class PortInfo:
@@ -1016,7 +1017,7 @@ def make_csv(input_file: Path, devices: Dict[str, Dict[str, str]], oui_manager: 
     
     console.print(f"\nDevice information written to {output_file}")
 
-def generate_port_report(input_file: Path, devices: Dict[str, Dict[str, str]], oui_manager: OUIManager) -> None:
+def generate_port_report(input_file: Path, devices: Dict[str, Dict[str, str]], oui_manager: OUIManager, is_mac_table: bool) -> None:
     """
     Creates a CSV report with port-based device information.
     
@@ -1031,12 +1032,11 @@ def generate_port_report(input_file: Path, devices: Dict[str, Dict[str, str]], o
         input_file: Path to the input file
         devices: Dictionary of device information
         oui_manager: OUI manager instance for vendor lookups
+        is_mac_table: Boolean indicating if the input file is a MAC address table
     """
     # Only generate port report for MAC address tables
-    with open(input_file, 'r', encoding='utf-8') as f:
-        first_line = f.readline().strip()
-        if not is_mac_address_table(first_line):
-            return
+    if not is_mac_table:
+        return
 
     # Initialize port data structure
     ports: Dict[str, PortInfo] = {}
@@ -1612,17 +1612,17 @@ def main():
         console.print(f"Found {len(set(d['port'] for d in devices.values() if d['port'] != 'N/A'))} unique ports")
     
     # Generate reports
-    make_csv(input_file, devices, oui_manager)
+    output_handler.make_csv(input_file, devices, oui_manager)
     
     # Only generate port report for MAC address tables
     if not is_arp_table:
-        generate_port_report(input_file, devices, oui_manager)
+        output_handler.generate_port_report(input_file, devices, oui_manager, not is_arp_table)
     
     # Create vendor distribution visualization
-    create_vendor_distribution(devices, oui_manager, input_file)
+    output_handler.create_vendor_distribution(devices, oui_manager, input_file)
     
     # Save vendor summary
-    save_vendor_summary(devices, oui_manager, input_file)
+    output_handler.save_vendor_summary(devices, oui_manager, input_file)
 
 if __name__ == "__main__":
     main()
