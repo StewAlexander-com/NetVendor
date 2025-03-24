@@ -19,7 +19,6 @@ vendor_summary.txt
 
 # Data and cache files
 *.csv                   # All CSV files
-oui_cache.json         # OUI cache
 failed_lookups.json    # Failed lookups cache
 processed_files.json   # Processed files cache
 oui_database.json      # OUI database
