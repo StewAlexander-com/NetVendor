@@ -120,8 +120,36 @@ def main():
         base_name = os.path.splitext(os.path.basename(input_file))[0]
         output_file = os.path.join('output', f"{base_name}-Devices.csv")
         
+        # Process the input file
+        devices = []
+        with open(input_file, 'r') as f:
+            for line in f:
+                # Skip empty lines and headers
+                if not line.strip() or any(header in line for header in ["Mac Address", "MAC Address", "Internet"]):
+                    continue
+                    
+                words = line.strip().split()
+                if len(words) < 2:
+                    continue
+                    
+                if is_mac_table:
+                    # Format: VLAN MAC_ADDRESS TYPE PORT
+                    if len(words) >= 4 and words[0].isdigit():
+                        devices.append({
+                            'vlan': words[0],
+                            'mac': words[1],
+                            'port': words[-1]
+                        })
+                else:
+                    # Format: IP_ADDRESS MAC_ADDRESS TYPE PORT
+                    if len(words) >= 4 and is_mac_address(words[1]):
+                        devices.append({
+                            'mac': words[1],
+                            'port': words[-1]
+                        })
+        
         # Process the file and generate outputs
-        devices = make_csv(input_file, output_file)
+        make_csv(devices, output_file)
         generate_port_report(devices, is_mac_table)
         create_vendor_distribution(devices)
         save_vendor_summary(devices)
