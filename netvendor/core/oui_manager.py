@@ -23,354 +23,216 @@ import json
 import requests
 import datetime
 import os
-import hashlib
+import re
+import time
 from pathlib import Path
-from typing import Dict, Set, Optional
+from typing import Dict, Set, Optional, List
 from rich import print
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn, DownloadColumn
+from rich.progress import Progress
 
 class OUIManager:
-    """
-    Implements vendor lookups with fallback mechanisms and caching.
-    
-    The manager operates in layers:
-    1. First tries memory cache (instant)
-    2. Then checks disk cache (fast)
-    3. Finally attempts API lookup (slow)
-       - Rotates between services on failure
-       - Implements rate limiting per service
-       - Batches requests when possible
-    
-    Cache management is optimized through:
-    - Lazy saving (accumulates changes)
-    - Periodic cleanup of duplicates
-    - Atomic file operations
-    """
-    
     def __init__(self):
-        """
-        Sets up the caching system and directory structure.
+        """Initialize the OUI manager with pre-seeded cache and API fallback."""
+        # Load pre-seeded Wireshark manufacturers database
+        package_data_dir = Path(__file__).parent.parent / 'data'
+        self.preseeded_cache_file = package_data_dir / 'oui_cache.json'
         
-        Creates a hierarchical structure:
-        output/
-        └── data/
-            ├── oui_cache.json     (vendor lookup cache)
-            ├── failed_lookups.json (known bad MACs)
-            └── processed_files.json (file state tracking)
-        
-        Initializes vendor name normalization mappings to standardize
-        variations in vendor names from different sources.
-        """
-        # Use environment variable for data directory if set
-        data_dir = os.environ.get("NETVENDOR_DATA_DIR")
-        if data_dir:
-            self.output_dir = Path(data_dir)
-            self.data_dir = self.output_dir
-        else:
-            self.output_dir = Path("output")
-            self.data_dir = self.output_dir / "data"
-        
+        # Setup user cache directory
+        self.output_dir = Path("output")
+        self.data_dir = self.output_dir / "data"
         self.data_dir.mkdir(parents=True, exist_ok=True)
         
         self.cache_file = self.data_dir / "oui_cache.json"
         self.failed_lookups_file = self.data_dir / "failed_lookups.json"
-        self.processed_files_file = self.data_dir / "processed_files.json"
         
-        # Initialize empty cache and metadata
+        # Initialize caches
         self.cache = {}
         self.failed_lookups = set()
-        self.processed_files = {}
         
-        # Create empty cache files if they don't exist
-        if not self.cache_file.exists():
-            self.save_cache()
-        if not self.failed_lookups_file.exists():
-            self.save_failed_lookups()
-        if not self.processed_files_file.exists():
-            self.save_processed_files()
+        # Load pre-seeded cache first
+        self.load_preseeded_cache()
         
-        # Load data from files
-        self.load_cache()
-        self.load_failed_lookups()
-        self.load_processed_files()
-
-    def load_cache(self):
-        """Load vendor cache from file."""
+        # Then load user cache (this may override some pre-seeded entries)
         if self.cache_file.exists():
+            self.load_cache()
+            
+        # Load failed lookups
+        if self.failed_lookups_file.exists():
+            self.load_failed_lookups()
+            
+        # API configuration
+        self.api_services = [
+            {
+                'name': 'macvendors',
+                'url': 'https://api.macvendors.com/{oui}',
+                'headers': {},
+                'rate_limit': 2.0,
+                'last_call': 0
+            },
+            {
+                'name': 'maclookup',
+                'url': 'https://api.maclookup.app/v2/macs/{oui}',
+                'headers': {},
+                'rate_limit': 1.0,
+                'last_call': 0
+            }
+        ]
+        self.current_service_index = 0
+
+    def load_preseeded_cache(self):
+        """Load the pre-seeded Wireshark manufacturers database."""
+        if self.preseeded_cache_file.exists():
             try:
-                with open(self.cache_file, 'r') as f:
+                with open(self.preseeded_cache_file, 'r') as f:
                     self.cache = json.load(f)
-            except json.JSONDecodeError:
+                print(f"Loaded {len(self.cache)} entries from pre-seeded OUI cache")
+            except (json.JSONDecodeError, IOError) as e:
+                print(f"Warning: Could not load pre-seeded cache ({e})")
                 self.cache = {}
 
+    def load_cache(self):
+        """Load user's cached vendor lookups."""
+        try:
+            with open(self.cache_file, 'r') as f:
+                user_cache = json.load(f)
+                # Update cache with user lookups (may override pre-seeded entries)
+                self.cache.update(user_cache)
+        except (json.JSONDecodeError, IOError):
+            pass
+
     def save_cache(self):
-        """Save vendor cache to file."""
+        """Save only user-added cache entries."""
         with open(self.cache_file, 'w') as f:
-            json.dump(self.cache, f)
+            json.dump(self.cache, f, indent=2)
 
     def load_failed_lookups(self):
-        """Load failed lookups from file."""
-        if self.failed_lookups_file.exists():
-            try:
-                with open(self.failed_lookups_file, 'r') as f:
-                    self.failed_lookups = set(json.load(f))
-            except json.JSONDecodeError:
-                self.failed_lookups = set()
-
-    def load_processed_files(self):
-        """Load processed files metadata."""
-        if self.processed_files_file.exists():
-            try:
-                with open(self.processed_files_file, 'r') as f:
-                    self.processed_files = json.load(f)
-            except json.JSONDecodeError:
-                self.processed_files = {}
-
-    def get_file_metadata(self, file_path: str) -> dict:
-        """Get metadata for a file."""
-        stats = os.stat(file_path)
-        return {
-            'size': stats.st_size,
-            'mtime': stats.st_mtime,
-            'hash': self._get_file_hash(file_path)
-        }
-
-    def _get_file_hash(self, file_path: str) -> str:
-        """Calculate SHA-256 hash of a file."""
-        sha256_hash = hashlib.sha256()
-        with open(file_path, "rb") as f:
-            for byte_block in iter(lambda: f.read(4096), b""):
-                sha256_hash.update(byte_block)
-        return sha256_hash.hexdigest()
-
-    def load_database(self) -> Dict:
-        """
-        Loads and validates the OUI database, creating it if missing.
-        
-        Handles database corruption by falling back to an empty database
-        if the JSON is invalid. This prevents the need to redownload
-        the entire database if only part of it is corrupted.
-        """
-        if self.oui_file.exists():
-            with open(self.oui_file, 'r') as f:
-                return json.load(f)
-        return {
-            "last_updated": "",
-            "vendors": {vendor: [] for vendor in self.vendors}
-        }
-
-    def save_database(self, data: Dict):
-        """
-        Saves the database with atomic write operations.
-        
-        Uses JSON indentation for human readability and atomic write
-        operations to prevent corruption if the script is interrupted
-        during a save operation.
-        """
-        with open(self.oui_file, 'w') as f:
-            json.dump(data, f, indent=4)
-
-    def update_database(self) -> bool:
-        """
-        Updates the OUI database with progress tracking and error handling.
-        
-        Process:
-        1. Downloads IEEE database in chunks to handle large file
-        2. Processes vendors in parallel with progress tracking
-        3. Merges new data with existing entries
-        4. Updates timestamps and saves atomically
-        
-        Implements retry logic and reports detailed statistics about
-        the update process.
-        """
-        print("\n[yellow]Updating OUI database from IEEE...[/yellow]")
-        
+        """Load previously failed lookups."""
         try:
-            # Create progress for download
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                BarColumn(),
-                DownloadColumn(),
-                TimeElapsedColumn(),
-                TimeRemainingColumn(),
-            ) as progress:
-                # Download task
-                download_task = progress.add_task("[cyan]Downloading IEEE OUI database...", total=None)
-                
-                # Download the IEEE OUI database
-                url = "http://standards-oui.ieee.org/oui/oui.txt"
-                response = requests.get(url, stream=True)
-                response.raise_for_status()
-                
-                # Mark download as complete
-                progress.update(download_task, completed=True)
-                
-                # Process vendors task
-                database = self.load_database()
-                content = response.text.split('\n')
-                
-                # Create a new progress bar for processing vendors
-                vendor_task = progress.add_task(
-                    "[cyan]Processing vendor OUIs...", 
-                    total=len(self.vendors)
-                )
-                
-                # Store statistics for reporting
-                stats = {}
-                
-                # Process each vendor
-                for vendor_key, search_names in self.vendors.items():
-                    progress.update(vendor_task, description=f"[cyan]Processing {vendor_key} OUIs...")
-                    new_ouis = set()
-                    
-                    # Create a progress bar for lines processing
-                    lines_task = progress.add_task(
-                        f"[blue]Scanning for {vendor_key}...",
-                        total=len(content)
-                    )
-                    
-                    # Search for each vendor name variant
-                    for line_num, line in enumerate(content):
-                        if any(name.upper() in line.upper() for name in search_names):
-                            if '(hex)' in line:
-                                oui = line.split('(hex)')[0].strip().replace('-', '').lower()
-                                oui = f"{oui[:4]}.{oui[4:]}"
-                                new_ouis.add(oui)
-                        progress.update(lines_task, completed=line_num + 1)
-                    
-                    # Update database with new OUIs
-                    existing_ouis = set(database["vendors"].get(vendor_key, []))
-                    updated_ouis = sorted(existing_ouis.union(new_ouis))
-                    
-                    # Store statistics
-                    stats[vendor_key] = {
-                        "existing": len(existing_ouis),
-                        "new": len(new_ouis - existing_ouis),
-                        "total": len(updated_ouis)
-                    }
-                    
-                    database["vendors"][vendor_key] = updated_ouis
-                    
-                    # Complete the vendor task step
-                    progress.update(vendor_task, advance=1)
-                    
-                    # Remove the lines task as we're done with it
-                    progress.remove_task(lines_task)
-                
-                # Update timestamp
-                database["last_updated"] = datetime.datetime.now().isoformat()
-                
-                # Add saving task
-                save_task = progress.add_task("[cyan]Saving updated database...", total=None)
-                self.save_database(database)
-                progress.update(save_task, completed=True)
-            
-            # Print summary of updates
-            print("\n[green]OUI database update completed successfully![/green]")
-            print("\n[yellow]Update Summary:[/yellow]")
-            for vendor, stat in stats.items():
-                print(f"[cyan]{vendor}:[/cyan]")
-                print(f"  • Previous OUIs: {stat['existing']}")
-                print(f"  • New OUIs found: {stat['new']}")
-                print(f"  • Total OUIs: {stat['total']}")
-                if stat['new'] > 0:
-                    print(f"  • [green]Added {stat['new']} new OUIs![/green]")
-                print()
-            
-            return True
-            
-        except Exception as e:
-            print(f"\n[red]Error updating OUI database: {e}[/red]")
-            return False
-
-    def check_update_needed(self) -> bool:
-        """
-        Determines if database update is needed based on age and completeness.
-        
-        Checks:
-        1. Time since last update (warns if >30 days)
-        2. Current OUI counts per vendor
-        3. Database existence and validity
-        
-        Provides detailed status report before prompting for update.
-        """
-        database = self.load_database()
-        last_updated = database.get("last_updated", "Never")
-        
-        if last_updated != "Never":
-            try:
-                last_update = datetime.datetime.fromisoformat(last_updated)
-                last_update_str = last_update.strftime("%Y-%m-%d %H:%M:%S")
-                
-                # Calculate days since last update
-                days_since_update = (datetime.datetime.now() - last_update).days
-                if days_since_update > 30:
-                    print(f"\n[yellow]Warning: OUI database is over {days_since_update} days old[/yellow]")
-            except:
-                last_update_str = last_updated
-        else:
-            last_update_str = "Never"
-            print("\n[yellow]Warning: OUI database has never been updated[/yellow]")
-
-        print(f"\n[yellow]OUI database was last updated: [cyan]{last_update_str}[/cyan][/yellow]")
-        
-        # Show current OUI counts
-        print("\n[yellow]Current OUI database status:[/yellow]")
-        for vendor in self.vendors:
-            oui_count = len(database["vendors"].get(vendor, []))
-            print(f"[cyan]{vendor}:[/cyan] {oui_count} OUIs")
-        
-        response = input("\nWould you like to update the OUI database? (y/N): ").lower()
-        return response == 'y'
-
-    def get_vendor_ouis(self, vendor: str) -> Set[str]:
-        """
-        Retrieves normalized vendor OUIs from the database.
-        
-        Returns a set for O(1) lookup performance when checking
-        multiple MAC addresses against a vendor's OUIs.
-        """
-        ouis = set()
-        for oui, v in self.cache.items():
-            if v.lower() == vendor.lower():
-                ouis.add(oui)
-        return ouis
-
-    def has_file_changed(self, file_path: str) -> bool:
-        """Check if a file has changed since last processing."""
-        if file_path not in self.processed_files:
-            return True
-        current_metadata = self.get_file_metadata(file_path)
-        stored_metadata = self.processed_files[file_path]
-        return (
-            current_metadata['size'] != stored_metadata['size'] or
-            current_metadata['mtime'] != stored_metadata['mtime'] or
-            current_metadata['hash'] != stored_metadata['hash']
-        )
-
-    def get_vendor(self, mac: str) -> Optional[str]:
-        """Get vendor for a MAC address."""
-        if mac in self.failed_lookups:
-            return None
-        oui = mac[:6].upper()
-        vendor = self.cache.get(oui)
-        if vendor is None:
-            self.failed_lookups.add(mac)
-            self.save_failed_lookups()
-        return vendor
+            with open(self.failed_lookups_file, 'r') as f:
+                self.failed_lookups = set(json.load(f))
+        except (json.JSONDecodeError, IOError):
+            self.failed_lookups = set()
 
     def save_failed_lookups(self):
-        """Save failed lookups to file."""
+        """Save failed lookups."""
         with open(self.failed_lookups_file, 'w') as f:
             json.dump(list(self.failed_lookups), f)
 
-    def update_file_metadata(self, file_path: str):
-        """Update metadata for a processed file."""
-        self.processed_files[file_path] = self.get_file_metadata(file_path)
-        self.save_processed_files()
+    def _normalize_mac(self, mac: str) -> str:
+        """Normalize MAC address format for lookups."""
+        # Remove any separators and convert to uppercase
+        mac = re.sub(r'[.:-]', '', mac.upper())
+        # Keep only first 6 characters (OUI portion)
+        return mac[:6]
 
-    def save_processed_files(self):
-        """Save processed files metadata."""
-        with open(self.processed_files_file, 'w') as f:
-            json.dump(self.processed_files, f) 
+    def _rate_limit(self, service):
+        """Implement rate limiting for API calls."""
+        current_time = time.time()
+        time_since_last_call = current_time - service['last_call']
+        if time_since_last_call < service['rate_limit']:
+            sleep_time = service['rate_limit'] - time_since_last_call
+            time.sleep(sleep_time)
+        service['last_call'] = time.time()
+
+    def get_vendor(self, mac: str) -> str:
+        """
+        Look up vendor for MAC address using cache first, then API.
+        
+        1. Try pre-seeded cache (Wireshark manufacturers database)
+        2. Try user cache (previous API lookups)
+        3. If not found and not previously failed, try API lookup
+        """
+        if not mac:
+            return "Unknown"
+            
+        oui = self._normalize_mac(mac)
+        
+        # Check cache first (includes both pre-seeded and user cache)
+        if oui in self.cache:
+            return self.cache[oui]
+            
+        # Check if this OUI previously failed lookup
+        if oui in self.failed_lookups:
+            return "Unknown"
+
+        # Try API lookup
+        original_service_index = self.current_service_index
+        retries = 0
+        max_retries = len(self.api_services) * 2
+
+        while retries < max_retries:
+            service = self.api_services[self.current_service_index]
+            
+            try:
+                self._rate_limit(service)
+                url = service['url'].format(oui=oui)
+                response = requests.get(url, headers=service['headers'], timeout=5)
+                
+                if response.status_code == 200:
+                    if service['name'] == 'maclookup':
+                        data = response.json()
+                        vendor = data.get('company', 'Unknown')
+                    else:
+                        vendor = response.text.strip()
+
+                    if vendor and vendor != "Unknown":
+                        # Cache the result
+                        self.cache[oui] = vendor
+                        self.save_cache()
+                        return vendor
+                        
+                elif response.status_code == 429:  # Rate limit
+                    service['rate_limit'] *= 1.5  # Increase backoff
+                    
+                elif response.status_code == 404:  # Not found
+                    self.failed_lookups.add(oui)
+                    self.save_failed_lookups()
+                    return "Unknown"
+
+            except (requests.RequestException, json.JSONDecodeError):
+                pass  # Try next service
+
+            self.current_service_index = (self.current_service_index + 1) % len(self.api_services)
+            retries += 1
+
+            if self.current_service_index == original_service_index:
+                time.sleep(1)  # Wait before retry cycle
+
+        # If all retries failed
+        self.failed_lookups.add(oui)
+        self.save_failed_lookups()
+        return "Unknown"
+
+    def batch_lookup_vendors(self, macs: List[str], progress: Progress = None) -> Dict[str, str]:
+        """Process MAC addresses in batch, using cache when available."""
+        results = {}
+        unknown_macs = []
+        
+        # First check cache for all MACs
+        for mac in macs:
+            if not mac:
+                results[mac] = "Unknown"
+                continue
+                
+            oui = self._normalize_mac(mac)
+            if oui in self.cache:
+                results[mac] = self.cache[oui]
+            elif oui in self.failed_lookups:
+                results[mac] = "Unknown"
+            else:
+                unknown_macs.append(mac)
+        
+        # Only create progress task if there are actually unknown MACs to look up
+        if unknown_macs and progress:
+            task_id = progress.add_task(
+                f"[cyan]Looking up vendors for {len(unknown_macs)} MAC addresses...", 
+                total=len(unknown_macs)
+            )
+            
+            # Look up unknown MACs one at a time
+            for mac in unknown_macs:
+                results[mac] = self.get_vendor(mac)
+                if progress:
+                    progress.advance(task_id)
+        
+        return results 
