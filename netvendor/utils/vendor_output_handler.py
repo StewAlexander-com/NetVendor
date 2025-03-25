@@ -41,17 +41,35 @@ def make_csv(device_data: List[Dict[str, str]], output_file: str) -> None:
                 device.get('port', '')
             ])
 
-def generate_port_report(port_data: Dict[str, Dict], output_file: str, is_mac_table: bool = True) -> None:
+def generate_port_report(device_data: List[Dict[str, str]], output_file: str, is_mac_table: bool = True) -> None:
     """
     Generate a CSV report with port-based device information.
     
     Args:
-        port_data (Dict[str, Dict]): Dictionary of port information
+        device_data (List[Dict[str, str]]): List of device dictionaries
         output_file (str): Path to output CSV file
         is_mac_table (bool): Whether the data is from a MAC table
     """
-    if not port_data:
-        port_data = {}
+    if not device_data:
+        device_data = []
+        
+    # Group devices by port
+    port_data = {}
+    for device in device_data:
+        port = device.get('port', '')
+        if port not in port_data:
+            port_data[port] = {
+                'total_devices': 0,
+                'vlans': set(),
+                'vendors': set(),
+                'devices': []
+            }
+        
+        port_info = port_data[port]
+        port_info['total_devices'] += 1
+        port_info['vlans'].add(device.get('vlan', ''))
+        port_info['vendors'].add(device.get('vendor', 'Unknown'))
+        port_info['devices'].append(device)
         
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -63,10 +81,10 @@ def generate_port_report(port_data: Dict[str, Dict], output_file: str, is_mac_ta
         for port, info in port_data.items():
             writer.writerow([
                 port,
-                info.get('total_devices', 0),
-                ','.join(sorted(info.get('vlans', set()))),
-                ','.join(sorted(info.get('vendors', set()))),
-                len(info.get('devices', []))
+                info['total_devices'],
+                ','.join(sorted(info['vlans'])),
+                ','.join(sorted(info['vendors'])),
+                len(info['devices'])
             ])
 
 def create_vendor_distribution(device_data: List[Dict[str, str]], output_file: str) -> None:
