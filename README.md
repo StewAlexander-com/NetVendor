@@ -37,8 +37,14 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
 
 ### How It Works
 1. **Device Discovery**
-   - Downloads the latest IEEE OUI database
-   - Identifies devices from major vendors (Apple, Cisco, Dell, HP, Mitel)
+   - Uses pre-seeded Wireshark manufacturers database (53,000+ entries)
+   - Multi-layered vendor lookup strategy:
+     1. First tries pre-seeded cache (instant)
+     2. Then checks user's local cache (fast)
+     3. Finally attempts API lookup (if needed)
+        - Rotates between multiple vendor lookup services
+        - Implements rate limiting and exponential backoff
+        - Caches successful lookups for future use
    - Shows real-time progress for each operation
 
 2. **Data Organization**
@@ -239,12 +245,16 @@ NetVendor/
 ## Project Status
 
 ### Latest Updates (March 2025)
+- Enhanced vendor lookup system [2f8e6e7]:
+  - Added multi-layered lookup strategy with pre-seeded cache
+  - Improved MAC address normalization for better matches
+  - Added API fallback with rate limiting and caching
 - Refactored codebase for better maintainability [72fa9f4]:
   - Modularized output handling into separate module
   - Added comprehensive unit tests
   - Improved code organization and documentation
 - Enhanced OUI cache management [31e53ed]:
-  - Pre-seeded OUI cache from Wireshark's database
+  - Pre-seeded OUI cache from Wireshark's database (53,000+ entries)
   - Added standalone update-oui-cache utility
   - Improved cache update reliability using system curl
 - Improved port analysis capabilities [1c4de02]:
