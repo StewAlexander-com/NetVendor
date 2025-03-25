@@ -77,4 +77,53 @@ def parse_port_info(line: str) -> str:
         int(port)
         return port
     except ValueError:
-        return None 
+        return None
+
+def main():
+    """
+    Main entry point for the NetVendor package.
+    """
+    # Check if required modules are installed
+    check_dependencies()
+    
+    # Check if input file is provided
+    if len(sys.argv) != 2:
+        console.print("[bold red]Error:[/bold red] Please provide an input file.")
+        console.print("Usage: netvendor <input_file>")
+        sys.exit(1)
+    
+    input_file = sys.argv[1]
+    
+    # Check if input file exists
+    if not os.path.exists(input_file):
+        console.print(f"[bold red]Error:[/bold red] Input file '{input_file}' not found.")
+        sys.exit(1)
+    
+    # Process the input file
+    try:
+        # Determine if the input is a MAC address table
+        with open(input_file, 'r') as f:
+            first_lines = [next(f) for _ in range(5)]
+            is_mac_table = any(is_mac_address_table(line) for line in first_lines)
+        
+        from netvendor.utils.vendor_output_handler import (
+            make_csv,
+            generate_port_report,
+            create_vendor_distribution,
+            save_vendor_summary
+        )
+        
+        # Process the file and generate outputs
+        devices = make_csv(input_file)
+        generate_port_report(devices, is_mac_table)
+        create_vendor_distribution(devices)
+        save_vendor_summary(devices)
+        
+        console.print("[bold green]Processing complete![/bold green]")
+        
+    except Exception as e:
+        console.print(f"[bold red]Error processing file:[/bold red] {str(e)}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main() 
