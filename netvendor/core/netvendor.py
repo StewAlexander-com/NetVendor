@@ -165,7 +165,7 @@ def main():
         with open(input_file, 'r') as f:
             for line in f:
                 # Skip empty lines and headers
-                if not line.strip() or any(header in line for header in ["Mac Address", "MAC Address", "Internet"]):
+                if not line.strip() or any(header in line for header in ["Mac Address", "MAC Address"]):
                     continue
                     
                 words = line.strip().split()
