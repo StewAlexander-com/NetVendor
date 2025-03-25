@@ -7,6 +7,12 @@ import sys
 import json
 from rich.console import Console
 from .oui_manager import OUIManager
+from ..utils import (
+    make_csv,
+    generate_port_report,
+    create_vendor_distribution,
+    save_vendor_summary
+)
 
 console = Console()
 
@@ -139,80 +145,54 @@ def main():
     console.print(f"Loaded OUI cache with {len(oui_manager.cache)} entries")
     
     # Process the input file
-    try:
-        # Determine if the input is a MAC address table
-        with open(input_file, 'r') as f:
-            first_lines = [next(f) for _ in range(5)]
-            is_mac_table = any(is_mac_address_table(line) for line in first_lines)
+    devices = {}
+    line_count = 0
+    port_count = 0
+    
+    with open(input_file, 'r') as f:
+        first_line = f.readline().strip()
+        is_arp_table = "Internet" in first_line
+        is_mac_table = not is_arp_table
         
-        console.print(f"File type: {'MAC table' if is_mac_table else 'IP ARP table'}")
+        # Determine which word contains the MAC address based on table type
+        mac_word = 4 if is_arp_table else 2  # MAC is 4th word in ARP, 2nd in MAC table
         
-        from netvendor.utils.vendor_output_handler import (
-            make_csv,
-            generate_port_report,
-            create_vendor_distribution,
-            save_vendor_summary
-        )
+        f.seek(0)  # Reset to start of file
         
-        # Create output directory if it doesn't exist
-        os.makedirs('output', exist_ok=True)
-        
-        # Generate output file names
-        base_name = os.path.splitext(os.path.basename(input_file))[0]
-        devices_csv = os.path.join('output', f"{base_name}-Devices.csv")
-        ports_csv = os.path.join('output', f"{base_name}-Ports.csv")
-        vendor_dist = os.path.join('output', "vendor_distribution.html")
-        vendor_summary = os.path.join('output', "vendor_summary.txt")
-        
-        # Process the input file
-        devices = []
-        with open(input_file, 'r') as f:
-            for line in f:
-                # Skip empty lines and headers
-                if not line.strip() or any(header in line for header in ["Mac Address", "MAC Address"]):
-                    continue
-                    
-                words = line.strip().split()
-                if len(words) < 2:
-                    continue
-                    
-                if is_mac_table:
-                    # Format: VLAN MAC_ADDRESS TYPE PORT
-                    if len(words) >= 4 and words[0].isdigit():
-                        mac = words[1]
-                        vendor = oui_manager.get_vendor(mac) or "Unknown"
-                        devices.append({
-                            'vlan': words[0],
-                            'mac': mac,
-                            'vendor': vendor,
-                            'port': words[-1]
-                        })
-                else:
-                    # Format: Internet IP_ADDRESS AGE MAC_ADDRESS ARPA PORT
-                    if len(words) >= 6 and words[0] == "Internet" and is_mac_address(words[3]):
-                        mac = words[3]
-                        vlan = words[-1].replace('Vlan', '')
-                        vendor = oui_manager.get_vendor(mac) or "Unknown"
-                        devices.append({
-                            'mac': mac,
-                            'vendor': vendor,
-                            'port': words[-1],
-                            'vlan': vlan
-                        })
-        
-        console.print(f"Found {len(devices)} devices")
-        
-        # Process the file and generate outputs
-        make_csv(devices, devices_csv)
-        generate_port_report(devices, ports_csv, is_mac_table)
-        create_vendor_distribution(devices, vendor_dist)
-        save_vendor_summary(devices, vendor_summary)
-        
-        console.print("[bold green]Processing complete![/bold green]")
-        
-    except Exception as e:
-        console.print(f"[bold red]Error processing file:[/bold red] {str(e)}")
-        sys.exit(1)
+        for line in f:
+            line_count += 1
+            words = line.strip().split()
+            if len(words) >= mac_word:
+                mac = words[mac_word - 1].lower()
+                if is_mac_address(mac):
+                    if is_arp_table:
+                        # Extract VLAN from "VlanXXX" format
+                        vlan = words[-1].replace('Vlan', '') if 'Vlan' in words[-1] else 'N/A'
+                        port = None  # ARP tables don't have port information
+                    else:
+                        vlan = words[0] if is_mac_address_table(line) else 'N/A'
+                        port = parse_port_info(line)
+                        if port:
+                            port_count += 1
+                    devices[mac] = {'vlan': vlan, 'port': port if port else 'N/A'}
+    
+    console.print(f"\nProcessed {line_count} lines")
+    if is_mac_table:
+        console.print(f"Found {port_count} port entries")
+        console.print(f"Found {len(set(d['port'] for d in devices.values() if d['port'] != 'N/A'))} unique ports")
+    
+    # Generate reports
+    make_csv(input_file, devices, oui_manager)
+    
+    # Only generate port report for MAC address tables
+    if is_mac_table:
+        generate_port_report(input_file, devices, oui_manager, is_mac_table)
+    
+    # Create vendor distribution visualization
+    create_vendor_distribution(devices, oui_manager, input_file)
+    
+    # Save vendor summary
+    save_vendor_summary(devices, oui_manager, input_file)
 
 if __name__ == "__main__":
     main() 
