@@ -132,6 +132,7 @@ def main():
     
     # Load OUI cache
     oui_cache = load_oui_cache()
+    console.print(f"Loaded OUI cache with {len(oui_cache)} entries")
     
     # Process the input file
     try:
@@ -139,6 +140,8 @@ def main():
         with open(input_file, 'r') as f:
             first_lines = [next(f) for _ in range(5)]
             is_mac_table = any(is_mac_address_table(line) for line in first_lines)
+        
+        console.print(f"File type: {'MAC table' if is_mac_table else 'IP ARP table'}")
         
         from netvendor.utils.vendor_output_handler import (
             make_csv,
@@ -190,6 +193,8 @@ def main():
                             'port': words[-1],
                             'vlan': vlan
                         })
+        
+        console.print(f"Found {len(devices)} devices")
         
         # Process the file and generate outputs
         make_csv(devices, devices_csv)
