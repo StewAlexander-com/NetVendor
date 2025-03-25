@@ -113,8 +113,15 @@ def main():
             save_vendor_summary
         )
         
+        # Create output directory if it doesn't exist
+        os.makedirs('output', exist_ok=True)
+        
+        # Generate output file name
+        base_name = os.path.splitext(os.path.basename(input_file))[0]
+        output_file = os.path.join('output', f"{base_name}-Devices.csv")
+        
         # Process the file and generate outputs
-        devices = make_csv(input_file)
+        devices = make_csv(input_file, output_file)
         generate_port_report(devices, is_mac_table)
         create_vendor_distribution(devices)
         save_vendor_summary(devices)
