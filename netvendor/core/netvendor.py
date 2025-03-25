@@ -107,8 +107,11 @@ def lookup_vendor(mac: str, oui_cache: dict) -> str:
     # Get OUI (first 6 characters)
     oui = mac[:6]
     
+    # Format OUI with colons for lookup
+    oui_formatted = ':'.join([oui[i:i+2] for i in range(0, 6, 2)])
+    
     # Look up vendor
-    return oui_cache.get(oui, "Unknown")
+    return oui_cache.get(oui_formatted, "Unknown")
 
 def main():
     """
