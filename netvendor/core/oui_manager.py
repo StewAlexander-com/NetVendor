@@ -122,8 +122,9 @@ class OUIManager:
         """Normalize MAC address format for lookups."""
         # Remove any separators and convert to uppercase
         mac = re.sub(r'[.:-]', '', mac.upper())
-        # Keep only first 6 characters (OUI portion)
-        return mac[:6]
+        # Keep only first 6 characters (OUI portion) and format with colons
+        oui = mac[:6]
+        return f"{oui[:2]}:{oui[2:4]}:{oui[4:]}"
 
     def _rate_limit(self, service):
         """Implement rate limiting for API calls."""
