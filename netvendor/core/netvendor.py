@@ -4,6 +4,7 @@ Core functionality for NetVendor package.
 
 import os
 import sys
+import json
 from rich.console import Console
 
 console = Console()
@@ -79,6 +80,36 @@ def parse_port_info(line: str) -> str:
     except ValueError:
         return None
 
+def load_oui_cache() -> dict:
+    """
+    Load the OUI cache from the package data directory.
+    """
+    try:
+        cache_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'oui_cache.json')
+        with open(cache_file, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        console.print(f"[bold red]Warning:[/bold red] Could not load OUI cache: {str(e)}")
+        return {}
+
+def lookup_vendor(mac: str, oui_cache: dict) -> str:
+    """
+    Look up a vendor from a MAC address using the OUI cache.
+    """
+    if not mac:
+        return "Unknown"
+        
+    # Normalize MAC address
+    mac = mac.lower().replace(':', '').replace('.', '').replace('-', '')
+    if len(mac) < 6:
+        return "Unknown"
+        
+    # Get OUI (first 6 characters)
+    oui = mac[:6]
+    
+    # Look up vendor
+    return oui_cache.get(oui, "Unknown")
+
 def main():
     """
     Main entry point for the NetVendor package.
@@ -98,6 +129,9 @@ def main():
     if not os.path.exists(input_file):
         console.print(f"[bold red]Error:[/bold red] Input file '{input_file}' not found.")
         sys.exit(1)
+    
+    # Load OUI cache
+    oui_cache = load_oui_cache()
     
     # Process the input file
     try:
@@ -138,17 +172,21 @@ def main():
                 if is_mac_table:
                     # Format: VLAN MAC_ADDRESS TYPE PORT
                     if len(words) >= 4 and words[0].isdigit():
+                        mac = words[1]
                         devices.append({
                             'vlan': words[0],
-                            'mac': words[1],
+                            'mac': mac,
+                            'vendor': lookup_vendor(mac, oui_cache),
                             'port': words[-1]
                         })
                 else:
                     # Format: Internet IP_ADDRESS AGE MAC_ADDRESS ARPA PORT
                     if len(words) >= 6 and words[0] == "Internet" and is_mac_address(words[3]):
+                        mac = words[3]
                         vlan = words[-1].replace('Vlan', '')
                         devices.append({
-                            'mac': words[3],
+                            'mac': mac,
+                            'vendor': lookup_vendor(mac, oui_cache),
                             'port': words[-1],
                             'vlan': vlan
                         })
