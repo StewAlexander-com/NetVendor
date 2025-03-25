@@ -116,9 +116,12 @@ def main():
         # Create output directory if it doesn't exist
         os.makedirs('output', exist_ok=True)
         
-        # Generate output file name
+        # Generate output file names
         base_name = os.path.splitext(os.path.basename(input_file))[0]
-        output_file = os.path.join('output', f"{base_name}-Devices.csv")
+        devices_csv = os.path.join('output', f"{base_name}-Devices.csv")
+        ports_csv = os.path.join('output', f"{base_name}-Ports.csv")
+        vendor_dist = os.path.join('output', "vendor_distribution.html")
+        vendor_summary = os.path.join('output', "vendor_summary.txt")
         
         # Process the input file
         devices = []
@@ -149,10 +152,10 @@ def main():
                         })
         
         # Process the file and generate outputs
-        make_csv(devices, output_file)
-        generate_port_report(devices, is_mac_table)
-        create_vendor_distribution(devices)
-        save_vendor_summary(devices)
+        make_csv(devices, devices_csv)
+        generate_port_report(devices, ports_csv, is_mac_table)
+        create_vendor_distribution(devices, vendor_dist)
+        save_vendor_summary(devices, vendor_summary)
         
         console.print("[bold green]Processing complete![/bold green]")
         
