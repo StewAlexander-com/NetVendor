@@ -6,6 +6,7 @@ import os
 import sys
 import json
 from rich.console import Console
+from .oui_manager import OUIManager
 
 console = Console()
 
@@ -133,9 +134,9 @@ def main():
         console.print(f"[bold red]Error:[/bold red] Input file '{input_file}' not found.")
         sys.exit(1)
     
-    # Load OUI cache
-    oui_cache = load_oui_cache()
-    console.print(f"Loaded OUI cache with {len(oui_cache)} entries")
+    # Initialize OUI manager
+    oui_manager = OUIManager()
+    console.print(f"Loaded OUI cache with {len(oui_manager.cache)} entries")
     
     # Process the input file
     try:
@@ -179,10 +180,11 @@ def main():
                     # Format: VLAN MAC_ADDRESS TYPE PORT
                     if len(words) >= 4 and words[0].isdigit():
                         mac = words[1]
+                        vendor = oui_manager.get_vendor(mac) or "Unknown"
                         devices.append({
                             'vlan': words[0],
                             'mac': mac,
-                            'vendor': lookup_vendor(mac, oui_cache),
+                            'vendor': vendor,
                             'port': words[-1]
                         })
                 else:
@@ -190,9 +192,10 @@ def main():
                     if len(words) >= 6 and words[0] == "Internet" and is_mac_address(words[3]):
                         mac = words[3]
                         vlan = words[-1].replace('Vlan', '')
+                        vendor = oui_manager.get_vendor(mac) or "Unknown"
                         devices.append({
                             'mac': mac,
-                            'vendor': lookup_vendor(mac, oui_cache),
+                            'vendor': vendor,
                             'port': words[-1],
                             'vlan': vlan
                         })
