@@ -144,11 +144,13 @@ def main():
                             'port': words[-1]
                         })
                 else:
-                    # Format: IP_ADDRESS MAC_ADDRESS TYPE PORT
-                    if len(words) >= 4 and is_mac_address(words[1]):
+                    # Format: Internet IP_ADDRESS AGE MAC_ADDRESS ARPA PORT
+                    if len(words) >= 6 and words[0] == "Internet" and is_mac_address(words[3]):
+                        vlan = words[-1].replace('Vlan', '')
                         devices.append({
-                            'mac': words[1],
-                            'port': words[-1]
+                            'mac': words[3],
+                            'port': words[-1],
+                            'vlan': vlan
                         })
         
         # Process the file and generate outputs
