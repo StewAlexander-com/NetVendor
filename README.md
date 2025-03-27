@@ -6,7 +6,7 @@
 NetVendor is a Python tool designed specifically for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of all devices on their network. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network routers and switches to provide detailed insights into your network's composition.
 
 ## Quick Navigation
-- 🚀 [Getting Started](#getting-started) - Installatioto analyze and visualize the vendor distribution of networking devices (routers and switches) in their infrastructure. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network devices to provide detailed insights into your network's composin and setup
+- 🚀 [Getting Started](#getting-started) - This app processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network devices to provide detailed insights into your network's compoistion and setup
 - 📋 [Features](#features) - What NetVendor can do
 - 📖 [Usage Guide](#usage) - How to use the tool
 - 📥 [Input/Output](#input) - File formats and results
@@ -77,13 +77,13 @@ NetVendor is designed for:
 
 ### Prerequisites
 - Working internet connection (for IEEE OUI database updates)
-- Output from network devices (routers and switches) containing MAC address tables or ARP data
+- Input file containing MAC addresses from network devices (routers and switches)
 - Python 3.6 or higher
 - Required Python packages:
-  - requests (for IEEE OUI database lookups)
-  - plotly (for interactive visualizations)
-  - rich (for console output formatting)
-  - tqdm (for progress tracking)
+  - requests
+  - plotly
+  - rich
+  - tqdm
 
 ### Installation
 1. Clone the repository:
@@ -104,14 +104,6 @@ Run the script with your network device output file:
 ```bash
 netvendor input_file.txt
 ```
-
-The tool will:
-1. Process the MAC addresses or ARP data from your network devices
-2. Identify vendors using the IEEE OUI database
-3. Generate comprehensive reports and visualizations
-4. Create an interactive dashboard showing vendor distribution
-5. Provide detailed port analysis and VLAN insights
-6. Output all results to the `output` directory
 
 ### Input File Format
 The tool accepts output from common network device commands:
