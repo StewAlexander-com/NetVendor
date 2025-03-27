@@ -3,7 +3,7 @@
 ## Introduction
 *What vendors are lurking on your network? This software figures this out!*
 
-NetVendor is a Python tool designed specifically for network administrators to analyze and visualize the vendor distribution of networking devices (routers and switches) in their infrastructure. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network devices to provide detailed insights into your network's composition.
+NetVendor is a Python tool designed specifically for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of networking devices (routers and switches) in their infrastructure. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network devices to provide detailed insights into your network's composition.
 
 ## Quick Navigation
 - 🚀 [Getting Started](#getting-started) - Installation and setup
@@ -13,18 +13,20 @@ NetVendor is a Python tool designed specifically for network administrators to a
 - 📈 [Project Status](#project-status) - Updates and future plans
 
 ## Features
-- Parses MAC address tables and ARP tables from Cisco routers and switches
-- Identifies networking device vendors using MAC address OUI (Organizationally Unique Identifier) lookups
-- Generates detailed reports and visualizations specifically tailored for network administrators
-- Supports multiple input formats from common network devices:
-  - Cisco IOS/IOS-XE show mac address-table
-  - Cisco NX-OS show mac address-table
-  - Cisco IOS/IOS-XE show ip arp
-  - HP/Aruba show mac-address
-  - Generic MAC address lists from other network devices
-- Pre-seeded OUI database from Wireshark's manufacturers database
-- Interactive HTML visualizations of vendor and VLAN distributions
-- CSV exports for detailed device information
+- Parse MAC address tables from network devices (routers and switches)
+- Identify device vendors using IEEE OUI database
+- Generate comprehensive reports and visualizations
+- Support for multiple network device output formats
+- Real-time progress tracking
+- Interactive HTML dashboard
+- Detailed port analysis for network troubleshooting
+- VLAN distribution analysis
+- Vendor-specific network insights
+- Network security assessment capabilities
+- Asset inventory management
+- Network topology mapping
+- Historical data tracking
+- Integration with network management systems
 
 ### Why Use NetVendor?
 - **Network Security**: Network administrators can quickly identify unauthorized or unexpected devices on their network
@@ -37,34 +39,39 @@ NetVendor is a Python tool designed specifically for network administrators to a
 
 ### How It Works
 1. **Device Discovery**
-   - Uses pre-seeded Wireshark manufacturers database (53,000+ entries)
-   - Multi-layered vendor lookup strategy:
-     1. First tries pre-seeded cache (instant)
-     2. Then checks user's local cache (fast)
-     3. Finally attempts API lookup (if needed)
-        - Rotates between multiple vendor lookup services
-        - Implements rate limiting and exponential backoff
-        - Caches successful lookups for future use
-   - Shows real-time progress for each operation
+   - Processes MAC addresses from network devices
+   - Identifies vendors using IEEE OUI database
+   - Maps devices to network segments
 
 2. **Data Organization**
-   - Creates vendor-specific device lists in text format
-   - Converts all results to CSV for spreadsheet analysis
-   - Organizes files in a clean directory structure
+   - Groups devices by vendor
+   - Tracks VLAN assignments
+   - Maps port connections
+   - Analyzes network topology
 
 3. **Visualization**
-   - Interactive dashboard with multiple views:
-     - Vendor distribution pie chart with detailed hover information
-     - VLAN device count analysis
-     - VLAN distribution per vendor heatmap
-   - Easy navigation between different visualizations
-   - Downloadable charts and data
+   - Creates interactive vendor distribution charts
+   - Generates VLAN analysis graphs
+   - Shows device distribution patterns
+   - Provides network security insights
 
 4. **Analysis**
-   - Identifies hidden VLANs
-   - Maps devices to IP addresses
-   - Tracks network composition changes
-   - Provides plain text summaries for easy sharing
+   - Identifies vendor patterns
+   - Highlights network security concerns
+   - Tracks device distribution
+   - Monitors network changes
+
+## Target Audience
+NetVendor is designed for:
+- Network administrators managing enterprise networks
+- Network engineers responsible for infrastructure
+- Network architects planning network changes
+- Network security teams monitoring device access
+- Cybersecurity professionals assessing network security
+- IT managers overseeing network infrastructure
+- Network operations teams maintaining network health
+- Network consultants providing network analysis
+- Network auditors performing compliance checks
 
 ## Getting Started
 
