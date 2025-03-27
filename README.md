@@ -3,7 +3,7 @@
 ## Introduction
 *What vendors are lurking on your network? This software figures this out!*
 
-NetVendor is a Python tool for analyzing network device vendors from MAC address tables or IP ARP data. It helps network administrators identify and track devices on their network by vendor, providing organized output and visual analytics.
+NetVendor is a Python tool designed specifically for network administrators to analyze and visualize the vendor distribution of networking devices (routers and switches) in their infrastructure. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network devices to provide detailed insights into your network's composition.
 
 ## Quick Navigation
 - 🚀 [Getting Started](#getting-started) - Installation and setup
@@ -13,27 +13,27 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
 - 📈 [Project Status](#project-status) - Updates and future plans
 
 ## Features
-- Parses MAC address tables and ARP tables from various network devices
-- Identifies device vendors using MAC address OUI (Organizationally Unique Identifier) lookups
-- Generates detailed reports and visualizations
-- Supports multiple input formats:
+- Parses MAC address tables and ARP tables from Cisco routers and switches
+- Identifies networking device vendors using MAC address OUI (Organizationally Unique Identifier) lookups
+- Generates detailed reports and visualizations specifically tailored for network administrators
+- Supports multiple input formats from common network devices:
   - Cisco IOS/IOS-XE show mac address-table
   - Cisco NX-OS show mac address-table
   - Cisco IOS/IOS-XE show ip arp
   - HP/Aruba show mac-address
-  - Generic MAC address lists
+  - Generic MAC address lists from other network devices
 - Pre-seeded OUI database from Wireshark's manufacturers database
 - Interactive HTML visualizations of vendor and VLAN distributions
 - CSV exports for detailed device information
 
 ### Why Use NetVendor?
-- **Security**: Understanding what exists in your network is essential for security
-- **Asset Management**: Easy identification of vendor devices
-- **Network Visibility**: Clear visualization of device distribution
-- **Port Analysis**: Detailed insights into port utilization and device connections
-- **Change Tracking**: Benchmark your network to easily see changes
-- **Efficiency**: Fast processing with progress tracking
-- **Organization**: All output files are neatly organized
+- **Network Security**: Network administrators can quickly identify unauthorized or unexpected devices on their network
+- **Asset Management**: Track and manage network infrastructure by vendor
+- **Network Visibility**: Clear visualization of device distribution across VLANs and ports
+- **Port Analysis**: Detailed insights into port utilization and device connections on switches
+- **Change Tracking**: Monitor network infrastructure changes over time
+- **Efficiency**: Fast processing with progress tracking for large network datasets
+- **Organization**: All output files are neatly organized for easy reference
 
 ### How It Works
 1. **Device Discovery**
@@ -70,7 +70,7 @@ NetVendor is a Python tool for analyzing network device vendors from MAC address
 
 ### Prerequisites
 - Working internet connection (for IEEE OUI database updates)
-- Input file containing MAC addresses
+- Input file containing MAC addresses from network devices (routers and switches)
 - Python 3.6 or higher
 - Required Python packages:
   - requests
@@ -93,214 +93,76 @@ pip install -e .
 ## Usage
 
 ### Basic Usage
-Run the script:
+Run the script with your network device output file:
 ```bash
 netvendor input_file.txt
 ```
 
-The script will:
-1. Check for required dependencies
-2. Process devices with progress visualization
-3. Generate an interactive dashboard with multiple visualizations
-4. Create a plain text summary and CSV report
-5. Organize all output files in the `output` directory
+### Input File Format
+The tool accepts output from common network device commands:
 
-### Updating the OUI Cache
-
-The package includes a pre-seeded `oui_cache.json` file containing manufacturer information from Wireshark's database. This cache is automatically installed with the package and used by default. However, if you need to update the cache with the latest manufacturer information, you can run:
-
-```bash
-update-oui-cache
+1. **Cisco IOS/IOS-XE MAC Address Table**
 ```
-
-This will fetch the latest manufacturer database from Wireshark and update your local cache.
-
-### Input File Formats
-The tool supports several input file formats:
-
-1. Cisco IOS/IOS-XE show mac address-table:
-```
-          Mac Address Table
--------------------------------------------
 Vlan    Mac Address       Type        Ports
-----    -----------       --------    -----
- 100    0001.0001.0001    DYNAMIC     Gi1/0/1
+----    -----------      --------    -----
+ 10     0011.2233.4455   DYNAMIC     Gi1/0/1
 ```
 
-2. Cisco NX-OS show mac address-table:
+2. **Cisco NX-OS MAC Address Table**
 ```
-* - primary entry, G - Gateway MAC, (R) - Routed MAC, O - Overlay MAC
-age - seconds since last seen,+ - primary entry using vPC Peer-Link, (T) - True, (E) - Egress
-   VLAN     MAC Address     Type      age     Secure NTFY Ports/SWID.SSID.LID
----------+-----------------+--------+---------+------+----+------------------
-* 100     0001.0001.0001   dynamic  0         F     F  Eth1/1
+VLAN     MAC Address     Type        Port
+----     -----------     --------    -----
+ 10      0011.2233.4455  dynamic     Eth1/1
 ```
 
-3. Cisco IOS/IOS-XE show ip arp:
+3. **Cisco IOS/IOS-XE ARP Table**
 ```
 Protocol  Address          Age (min)  Hardware Addr   Type   Interface
-Internet  192.168.1.1            -   0001.0001.0001  ARPA   GigabitEthernet1/0/1
+Internet  192.168.1.1            -   0011.2233.4455  ARPA   GigabitEthernet1/0/1
 ```
 
-4. HP/Aruba show mac-address:
+4. **HP/Aruba MAC Address Table**
 ```
-MAC Address         VLAN    Type    Port
-----------------    ----    ----    ----
-0001-0001-0001      100     DYNAMIC 1
-```
-
-5. Generic MAC address list:
-```
-0001.0001.0001
-0002.0002.0002
+MAC Address       Port    Type    VLAN
+0011.2233.4455    1       dynamic 10
 ```
 
-### Output
-NetVendor generates five types of output:
+### Output Files
+The tool generates several output files in the `output` directory:
 
-1. **Console Output**
-   - Real-time dependency checks
-   - Progress bars for MAC address processing
-   - Summary table showing vendor distribution
+1. **Device Information CSV**
+   - Lists all discovered network devices
+   - Includes MAC address, vendor, VLAN, and port information
+   - Useful for inventory management and network documentation
 
-2. **Interactive HTML Dashboard** (`output/vendor_distribution.html`)
+2. **Port Report CSV** (for MAC address tables)
+   - Shows port utilization on switches
+   - Lists devices connected to each port
+   - Includes VLAN and vendor information per port
+   - Helps with network troubleshooting and capacity planning
 
-<img src="https://github.com/user-attachments/assets/f6bd4671-81c2-4317-9344-08e6dd65d9ec" 
-     alt="Screenshot 2025-03-18 at 3 29 24 PM" 
-     style="width: 67%; height: auto">
----     
+3. **Vendor Distribution HTML**
+   - Interactive dashboard with multiple visualizations
+   - Vendor distribution pie chart
+   - VLAN analysis charts
+   - Device distribution across network segments
+   - Helps network administrators understand their network composition
 
-<img src="https://github.com/user-attachments/assets/b967ed89-b976-4c70-88f2-88145ce427b6" 
-     alt="Screenshot 2025-03-18 at 3 30 59 PM" 
-     style="width: 67%; height: auto">
- 
-   - Page 1: Vendor Distribution
-     - Large, centered interactive pie chart showing vendor distribution
-     - Comprehensive hover information for each vendor:
-       - Total device count with thousands separators
-       - Percentage of network devices
-       - Number of VLANs the vendor appears in
-       - Most commonly used VLAN
-       - Maximum devices in any single VLAN
-     - Detailed vendor list with device counts
-     - Clean, modern layout with optimized spacing
-   - Page 2: VLAN Analysis
-     - Four well-spaced analysis graphs:
-       - Top VLANs by total device count
-       - Vendor presence across VLANs
-       - VLAN distribution patterns
-       - Device concentration heatmap
-     - Interactive tooltips and zoom capabilities
-     - Responsive layout that adapts to window size
-     - Clear visualization of VLAN relationships
-
-   Features:
-   - Easy navigation between pages via fixed top-right menu
-   - Responsive design that adjusts to browser window size
-   - Optimized spacing and centering for better readability
-   - Professional styling with consistent fonts and colors
-   - Interactive elements for detailed data exploration
-
-4. **Plain Text Summary** (`output/vendor_summary.txt`)
-   - Clean, ASCII-formatted table
-   - Vendor names, device counts, and percentages
-   - Easy to share in emails or documents
-
-5. **CSV Report** (`output/[input-filename]-Devices.csv`)
-   - Detailed device information including:
-     - IP Address
-     - MAC Address
-     - VLAN
-     - Vendor
-
-6. **Port Analysis Report** (`output/[input-filename]-Ports.csv`) - *For MAC address tables only*
-   - Comprehensive port-based analysis including:
-     - Port identifier (e.g., Gi1/0/1, Fa1/0/1)
-     - Total connected devices per port
-     - List of VLANs present on each port
-     - List of vendors present on each port
-     - Detailed device information including:
-       - MAC addresses with vendor names
-       - VLAN assignments per device
-       - Port-to-device mapping for network topology
-     - Useful for:
-       - Identifying heavily utilized ports
-       - Detecting unauthorized devices or VLANs
-       - Planning network segmentation
-       - Troubleshooting connectivity issues
-       - Auditing network access and security
-
-### Output Directory Structure
-```
-NetVendor/
-├── NetVendor.py          # Main application
-├── oui_cache.json        # Cached vendor lookups
-└── output/               # Generated at runtime
-    ├── vendor_distribution.html    # Interactive dashboard
-    ├── vendor_summary.txt          # Plain text summary
-    ├── [input-filename]-Devices.csv  # Detailed device list
-    └── [input-filename]-Ports.csv    # Port analysis (MAC tables only)
-```
+4. **Vendor Summary Text**
+   - Plain text summary of vendor distribution
+   - Quick reference for network documentation
+   - Easy to share with team members
 
 ## Project Status
+NetVendor is actively maintained and regularly updated with new features and improvements. Future plans include:
+- Support for additional network device output formats
+- Enhanced visualization options
+- Network topology mapping
+- Historical data tracking
+- Integration with network management systems
 
-### Latest Updates (March 2025)
-- Enhanced vendor lookup system [2f8e6e7]:
-  - Added multi-layered lookup strategy with pre-seeded cache
-  - Improved MAC address normalization for better matches
-  - Added API fallback with rate limiting and caching
-- Refactored codebase for better maintainability [72fa9f4]:
-  - Modularized output handling into separate module
-  - Added comprehensive unit tests
-  - Improved code organization and documentation
-- Enhanced OUI cache management [31e53ed]:
-  - Pre-seeded OUI cache from Wireshark's database (53,000+ entries)
-  - Added standalone update-oui-cache utility
-  - Improved cache update reliability using system curl
-- Improved port analysis capabilities [1c4de02]:
-  - Detailed port-to-device mapping
-  - VLAN distribution per port
-  - Vendor distribution per port
-  - Comprehensive device details per port
-- Enhanced visualization dashboard:
-  - Interactive vendor distribution pie charts
-  - VLAN analysis graphs with proper spacing
-  - Better navigation between visualization pages
-  - Centered layout with optimized dimensions
-  - Enhanced vendor list formatting
-  - Detailed hover information for all charts
-
-### Future Enhancements
-**High Priority:**
-- Add support for more network device output formats
-- Implement configuration file for customizable settings
-- Add command line arguments for automation
-- Expand test coverage
-
-**Medium Priority:**
-- Add historical data comparison
-- Support for bulk file processing
-- Add network scanning capabilities
-- Add export to additional formats
-
-**Low Priority:**
-- Create web interface for easier use
-- Add detailed vendor statistics
-- Add custom report templates
-- Support for real-time monitoring
-
-### Author
-Created by Stew Alexander (2021)
-
-## Dependencies
-
-- Python 3.8 or higher
-- requests
-- plotly
-- tqdm
-- rich
-- curl (system command for OUI cache updates)
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
-
 This project is licensed under the MIT License - see the LICENSE file for details.
