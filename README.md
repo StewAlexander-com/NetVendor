@@ -77,13 +77,13 @@ NetVendor is designed for:
 
 ### Prerequisites
 - Working internet connection (for IEEE OUI database updates)
-- Input file containing MAC addresses from network devices (routers and switches)
+- Output from network devices (routers and switches) containing MAC address tables or ARP data
 - Python 3.6 or higher
 - Required Python packages:
-  - requests
-  - plotly
-  - rich
-  - tqdm
+  - requests (for IEEE OUI database lookups)
+  - plotly (for interactive visualizations)
+  - rich (for console output formatting)
+  - tqdm (for progress tracking)
 
 ### Installation
 1. Clone the repository:
@@ -104,6 +104,14 @@ Run the script with your network device output file:
 ```bash
 netvendor input_file.txt
 ```
+
+The tool will:
+1. Process the MAC addresses or ARP data from your network devices
+2. Identify vendors using the IEEE OUI database
+3. Generate comprehensive reports and visualizations
+4. Create an interactive dashboard showing vendor distribution
+5. Provide detailed port analysis and VLAN insights
+6. Output all results to the `output` directory
 
 ### Input File Format
 The tool accepts output from common network device commands:
