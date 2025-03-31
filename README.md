@@ -202,17 +202,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Major Updates
-Recent significant changes to NetVendor:
-
-### March 31, 2025
-- Added interactive dashboard visualizations with sample data
-- Improved README with visual examples and better formatting
-- Added Windows-specific runtime commands for PowerShell users
-- Enhanced documentation of pre-seeded cache functionality
-
-### March 27, 2025
-- Clarified tool's scope to analyze all network devices
-- Updated documentation to focus on network administrators
-- Improved Getting Started section with clearer instructions
-- Enhanced Quick Navigation for better user experience
+Key Features by Commit:
+- Interactive dashboard visualizations with sample data [c371673]
+- Windows-specific runtime commands for PowerShell users [9aee20e]
+- Pre-seeded cache with 53,000+ vendor entries [c000646]
+- Enhanced documentation and Quick Navigation [a1e928c]
