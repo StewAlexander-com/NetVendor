@@ -105,6 +105,21 @@ Run the script with your network device output file:
 netvendor input_file.txt
 ```
 
+The tool will:
+1. Process the MAC addresses or ARP data from your network devices
+2. Identify vendors using the IEEE OUI database
+3. Generate comprehensive reports and visualizations
+4. Create an interactive dashboard showing vendor distribution
+5. Provide detailed port analysis and VLAN insights
+6. Output all results to the `output` directory
+
+### Windows Runtime Commands
+```powershell
+$env:PYTHONIOENCODING = "utf-8"
+$env:PYTHONUTF8 = "1"
+python3 -m netvendor MAC-Table.txt
+```
+
 ### Input File Format
 The tool accepts output from common network device commands:
 
