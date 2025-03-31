@@ -201,3 +201,30 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Code Changes
+Major improvements to the NetVendor codebase:
+
+### Core Functionality
+- Implemented efficient MAC address processing with chunk-based file reading [70b4371]
+- Added support for multiple network device output formats (Cisco IOS/IOS-XE, NX-OS, HP/Aruba) [c371673]
+- Enhanced vendor lookup with pre-seeded OUI cache containing 53,000+ entries [c000646]
+- Improved port analysis with detailed VLAN and device tracking [a1e928c]
+
+### Performance & Reliability
+- Added chunk-based file processing for handling large network datasets
+- Implemented file state tracking to skip unchanged files
+- Enhanced error handling and dependency validation
+- Optimized vendor lookups with local caching
+
+### Output Generation
+- Created interactive HTML dashboard with multiple visualizations
+- Added comprehensive port-based device analysis
+- Implemented detailed VLAN distribution tracking
+- Enhanced vendor summary generation with percentage calculations
+
+### Code Architecture
+- Modularized code into core and utility components
+- Added type hints for better code maintainability
+- Implemented dataclasses for structured data handling
+- Enhanced error handling and logging
