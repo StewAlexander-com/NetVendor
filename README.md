@@ -5,7 +5,7 @@
 
 NetVendor is a Python tool designed specifically for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of all devices on their network. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network routers and switches to provide detailed insights into your network's composition.
 
-![NetVendor Overview](docs/images/overview.png)
+<img src="docs/images/overview.png" alt="NetVendor Overview" width="267" style="width: 267px; height: auto;" />
 *NetVendor provides comprehensive network device analysis and visualization*
 
 ## Quick Navigation
@@ -43,7 +43,7 @@ NetVendor is a Python tool designed specifically for network administrators and 
 - **Organization**: All output files are neatly organized for easy reference
 - **Speed & Security**: Most vendor lookups are performed locally using a pre-seeded cache, minimizing external API calls and ensuring fast, secure operation
 
-![Network Security Dashboard](docs/images/security-dashboard.png)
+<img src="docs/images/security-dashboard.png" alt="Network Security Dashboard" width="267" style="width: 267px; height: auto;" />
 *Interactive security dashboard showing device distribution and potential security concerns*
 
 ### How It Works
@@ -180,7 +180,7 @@ The tool generates several output files in the `output` directory:
    - Device distribution across network segments
    - Helps network administrators understand their network composition
 
-![Vendor Distribution Dashboard](docs/images/vendor-dashboard.png)
+<img src="docs/images/vendor-dashboard.png" alt="Vendor Distribution Dashboard" width="267" style="width: 267px; height: auto;" />
 *Interactive vendor distribution dashboard showing device types and network segments*
 
 4. **Vendor Summary Text**
