@@ -114,6 +114,7 @@ The tool will:
 6. Output all results to the `output` directory
 
 ### Windows Runtime Commands
+If you are on Windows please run this script from PowerShell using these commands:
 ```powershell
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUTF8 = "1"
