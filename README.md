@@ -15,6 +15,8 @@ NetVendor is a Python tool designed specifically for network administrators and 
 ## Features
 - Parse MAC address tables from network devices (routers and switches)
 - Identify device vendors using IEEE OUI database
+- Fast local lookups using pre-seeded cache (53,000+ entries)
+- Secure operation with minimal external API calls
 - Generate comprehensive reports and visualizations
 - Support for multiple network device output formats
 - Real-time progress tracking
@@ -36,6 +38,7 @@ NetVendor is a Python tool designed specifically for network administrators and 
 - **Change Tracking**: Monitor network infrastructure changes over time
 - **Efficiency**: Fast processing with progress tracking for large network datasets
 - **Organization**: All output files are neatly organized for easy reference
+- **Speed & Security**: Most vendor lookups are performed locally using a pre-seeded cache, minimizing external API calls and ensuring fast, secure operation
 
 ### How It Works
 1. **Device Discovery**
