@@ -9,10 +9,10 @@ NetVendor is a Python tool designed specifically for network administrators and 
 *NetVendor provides comprehensive network device analysis and visualization*
 
 ## Quick Navigation
-- 🚀 [Getting Started](#getting-started) - This app processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network devices to provide detailed insights into your network's compoistion and setup
+- 🚀 [Getting Started](#getting-started) - Installation and setup instructions
 - 📋 [Features](#features) - What NetVendor can do
 - 📖 [Usage Guide](#usage) - How to use the tool
-- 📥 [Input/Output](#input) - File formats and results
+- 📥 [Input/Output](#input-file-format) - File formats and results
 - 📈 [Project Status](#project-status) - Updates and future plans
 
 ## Features
@@ -201,3 +201,18 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Major Updates
+Recent significant changes to NetVendor:
+
+### March 31, 2025
+- Added interactive dashboard visualizations with sample data
+- Improved README with visual examples and better formatting
+- Added Windows-specific runtime commands for PowerShell users
+- Enhanced documentation of pre-seeded cache functionality
+
+### March 27, 2025
+- Clarified tool's scope to analyze all network devices
+- Updated documentation to focus on network administrators
+- Improved Getting Started section with clearer instructions
+- Enhanced Quick Navigation for better user experience
