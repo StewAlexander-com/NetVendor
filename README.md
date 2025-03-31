@@ -124,11 +124,12 @@ The tool will:
 
 ### Windows Runtime Commands
 If you are on Windows please run this script from PowerShell using these commands:
-```powershell
+
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUTF8 = "1"
 python3 -m netvendor MAC-Table.txt
-```
+
+Please replace `MAC-Table.txt` with the name of your switch or router output file.
 
 ### Input File Format
 The tool accepts output from common network device commands:
