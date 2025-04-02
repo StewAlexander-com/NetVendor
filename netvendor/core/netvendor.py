@@ -148,38 +148,61 @@ def main():
     devices = {}
     line_count = 0
     port_count = 0
+    mac_count = 0
     
     with open(input_file, 'r') as f:
+        # Read first line to determine file type
         first_line = f.readline().strip()
-        is_arp_table = "Internet" in first_line
-        is_mac_table = not is_arp_table
         
-        # Determine which word contains the MAC address based on table type
-        mac_word = 4 if is_arp_table else 2  # MAC is 4th word in ARP, 2nd in MAC table
+        # Check if it's a MAC list file (first line is a MAC address)
+        is_mac_list = is_mac_address(first_line)
+        is_arp_table = not is_mac_list and "Internet" in first_line
+        is_mac_table = not is_mac_list and not is_arp_table
         
-        f.seek(0)  # Reset to start of file
+        # Reset file pointer to start
+        f.seek(0)
         
         for line in f:
+            line = line.strip()
+            if not line:  # Skip empty lines
+                continue
+                
             line_count += 1
-            words = line.strip().split()
-            if len(words) >= mac_word:
-                mac = words[mac_word - 1].lower()
+            
+            if is_mac_list:
+                # For MAC list files, treat each line as a potential MAC address
+                mac = line.lower()
                 if is_mac_address(mac):
-                    if is_arp_table:
-                        # Extract VLAN from "VlanXXX" format
-                        vlan = words[-1].replace('Vlan', '') if 'Vlan' in words[-1] else 'N/A'
-                        port = None  # ARP tables don't have port information
-                    else:
-                        vlan = words[0] if is_mac_address_table(line) else 'N/A'
-                        port = parse_port_info(line)
-                        if port:
-                            port_count += 1
-                    devices[mac] = {'vlan': vlan, 'port': port if port else 'N/A'}
+                    devices[mac] = {'vlan': 'N/A', 'port': 'N/A'}
+                    mac_count += 1
+            else:
+                words = line.split()
+                mac_word = 4 if is_arp_table else 2  # MAC is 4th word in ARP, 2nd in MAC table
+                
+                if len(words) >= mac_word:
+                    mac = words[mac_word - 1].lower()
+                    if is_mac_address(mac):
+                        if is_arp_table:
+                            vlan = words[-1].replace('Vlan', '') if 'Vlan' in words[-1] else 'N/A'
+                            port = None  # ARP tables don't have port information
+                        else:
+                            vlan = words[0] if is_mac_address_table(line) else 'N/A'
+                            port = parse_port_info(line)
+                            if port:
+                                port_count += 1
+                        devices[mac] = {'vlan': vlan, 'port': port if port else 'N/A'}
+                        mac_count += 1
     
+    # Print processing summary
     console.print(f"\nProcessed {line_count} lines")
-    if is_mac_table:
+    if is_mac_list:
+        console.print(f"Found {mac_count} MAC addresses")
+    elif is_mac_table:
         console.print(f"Found {port_count} port entries")
         console.print(f"Found {len(set(d['port'] for d in devices.values() if d['port'] != 'N/A'))} unique ports")
+    
+    # Ensure output directory exists
+    os.makedirs('output', exist_ok=True)
     
     # Generate reports
     make_csv(input_file, devices, oui_manager)
