@@ -1,58 +1,142 @@
-Features:
-- Automatic format detection
-- VLAN extraction from interface field
-- Support for dot-separated MAC addresses
+# NetVendor
+
+## Introduction
+NetVendor is a Python-based network analysis tool designed to help network administrators and security professionals identify and analyze network devices by their MAC addresses. It processes MAC address tables and ARP data from network devices, providing detailed vendor information and network composition analysis.
+
+## Features
+- Processes MAC addresses from various input formats:
+  * Simple MAC address lists
+  * Switch MAC address tables
+  * ARP tables
+- Identifies device vendors using IEEE OUI database
+- Generates detailed reports and visualizations
+- Supports multiple network device output formats
+- Provides VLAN and port analysis
+- Creates interactive HTML dashboards
+- Maintains a local OUI cache for fast lookups
+
+## Installation
+
+### Prerequisites
+- Python 3.6 or higher
+- Required packages:
+  * requests
+  * plotly
+  * rich
+  * tqdm
+
+### Setup
+1. Clone the repository:
+```bash
+git clone https://github.com/StewAlexander-com/NetVendor.git
+cd NetVendor
+```
+
+2. Install the package:
+```bash
+pip install -e .
+```
+
+## Usage
+
+### Basic Command
+```bash
+netvendor input_file.txt
+```
+
+### Windows Usage
+For Windows systems, run from PowerShell:
+```powershell
+$env:PYTHONIOENCODING = "utf-8"
+$env:PYTHONUTF8 = "1"
+python3 -m netvendor input_file.txt
+```
+
+## Input File Format
+The tool supports three main types of input files:
+
+1. **Simple MAC Address List**
+```
+00:11:22:33:44:55
+00:AA:BB:CC:DD:EE
+40:B0:76:12:34:56
+```
+
+2. **MAC Address Tables** (Cisco/HP/Aruba format)
+```
+Vlan    Mac Address       Type        Ports
+----    -----------      --------    -----
+ 10     0011.2233.4455   DYNAMIC     Gi1/0/1
+ 20     00aa.bbcc.ddee   DYNAMIC     Gi1/0/2
+```
+
+3. **ARP Tables**
+```
+Protocol  Address          Age (min)  Hardware Addr   Type   Interface
+Internet  192.168.1.1            -   0011.2233.4455  ARPA   Vlan10
+Internet  192.168.1.2           10   00aa.bbcc.ddee  ARPA   Vlan20
+```
 
 ### Enhanced Format Detection
-NetVendor now features improved file format detection:
-- Automatically identifies file type based on content
-- Handles multiple MAC address formats (colon-separated, dot-separated, no separators)
-- Intelligently extracts VLAN information from different sources:
-  * MAC tables: First column
-  * ARP tables: Interface field (e.g., "Vlan10")
-  * Simple MAC lists: Marked as N/A
-- Preserves port information where available
-- Skips header lines automatically
+- Automatic file type identification
+- Support for multiple MAC address formats:
+  * Colon-separated (00:11:22:33:44:55)
+  * Dot-separated (0011.2233.4455)
+  * No separators (001122334455)
+- Intelligent VLAN extraction:
+  * From MAC table VLAN column
+  * From ARP table interface field
+  * Defaults to "N/A" for simple lists
+- Automatic header detection and skipping
+- Port information preservation where available
 
-### Output Files
-The tool generates several output files in the `output` directory:
+## Output Files
+The tool generates several files in the `output` directory:
 
 1. **Device Information CSV**
-   - Lists all discovered network devices
-   - Includes MAC address, vendor, VLAN, and port information
-   - Useful for inventory management and network documentation
+- Complete device inventory
+- MAC addresses with vendor information
+- VLAN and port details
+- Last seen timestamps
 
-2. **Port Report CSV** (for MAC address tables)
-   - Shows port utilization on switches
-   - Lists devices connected to each port
-   - Includes VLAN and vendor information per port
-   - Helps with network troubleshooting and capacity planning
+2. **Vendor Distribution HTML**
+- Interactive charts
+- Network composition visualization
+- VLAN distribution analysis
+- Device type breakdown
 
-3. **Vendor Distribution HTML**
-   - Interactive dashboard with multiple visualizations
-   - Vendor distribution pie chart
-   - VLAN analysis charts
-   - Device distribution across network segments
-   - Helps network administrators understand their network composition
-
-<img src="docs/images/vendor-dashboard.png" alt="Vendor Distribution Dashboard" width="267" style="width: 267px; height: auto;" />
-*Interactive vendor distribution dashboard showing device types and network segments*
-
-4. **Vendor Summary Text**
-   - Plain text summary of vendor distribution
-   - Quick reference for network documentation
-   - Easy to share with team members
+3. **Vendor Summary Text**
+- Quick reference summary
+- Total device counts by vendor
+- VLAN statistics
+- Port utilization overview
 
 ## Project Status
-NetVendor is actively maintained and regularly updated with new features and improvements. Recent updates include:
-- Enhanced file format detection and processing
-- Improved VLAN extraction across different file types
-- Better handling of various MAC address formats
-- Automatic header detection and skipping
+NetVendor is actively maintained with regular updates:
 
-Future plans include:
-- Support for additional network device output formats
+### Recent Improvements
+- Enhanced file format detection
+- Improved VLAN extraction
+- Better MAC address format handling
+- Automatic header detection
+- Cleaner output presentation
+
+### Upcoming Features
+- Additional device format support
 - Enhanced visualization options
 - Network topology mapping
 - Historical data tracking
-- Integration with network management systems
+- Management system integration
+
+## Contributing
+Contributions are welcome! Please feel free to submit pull requests or open issues for improvements.
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Author
+Stewart Alexander
+
+## Acknowledgments
+- IEEE for OUI database access
+- Open source community for various Python packages
