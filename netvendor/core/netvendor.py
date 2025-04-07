@@ -187,17 +187,20 @@ def main():
         first_line = f.readline().strip()
         second_line = f.readline().strip() if first_line else ""
         
-        # Check file type
+        # Determine file type
         is_mac_list = is_mac_address(first_line)
         is_arp = is_arp_table(first_line) or (second_line and is_arp_table(second_line))
-        is_mac_table = not is_mac_list and not is_arp
+        is_mac_table = not is_mac_list and not is_arp and ("Vlan" in first_line or "VLAN" in first_line)
         
         # Reset to start of file
         f.seek(0)
         
-        # Skip header for ARP table
-        if is_arp:
-            next(f)  # Skip the header line
+        # Skip headers for MAC and ARP tables
+        if is_mac_table:
+            next(f)  # Skip "Vlan Mac Address..." line
+            next(f)  # Skip "---- -----------..." line
+        elif is_arp:
+            next(f)  # Skip "Protocol Address..." line
         
         for line in f:
             line = line.strip()
@@ -207,34 +210,44 @@ def main():
             line_count += 1
             
             if is_mac_list:
+                # Simple MAC list processing
                 mac = line.lower()
                 if is_mac_address(mac):
                     mac_formatted = format_mac_address(mac)
                     if mac_formatted:
                         devices[mac_formatted] = {'vlan': 'N/A', 'port': 'N/A'}
                         mac_count += 1
+                        
             elif is_arp:
-                # Skip the header line
-                if "Protocol" in line:
-                    continue
-                
-                mac_formatted, vlan = process_arp_line(line)
-                if mac_formatted:
-                    devices[mac_formatted] = {'vlan': vlan, 'port': 'N/A'}
-                    mac_count += 1
-            else:
-                # MAC table processing
-                words = line.split()
-                if len(words) >= 2:
-                    mac = words[1]
+                # ARP table processing
+                parts = line.split(None, 5)  # Split into max 6 parts
+                if len(parts) >= 6 and parts[0] == "Internet":
+                    mac = parts[3].strip()  # Hardware address is the 4th field
+                    interface = parts[5].strip()  # Interface is the last field
+                    
                     mac_formatted = format_mac_address(mac)
                     if mac_formatted:
-                        vlan = words[0] if is_mac_address_table(line) else 'N/A'
-                        port = parse_port_info(line)
-                        if port:
-                            port_count += 1
-                        devices[mac_formatted] = {'vlan': vlan, 'port': port if port else 'N/A'}
+                        # Extract VLAN from interface field (e.g., "Vlan59" -> "59")
+                        vlan = interface.replace('Vlan', '') if 'Vlan' in interface else 'N/A'
+                        devices[mac_formatted] = {'vlan': vlan, 'port': 'N/A'}
                         mac_count += 1
+                        
+            else:
+                # MAC table processing
+                parts = line.split(None, 4)  # Split into max 5 parts to preserve spacing
+                if len(parts) >= 4:  # Need at least VLAN, MAC, Type, and Port
+                    try:
+                        vlan = str(int(parts[0]))  # Validate VLAN is a number
+                        mac = parts[1]
+                        port = parts[3]
+                        
+                        mac_formatted = format_mac_address(mac)
+                        if mac_formatted:
+                            devices[mac_formatted] = {'vlan': vlan, 'port': port}
+                            mac_count += 1
+                            port_count += 1
+                    except (ValueError, IndexError):
+                        continue  # Skip invalid lines
     
     # Print processing summary
     console.print(f"\nProcessed {line_count} lines")
