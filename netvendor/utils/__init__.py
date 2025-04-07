@@ -2,6 +2,7 @@
 Utility functions for NetVendor package.
 """
 
+from ..core.oui_manager import OUIManager
 from .vendor_output_handler import (
     make_csv,
     generate_port_report,
@@ -13,5 +14,6 @@ __all__ = [
     'make_csv',
     'generate_port_report',
     'create_vendor_distribution',
-    'save_vendor_summary'
+    'save_vendor_summary',
+    'OUIManager'
 ]

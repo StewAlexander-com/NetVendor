@@ -13,18 +13,34 @@ import csv
 import json
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from typing import Dict, List, Set, Any
+from typing import Dict, List, Set, Any, Union
 from collections import Counter
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
 from pathlib import Path
 from collections import defaultdict
+from ..core.oui_manager import OUIManager  # Import OUIManager from core package
 
 console = Console()
 
-def make_csv(input_file: Path, devices: Dict[str, Dict[str, str]], oui_manager) -> None:
-    """Creates a CSV file with device information."""
-    output_file = Path("output") / f"{input_file.stem}-Devices.csv"
+def make_csv(input_file: Union[Path, str], devices: Dict[str, Dict[str, str]], oui_manager: OUIManager) -> None:
+    """
+    Creates a CSV file with device information.
+    
+    Args:
+        input_file: Path to the input file
+        devices: Dictionary of device information
+        oui_manager: OUI manager instance for vendor lookups
+    """
+    # Ensure output directory exists
+    output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True)
+    
+    # Convert input_file to Path if it's a string
+    if isinstance(input_file, str):
+        input_file = Path(input_file)
+    
+    output_file = output_dir / f"{input_file.stem}-Devices.csv"
     
     with Progress(
         SpinnerColumn(),
