@@ -1,48 +1,113 @@
-"""
-Core functionality for NetVendor package.
-"""
-
 import os
 import sys
-import json
 from rich.console import Console
+from ..utils.vendor_output_handler import make_csv, generate_port_report, create_vendor_distribution, save_vendor_summary
 from .oui_manager import OUIManager
-from ..utils import (
-    make_csv,
-    generate_port_report,
-    create_vendor_distribution,
-    save_vendor_summary
-)
 
 console = Console()
 
-def check_dependencies() -> None:
-    """
-    Validates required modules before script execution to prevent runtime failures.
-    """
-    modules_to_check = ["requests", "plotly", "tqdm", "rich"]
-    
-    for module_name in modules_to_check:
+def check_dependencies():
+    """Check if required modules are installed."""
+    required_modules = ['requests', 'plotly', 'tqdm', 'rich']
+    for module in required_modules:
         try:
-            __import__(module_name)
-            console.print(f"The module '{module_name}' is installed.")
+            __import__(module)
+            console.print(f"The module '{module}' is installed.")
         except ImportError:
-            console.print(f"The module '{module_name}' is not installed, this is required to run NetVendor.")
-            console.print("\n[bold red]NetVendor will now exit[/bold red]")
+            console.print(f"[red]Error: The module '{module}' is not installed.[/red]")
+            console.print(f"Please install it using: pip install {module}")
             sys.exit(1)
 
 def is_mac_address(mac: str) -> bool:
     """
-    Check if a string is a valid MAC address.
+    Check if a string is a valid MAC address in standard format.
+    For MAC address list files only.
+    Supports formats:
+    - 00:11:22:33:44:55
+    - 00-11-22-33-44-55
+    - 001122334455
     """
-    mac = mac.lower().replace(':', '').replace('.', '').replace('-', '')
-    if len(mac) != 12:
+    if not mac:
         return False
+        
+    # Remove all separators and spaces
+    mac_clean = mac.strip().lower().replace(':', '').replace('-', '')
+    
+    # Check length
+    if len(mac_clean) != 12:
+        return False
+        
+    # Check if all characters are valid hex
     try:
-        int(mac, 16)
+        int(mac_clean, 16)
         return True
     except ValueError:
         return False
+
+def is_arp_table_mac(mac: str) -> bool:
+    """
+    Check if a string is a valid MAC address in ARP table format.
+    Handles dot notation format like: D8.C7.C8.14C17B
+    """
+    if not mac:
+        return False
+    
+    # Split by dots and check we have parts
+    parts = mac.strip().split('.')
+    if len(parts) != 4:
+        return False
+    
+    # Join parts and check if it's valid hex
+    mac_clean = ''.join(parts)[:12]  # Take first 12 chars in case of longer format
+    try:
+        int(mac_clean, 16)
+        return True
+    except ValueError:
+        return False
+
+def format_mac_address(mac: str) -> str:
+    """
+    Format a MAC address consistently.
+    Input can be any format, output will be xx:xx:xx:xx:xx:xx
+    """
+    if not mac:
+        return None
+    
+    # Handle dot notation (ARP table format)
+    if '.' in mac:
+        parts = mac.strip().split('.')
+        mac_clean = ''.join(parts)[:12]
+    else:
+        # Handle standard formats
+        mac_clean = mac.strip().lower().replace(':', '').replace('-', '')
+    
+    # Take first 12 characters and format with colons
+    if len(mac_clean) >= 12:
+        mac_clean = mac_clean[:12]
+        return ':'.join([mac_clean[i:i+2] for i in range(0, 12, 2)])
+    return None
+
+def is_arp_table(line: str) -> bool:
+    """
+    Check if a line is from an ARP table.
+    Returns True if the line matches ARP table format.
+    """
+    # Check for header
+    if "Protocol" in line and "Address" in line and "Hardware Addr" in line:
+        return True
+    
+    # Check for data line format
+    parts = line.split(None, 5)  # Split into max 6 parts
+    if len(parts) >= 6:
+        # Check if first field is "Internet"
+        if parts[0] != "Internet":
+            return False
+        
+        # Check if fourth field (hardware address) is in MAC format
+        mac = parts[3].strip()
+        return is_arp_table_mac(mac)
+    
+    return False
 
 def is_mac_address_table(line: str) -> bool:
     """
@@ -68,99 +133,71 @@ def is_mac_address_table(line: str) -> bool:
     return is_mac_address(words[1])
 
 def parse_port_info(line: str) -> str:
-    """
-    Extract port information from a line.
-    """
-    if "Internet" in line and "ARPA" in line:
-        return None
+    """Extract port information from a line."""
     words = line.strip().split()
-    if len(words) < 2:
-        return None
-    port = words[-1]
-    # Check for common port prefixes
-    if any(port.startswith(prefix) for prefix in ['Gi', 'Fa', 'Te', 'Eth']):
-        return port
-    # Check if it's a simple port number
-    try:
-        int(port)
-        return port
-    except ValueError:
-        return None
+    if len(words) >= 4:
+        return words[-1]
+    return None
 
-def load_oui_cache() -> dict:
+def process_arp_line(line: str) -> tuple[str, str]:
     """
-    Load the OUI cache from the package data directory.
+    Process a line from an ARP table and extract MAC address and VLAN.
+    Returns tuple of (formatted_mac, vlan) or (None, None) if invalid.
     """
-    try:
-        cache_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'oui_cache.json')
-        with open(cache_file, 'r') as f:
-            return json.load(f)
-    except Exception as e:
-        console.print(f"[bold red]Warning:[/bold red] Could not load OUI cache: {str(e)}")
-        return {}
-
-def lookup_vendor(mac: str, oui_cache: dict) -> str:
-    """
-    Look up a vendor from a MAC address using the OUI cache.
-    """
-    if not mac:
-        return "Unknown"
+    parts = line.split(None, 5)
+    if len(parts) >= 6 and parts[0] == "Internet":
+        mac = parts[3].strip()
+        interface = parts[5].strip()
         
-    # Normalize MAC address
-    mac = mac.lower().replace(':', '').replace('.', '').replace('-', '')
-    if len(mac) < 6:
-        return "Unknown"
-        
-    # Get OUI (first 6 characters)
-    oui = mac[:6]
+        if is_arp_table_mac(mac):
+            mac_formatted = format_mac_address(mac)
+            vlan = interface.replace('Vlan', '') if 'Vlan' in interface else 'N/A'
+            return mac_formatted, vlan
     
-    # Format OUI with colons for lookup
-    oui_formatted = ':'.join([oui[i:i+2] for i in range(0, 6, 2)])
-    
-    # Look up vendor
-    return oui_cache.get(oui_formatted, "Unknown")
+    return None, None
 
 def main():
-    """
-    Main entry point for the NetVendor package.
-    """
-    # Check if required modules are installed
-    check_dependencies()
-    
-    # Check if input file is provided
+    """Main function to process input file and generate reports."""
+    # Check command line arguments
     if len(sys.argv) != 2:
-        console.print("[bold red]Error:[/bold red] Please provide an input file.")
+        console.print("[red]Error: Please provide an input file.[/red]")
         console.print("Usage: netvendor <input_file>")
         sys.exit(1)
-    
+
     input_file = sys.argv[1]
-    
+
     # Check if input file exists
     if not os.path.exists(input_file):
-        console.print(f"[bold red]Error:[/bold red] Input file '{input_file}' not found.")
+        console.print(f"[red]Error: Input file '{input_file}' not found.[/red]")
         sys.exit(1)
-    
+
+    # Check dependencies
+    check_dependencies()
+
     # Initialize OUI manager
     oui_manager = OUIManager()
-    console.print(f"Loaded OUI cache with {len(oui_manager.cache)} entries")
-    
-    # Process the input file
+
+    # Dictionary to store device information
     devices = {}
     line_count = 0
     port_count = 0
     mac_count = 0
     
     with open(input_file, 'r') as f:
-        # Read first line to determine file type
         first_line = f.readline().strip()
+        second_line = f.readline().strip() if first_line else ""
         
-        # Check if it's a MAC list file (first line is a MAC address)
+        # Check file type
         is_mac_list = is_mac_address(first_line)
-        is_arp_table = not is_mac_list and "Internet" in first_line
-        is_mac_table = not is_mac_list and not is_arp_table
+        is_arp = is_arp_table(first_line) or (second_line and is_arp_table(second_line))
+        is_mac_table = not is_mac_list and not is_arp
         
-        # Reset file pointer to start
+        # Reset to start of file
         f.seek(0)
+        
+        # Skip header for ARP table
+        if is_arp:
+            next(f)  # Skip the header line
         
         for line in f:
             line = line.strip()
@@ -170,36 +207,45 @@ def main():
             line_count += 1
             
             if is_mac_list:
-                # For MAC list files, treat each line as a potential MAC address
                 mac = line.lower()
                 if is_mac_address(mac):
-                    devices[mac] = {'vlan': 'N/A', 'port': 'N/A'}
+                    mac_formatted = format_mac_address(mac)
+                    if mac_formatted:
+                        devices[mac_formatted] = {'vlan': 'N/A', 'port': 'N/A'}
+                        mac_count += 1
+            elif is_arp:
+                # Skip the header line
+                if "Protocol" in line:
+                    continue
+                
+                mac_formatted, vlan = process_arp_line(line)
+                if mac_formatted:
+                    devices[mac_formatted] = {'vlan': vlan, 'port': 'N/A'}
                     mac_count += 1
             else:
+                # MAC table processing
                 words = line.split()
-                mac_word = 4 if is_arp_table else 2  # MAC is 4th word in ARP, 2nd in MAC table
-                
-                if len(words) >= mac_word:
-                    mac = words[mac_word - 1].lower()
-                    if is_mac_address(mac):
-                        if is_arp_table:
-                            vlan = words[-1].replace('Vlan', '') if 'Vlan' in words[-1] else 'N/A'
-                            port = None  # ARP tables don't have port information
-                        else:
-                            vlan = words[0] if is_mac_address_table(line) else 'N/A'
-                            port = parse_port_info(line)
-                            if port:
-                                port_count += 1
-                        devices[mac] = {'vlan': vlan, 'port': port if port else 'N/A'}
+                if len(words) >= 2:
+                    mac = words[1]
+                    mac_formatted = format_mac_address(mac)
+                    if mac_formatted:
+                        vlan = words[0] if is_mac_address_table(line) else 'N/A'
+                        port = parse_port_info(line)
+                        if port:
+                            port_count += 1
+                        devices[mac_formatted] = {'vlan': vlan, 'port': port if port else 'N/A'}
                         mac_count += 1
     
     # Print processing summary
     console.print(f"\nProcessed {line_count} lines")
-    if is_mac_list:
-        console.print(f"Found {mac_count} MAC addresses")
-    elif is_mac_table:
+    console.print(f"Found {mac_count} MAC addresses")
+    if is_mac_table:
         console.print(f"Found {port_count} port entries")
         console.print(f"Found {len(set(d['port'] for d in devices.values() if d['port'] != 'N/A'))} unique ports")
+    
+    if len(devices) == 0:
+        console.print("[bold red]Warning:[/bold red] No MAC addresses were processed!")
+        sys.exit(1)
     
     # Ensure output directory exists
     os.makedirs('output', exist_ok=True)
@@ -218,4 +264,4 @@ def main():
     save_vendor_summary(devices, oui_manager, input_file)
 
 if __name__ == "__main__":
-    main() 
+    main()
