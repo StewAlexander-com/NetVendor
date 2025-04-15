@@ -1,9 +1,15 @@
 ![NetVendor-Image](https://github.com/user-attachments/assets/59c0083a-e3c0-4723-a3be-d06a9afd79c7)
 
 ## Introduction
-*What exactly is lurking in your network? Are you sure you really know? This tool audits ARP and MAC address data to provide deep insights on the devices in a network
+### What exactly is lurking in your network? Are you sure you really know?
 
-NetVendor is a Python tool designed specifically for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of all devices on their network. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network routers and switches to provide detailed insights into your network's composition.
+*This tool audits ARP and MAC address data to provide deep insights on the devices in a network*
+
+<br />
+
+> NetVendor is a Python tool designed specifically for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of all devices on their network. It processes MAC address tables and IP ARP data from Cisco, HP/Aruba, and other network routers and switches to provide detailed insights into your network's composition.
+
+<br />
 
 <img src="docs/images/overview.png" alt="NetVendor Overview" width="267" style="width: 267px; height: auto;" />
 
