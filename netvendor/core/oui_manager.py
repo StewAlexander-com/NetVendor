@@ -31,11 +31,13 @@ from rich import print
 from rich.progress import Progress
 
 class OUIManager:
-    def __init__(self):
+    def __init__(self, oui_file: str = None):
         """Initialize the OUI manager with pre-seeded cache and API fallback."""
-        # Load pre-seeded Wireshark manufacturers database
-        package_data_dir = Path(__file__).parent.parent / 'data'
-        self.preseeded_cache_file = package_data_dir / 'oui_cache.json'
+        self.oui_file = oui_file
+        self.cache = {}
+        self.failed_lookups = set()
+        self._file_metadata = None
+        self._load_oui_file()
         
         # Setup user cache directory
         self.output_dir = Path("output")
@@ -44,10 +46,6 @@ class OUIManager:
         
         self.cache_file = self.data_dir / "oui_cache.json"
         self.failed_lookups_file = self.data_dir / "failed_lookups.json"
-        
-        # Initialize caches
-        self.cache = {}
-        self.failed_lookups = set()
         
         # Load pre-seeded cache first
         self.load_preseeded_cache()
@@ -79,12 +77,62 @@ class OUIManager:
         ]
         self.current_service_index = 0
 
+    def _load_oui_file(self):
+        """Load OUI database from file."""
+        if not self.oui_file or not os.path.exists(self.oui_file):
+            return
+            
+        try:
+            with open(self.oui_file, 'r') as f:
+                for line in f:
+                    if line.startswith('#'):
+                        continue
+                    parts = line.strip().split('\t')
+                    if len(parts) >= 2:
+                        oui = parts[0].strip().lower()
+                        vendor = parts[1].strip()
+                        self.cache[oui] = vendor
+        except Exception as e:
+            print(f"Error loading OUI file: {e}")
+            
+    def get_file_metadata(self) -> dict:
+        """Get metadata about the OUI file."""
+        if not self.oui_file or not os.path.exists(self.oui_file):
+            return None
+            
+        if self._file_metadata is None:
+            try:
+                stat = os.stat(self.oui_file)
+                self._file_metadata = {
+                    'size': stat.st_size,
+                    'mtime': stat.st_mtime,
+                    'path': self.oui_file
+                }
+            except Exception as e:
+                print(f"Error getting file metadata: {e}")
+                self._file_metadata = None
+                
+        return self._file_metadata
+        
+    def clear_cache(self):
+        """Clear the OUI cache."""
+        self.cache.clear()
+        self.failed_lookups.clear()
+        self._file_metadata = None
+        
     def load_preseeded_cache(self):
         """Load the pre-seeded Wireshark manufacturers database."""
-        if self.preseeded_cache_file.exists():
+        if self.oui_file and os.path.exists(self.oui_file):
             try:
-                with open(self.preseeded_cache_file, 'r') as f:
-                    self.cache = json.load(f)
+                with open(self.oui_file, 'r') as f:
+                    for line in f:
+                        if line.startswith('#'):
+                            continue
+                        parts = line.strip().split('\t')
+                        if len(parts) >= 2:
+                            oui = parts[0].strip().lower()
+                            vendor = parts[1].strip()
+                            self.cache[oui] = vendor
                 print(f"Loaded {len(self.cache)} entries from pre-seeded OUI cache")
             except (json.JSONDecodeError, IOError) as e:
                 print(f"Warning: Could not load pre-seeded cache ({e})")
@@ -144,18 +192,18 @@ class OUIManager:
         3. If not found and not previously failed, try API lookup
         """
         if not mac:
-            return "Unknown"
+            return None
             
         oui = self._normalize_mac(mac)
         
-        # Check cache first (includes both pre-seeded and user cache)
+        # Check failed lookups first
+        if oui in self.failed_lookups:
+            return None
+            
+        # Check cache
         if oui in self.cache:
             return self.cache[oui]
             
-        # Check if this OUI previously failed lookup
-        if oui in self.failed_lookups:
-            return "Unknown"
-
         # Try API lookup
         original_service_index = self.current_service_index
         retries = 0
@@ -188,7 +236,7 @@ class OUIManager:
                 elif response.status_code == 404:  # Not found
                     self.failed_lookups.add(oui)
                     self.save_failed_lookups()
-                    return "Unknown"
+                    return None
 
             except (requests.RequestException, json.JSONDecodeError):
                 pass  # Try next service
@@ -202,7 +250,7 @@ class OUIManager:
         # If all retries failed
         self.failed_lookups.add(oui)
         self.save_failed_lookups()
-        return "Unknown"
+        return None
 
     def batch_lookup_vendors(self, macs: List[str], progress: Progress = None) -> Dict[str, str]:
         """Process MAC addresses in batch, using cache when available."""
