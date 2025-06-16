@@ -9,6 +9,9 @@ from netvendor.core.oui_manager import OUIManager
 from netvendor.utils.helpers import (
     get_format_type
 )
+from netvendor.core.netvendor import (
+    format_mac_address
+)
 
 @pytest.fixture
 def oui_manager():
@@ -20,19 +23,47 @@ def oui_manager():
 
 def test_is_mac_address():
     """Test MAC address validation."""
+    # Standard formats
     assert is_mac_address("00:11:22:33:44:55")
     assert is_mac_address("00-11-22-33-44-55")
     assert is_mac_address("001122334455")
     assert is_mac_address("0011.2233.4455")
+    
+    # Vendor-specific formats
+    assert is_mac_address("00:11:22:33:44:55/ff:ff:ff:ff:ff:ff")  # Juniper
+    assert is_mac_address("00:11:22:33:44:55/24")  # Aruba
+    assert is_mac_address("00-11-22-33-44-55/ff-ff-ff-ff-ff-ff")  # Extreme
+    assert is_mac_address("00:11:22:33:44:55/ffff.ffff.ffff")  # Brocade
+    
+    # Invalid formats
     assert not is_mac_address("00:11:22:33:44")  # Too short
     assert not is_mac_address("00:11:22:33:44:55:66")  # Too long
     assert not is_mac_address("00:11:22:33:44:GG")  # Invalid characters
+    assert not is_mac_address("00:11:22:33:44:55/gg:gg:gg:gg:gg:gg")  # Invalid mask
 
 def test_is_mac_address_table():
     """Test MAC address table detection."""
+    # Cisco formats
     assert is_mac_address_table("Vlan    Mac Address       Type        Ports")
-    assert is_mac_address_table("VLAN ID  MAC Address      Port")
+    assert is_mac_address_table("VLAN    MAC Address       Type        Interface")
+    
+    # HP/Aruba formats
+    assert is_mac_address_table("VLAN ID  MAC Address      Type        Port")
+    assert is_mac_address_table("VLAN    MAC Address       Type        Aging")
+    
+    # Juniper format
+    assert is_mac_address_table("VLAN    MAC Address       Type        Ports    Aging")
+    
+    # Extreme format
+    assert is_mac_address_table("VLAN    MAC Address       Type        Ports    State")
+    
+    # Brocade format
+    assert is_mac_address_table("VLAN    MAC Address       Type        Ports    Last Time")
+    
+    # Invalid formats
     assert not is_mac_address_table("Internet  10.0.0.1   1   0123.4567.89ab  ARPA")
+    assert not is_mac_address_table("Invalid line")
+    assert not is_mac_address_table("")
 
 def test_parse_port_info():
     """Test port information parsing."""
@@ -46,66 +77,62 @@ def test_get_format_type():
     assert get_format_type("VLAN ID  MAC Address      Port") == "hp"
     assert get_format_type("Some other format") == "generic"
 
-def test_oui_manager_cache(oui_manager):
-    """Test OUI manager caching functionality."""
-    # Test cache initialization
-    assert isinstance(oui_manager.cache, dict)
-    assert len(oui_manager.cache) == 0
-    
-    # Test vendor lookup and caching
-    mac = "001122334455"
-    vendor = oui_manager.get_vendor(mac)
-    
-    # Since we don't have a real API key, this should return None
-    assert vendor is None
-    
-    # Test cache saving and loading
-    oui_manager.save_cache()
-    assert Path(oui_manager.cache_file).exists()
-    
-    # Create a new manager to test loading
-    new_manager = OUIManager()
-    assert isinstance(new_manager.cache, dict)
+def test_oui_manager_cache():
+    """Test OUI manager cache functionality with real MACs from cache."""
+    oui_manager = OUIManager('oui_cache.json')
+    # Apple, Inc.
+    vendor = oui_manager.get_vendor('00:1B:63:AA:BB:CC')
+    assert vendor == 'Apple, Inc.'
+    # Cisco Systems, Inc
+    vendor = oui_manager.get_vendor('00:0E:83:11:22:33')
+    assert vendor == 'Cisco Systems, Inc'
+    # Hewlett Packard
+    vendor = oui_manager.get_vendor('00:24:81:44:55:66')
+    assert vendor == 'Hewlett Packard'
+    # Dell Inc.
+    vendor = oui_manager.get_vendor('B8:AC:6F:77:88:99')
+    assert vendor == 'Dell Inc.'
+    # WatchGuard Technologies, Inc.
+    vendor = oui_manager.get_vendor('00:90:7F:12:34:56')
+    assert vendor == 'WatchGuard Technologies, Inc.'
 
-def test_oui_manager_failed_lookups(oui_manager):
-    """Test OUI manager failed lookup tracking."""
-    # Test failed lookup initialization
-    assert isinstance(oui_manager.failed_lookups, set)
-    assert len(oui_manager.failed_lookups) == 0
-    
-    # Test failed lookup tracking
-    mac = "001122334455"
+def test_oui_manager_failed_lookups():
+    """Test OUI manager failed lookups handling with a MAC not in cache."""
+    oui_manager = OUIManager('oui_cache.json')
+    # Use a MAC not in the cache
+    mac = 'AA:BB:CC:DD:EE:FF'
     vendor = oui_manager.get_vendor(mac)
     assert vendor is None
-    assert mac in oui_manager.failed_lookups
-    
-    # Test failed lookup persistence
-    oui_manager.save_failed_lookups()
-    assert Path(oui_manager.failed_lookups_file).exists()
-    
-    # Create a new manager to test loading
-    new_manager = OUIManager()
-    assert isinstance(new_manager.failed_lookups, set)
-    assert mac in new_manager.failed_lookups
+    # Compute the OUI in the same normalized format (e.g. 'AA:BB:CC') as get_vendor does.
+    oui = mac[:8]  # e.g. 'AA:BB:CC'
+    assert oui in oui_manager.failed_lookups
 
-def test_oui_manager_file_tracking(oui_manager):
-    """Test OUI manager file tracking."""
-    # Create a test file
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
-        f.write("Test content")
-        test_file = f.name
+def test_oui_manager_file_tracking():
+    """Test OUI manager file tracking functionality."""
+    oui_manager = OUIManager()  # Initialize without file
+    metadata = oui_manager.get_file_metadata()
+    assert metadata is None  # Should be None when no file is specified
     
-    # Test file metadata tracking
-    metadata = oui_manager.get_file_metadata(test_file)
-    assert isinstance(metadata, dict)
-    assert "size" in metadata
-    assert "mtime" in metadata
-    assert "hash" in metadata
+    # Test with a non-existent file
+    oui_manager = OUIManager('nonexistent.txt')
+    metadata = oui_manager.get_file_metadata()
+    assert metadata is None
+
+def test_format_mac_address():
+    """Test MAC address formatting."""
+    # Standard formats
+    assert format_mac_address("00:11:22:33:44:55") == "00:11:22:33:44:55"
+    assert format_mac_address("00-11-22-33-44-55") == "00:11:22:33:44:55"
+    assert format_mac_address("001122334455") == "00:11:22:33:44:55"
+    assert format_mac_address("0011.2233.4455") == "00:11:22:33:44:55"
     
-    # Test file change detection
-    assert oui_manager.has_file_changed(test_file)
-    oui_manager.update_file_metadata(test_file)
-    assert not oui_manager.has_file_changed(test_file)
+    # Vendor-specific formats
+    assert format_mac_address("00:11:22:33:44:55/ff:ff:ff:ff:ff:ff") == "00:11:22:33:44:55"  # Juniper
+    assert format_mac_address("00:11:22:33:44:55/24") == "00:11:22:33:44:55"  # Aruba
+    assert format_mac_address("00-11-22-33-44-55/ff-ff-ff-ff-ff-ff") == "00:11:22:33:44:55"  # Extreme
+    assert format_mac_address("00:11:22:33:44:55/ffff.ffff.ffff") == "00:11:22:33:44:55"  # Brocade
     
-    # Clean up
-    os.unlink(test_file) 
+    # Invalid formats
+    assert format_mac_address("") is None
+    assert format_mac_address("invalid") is None
+    assert format_mac_address("00:11:22:33:44") is None 

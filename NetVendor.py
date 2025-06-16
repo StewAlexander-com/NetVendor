@@ -49,7 +49,7 @@ def is_mac_address(mac: str) -> bool:
     # Check if we have enough characters for a MAC address
     if len(mac_clean) < 12:
         return False
-        
+    
     # Take first 12 characters (some formats might have more)
     mac_clean = mac_clean[:12]
     
@@ -101,7 +101,7 @@ def parse_port_info(line: str) -> str:
         int(port)
         return port
     except ValueError:
-        return None
+    return None
 
 def format_mac_address(mac: str) -> str:
     """
@@ -181,7 +181,7 @@ def main():
             line = line.strip()
             if not line:  # Skip empty lines
                 continue
-                
+            
             line_count += 1
             
             if is_mac_list:
@@ -195,7 +195,7 @@ def main():
             elif is_arp_table:
                 # Skip the header line
                 if "Protocol" in line:
-                    continue
+                        continue
                     
                 # Use string split with maxsplit to preserve spacing
                 parts = line.split(None, 5)  # Split into 6 parts max
@@ -244,7 +244,7 @@ def main():
     console.print("\nSample of processed devices:")
     for i, (mac, info) in enumerate(devices.items()):
         if i >= 5:  # Show first 5 entries
-            break
+                    break
         console.print(f"  {mac}: {info}")
     
     # Ensure output directory exists
@@ -270,7 +270,7 @@ def main():
             content = f.read()
             console.print(f"\nOutput file content (first few lines):")
             console.print(content[:500])  # Show first 500 characters
-    else:
+                    else:
         console.print("[bold red]Error:[/bold red] Output file was not created!")
     
     # Generate additional reports
