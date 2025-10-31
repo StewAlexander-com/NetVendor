@@ -6,8 +6,8 @@ import json
 import csv
 from rich.console import Console
 
-from netvendor.oui_manager import OUIManager
-from netvendor.vendor_output_handler import (
+from netvendor.core.oui_manager import OUIManager
+from netvendor.utils.vendor_output_handler import (
     make_csv,
     generate_port_report,
     create_vendor_distribution,
@@ -15,6 +15,7 @@ from netvendor.vendor_output_handler import (
 )
 
 console = Console()
+VERBOSE = os.getenv("NETVENDOR_VERBOSE", "0") in ("1", "true", "True")
 
 def check_dependencies():
     """
@@ -101,7 +102,7 @@ def parse_port_info(line: str) -> str:
         int(port)
         return port
     except ValueError:
-    return None
+        return None
 
 def format_mac_address(mac: str) -> str:
     """
@@ -143,7 +144,8 @@ def main():
     
     # Initialize OUI manager
     oui_manager = OUIManager()
-    console.print(f"Loaded OUI cache with {len(oui_manager.cache)} entries")
+    if VERBOSE:
+        console.print(f"Loaded OUI cache with {len(oui_manager.cache)} entries")
     
     # Process the input file
     devices = {}
@@ -156,9 +158,10 @@ def main():
         second_line = f.readline().strip() if first_line else ""
         
         # Debug output for file type detection
-        console.print(f"\nFile Analysis:")
-        console.print(f"First line: {first_line}")
-        console.print(f"Second line: {second_line}")
+        if VERBOSE:
+            console.print(f"\nFile Analysis:")
+            console.print(f"First line: {first_line}")
+            console.print(f"Second line: {second_line}")
         
         # Check file type
         is_mac_list = is_mac_address(first_line)
@@ -169,10 +172,11 @@ def main():
         )
         is_mac_table = not is_mac_list and not is_arp_table
         
-        console.print(f"\nFile Type Detection:")
-        console.print(f"  is_mac_list: {is_mac_list}")
-        console.print(f"  is_arp_table: {is_arp_table}")
-        console.print(f"  is_mac_table: {is_mac_table}")
+        if VERBOSE:
+            console.print(f"\nFile Type Detection:")
+            console.print(f"  is_mac_list: {is_mac_list}")
+            console.print(f"  is_arp_table: {is_arp_table}")
+            console.print(f"  is_mac_table: {is_mac_table}")
         
         # Reset to start of file
         f.seek(0)
@@ -191,30 +195,34 @@ def main():
                     if mac_formatted:
                         devices[mac_formatted] = {'vlan': 'N/A', 'port': 'N/A'}
                         mac_count += 1
-                        console.print(f"Added MAC list entry: {mac_formatted}")
+                        if VERBOSE:
+                            console.print(f"Added MAC list entry: {mac_formatted}")
             elif is_arp_table:
                 # Skip the header line
                 if "Protocol" in line:
-                        continue
+                    continue
                     
                 # Use string split with maxsplit to preserve spacing
                 parts = line.split(None, 5)  # Split into 6 parts max
-                console.print(f"\nProcessing line: {line}")
-                console.print(f"Split parts: {parts}")
+                if VERBOSE:
+                    console.print(f"\nProcessing line: {line}")
+                    console.print(f"Split parts: {parts}")
                 
                 if len(parts) >= 6 and parts[0] == "Internet":
                     mac = parts[3].strip()  # Hardware address is the 4th field
                     interface = parts[5].strip()  # Interface is the last field
                     
-                    console.print(f"Found MAC: {mac}")
-                    console.print(f"Interface: {interface}")
+                    if VERBOSE:
+                        console.print(f"Found MAC: {mac}")
+                        console.print(f"Interface: {interface}")
                     
                     mac_formatted = format_mac_address(mac)
                     if mac_formatted:
                         vlan = interface.replace('Vlan', '') if 'Vlan' in interface else 'N/A'
                         devices[mac_formatted] = {'vlan': vlan, 'port': 'N/A'}
                         mac_count += 1
-                        console.print(f"Added MAC: {mac_formatted} with VLAN: {vlan}")
+                        if VERBOSE:
+                            console.print(f"Added MAC: {mac_formatted} with VLAN: {vlan}")
             else:
                 # MAC table processing
                 words = line.split()
@@ -228,31 +236,35 @@ def main():
                             port_count += 1
                         devices[mac_formatted] = {'vlan': vlan, 'port': port if port else 'N/A'}
                         mac_count += 1
-                        console.print(f"Added MAC table entry: {mac_formatted} (VLAN: {vlan}, Port: {port if port else 'N/A'})")
+                        if VERBOSE:
+                            console.print(f"Added MAC table entry: {mac_formatted} (VLAN: {vlan}, Port: {port if port else 'N/A'})")
     
     # Print processing summary
     console.print(f"\nProcessing Summary:")
     console.print(f"Processed {line_count} lines")
     console.print(f"Found {mac_count} MAC addresses")
-    console.print(f"Total devices in dictionary: {len(devices)}")
+    if VERBOSE:
+        console.print(f"Total devices in dictionary: {len(devices)}")
     
     if len(devices) == 0:
         console.print("[bold red]Warning:[/bold red] No MAC addresses were processed!")
         sys.exit(1)
     
     # Show sample of processed devices
-    console.print("\nSample of processed devices:")
-    for i, (mac, info) in enumerate(devices.items()):
-        if i >= 5:  # Show first 5 entries
-                    break
-        console.print(f"  {mac}: {info}")
+    if VERBOSE:
+        console.print("\nSample of processed devices:")
+        for i, (mac, info) in enumerate(devices.items()):
+            if i >= 5:  # Show first 5 entries
+                break
+            console.print(f"  {mac}: {info}")
     
     # Ensure output directory exists
     os.makedirs('output', exist_ok=True)
     
     # Generate reports
     output_file = os.path.join('output', os.path.basename(input_file).replace('.txt', '-Devices.csv'))
-    console.print(f"\nWriting to CSV file: {output_file}")
+    if VERBOSE:
+        console.print(f"\nWriting to CSV file: {output_file}")
     
     with open(output_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
@@ -262,15 +274,17 @@ def main():
             vlan = info.get('vlan', 'N/A')
             port = info.get('port', 'N/A')
             writer.writerow([mac, vendor, vlan, port])
-            console.print(f"Wrote: {mac}, {vendor}, {vlan}, {port}")
+            if VERBOSE:
+                console.print(f"Wrote: {mac}, {vendor}, {vlan}, {port}")
     
     # Verify the file was written
     if os.path.exists(output_file):
-        with open(output_file, 'r') as f:
-            content = f.read()
-            console.print(f"\nOutput file content (first few lines):")
-            console.print(content[:500])  # Show first 500 characters
-                    else:
+        if VERBOSE:
+            with open(output_file, 'r') as f:
+                content = f.read()
+                console.print(f"\nOutput file content (first few lines):")
+                console.print(content[:500])  # Show first 500 characters
+    else:
         console.print("[bold red]Error:[/bold red] Output file was not created!")
     
     # Generate additional reports
