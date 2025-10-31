@@ -68,6 +68,56 @@ python3 -m netvendor input_file.txt
 - **Security**: Treat MAC/ARP dumps as sensitive. Review `output/data/failed_lookups.json` before sharing artifacts.
 - **Reproducibility**: Pin and install dependencies from this repo. Archive `output/data/oui_cache.json` with reports for future re-runs.
 
+---
+
+## ⚙️ Runtime Considerations
+
+### Performance & Scalability
+
+- **Memory usage**: All devices are loaded into memory as a dictionary. Typical runs with thousands of MACs use minimal memory (<100MB). Very large inputs (100K+ MACs) may require 500MB-1GB RAM.
+- **Processing time**: 
+  - Cached lookups: ~0.5-1 second per 1,000 MACs
+  - With API lookups: ~2-5 seconds per 1,000 MACs (depends on rate limits and network latency)
+  - Visualization generation: Additional 1-3 seconds for HTML generation
+- **Duplicate MAC handling**: Duplicate MAC addresses in input files are automatically deduplicated (last occurrence overwrites earlier ones).
+- **File size limits**: No hard limits, but processing files with >100K unique MACs may be slow. Consider splitting very large files into batches.
+
+### Network & API Behavior
+
+- **Internet connectivity required**: API vendor lookups require internet access. Without connectivity, only cached vendors (from `oui_cache.json`) are available.
+- **API timeout**: 5-second timeout per API request. Failed requests are retried with exponential backoff across multiple services.
+- **Rate limiting**: Automatic rate limiting (1-2 seconds between calls) prevents API throttling. Service rotation handles temporary failures gracefully.
+- **Offline operation**: After initial cache population, the tool works offline using cached data only. Un-cached MACs will appear as "Unknown" when offline.
+
+### Verbose Output
+
+Control debug output with the `NETVENDOR_VERBOSE` environment variable:
+
+```bash
+# Quiet mode (default) - only essential output
+netvendor input_file.txt
+
+# Verbose mode - detailed processing information
+NETVENDOR_VERBOSE=1 netvendor input_file.txt
+```
+
+### Disk Space & Output Files
+
+- **Output directory**: Requires write permissions. Creates `output/` directory if missing.
+- **File sizes**: 
+  - Device CSV: ~50 bytes per device
+  - Port CSV (MAC tables only): ~200-500 bytes per port
+  - HTML dashboard: ~30-80KB base + ~0.5KB per vendor
+  - Vendor summary: ~50 bytes per vendor
+- **Multiple runs**: Output files are overwritten by default. Previous outputs are not preserved unless manually backed up.
+
+### Error Handling
+
+- **Missing dependencies**: Tool exits with clear error message if required packages are missing.
+- **Invalid input files**: Malformed lines are silently skipped; processing continues for valid entries.
+- **API failures**: Failed vendor lookups are cached in `failed_lookups.json` to avoid repeated attempts. These appear as "Unknown" in output.
+- **Write failures**: If output directory cannot be created or files cannot be written, the tool exits with an error message.
+
 ## 📥 Supported Input Formats
 
 NetVendor automatically detects and parses the following formats:
