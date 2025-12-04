@@ -139,7 +139,7 @@ python3 NetVendor.py \
 | Flag | Description | Example |
 |------|-------------|---------|
 | `--offline` | Disable external vendor lookups (cache-only) | `--offline` |
-| `--history-dir DIR` | Directory for archiving vendor summaries | `--history-dir history` |
+| `--history-dir DIR` | Directory for archiving vendor summaries (created automatically if it doesn't exist) | `--history-dir history` |
 | `--analyze-drift` | Run drift analysis on archived summaries | `--analyze-drift` |
 | `--site SITE` | Site/region identifier for SIEM/drift metadata | `--site DC1` |
 | `--environment ENV` | Environment identifier for SIEM exports | `--environment prod` |
@@ -168,6 +168,7 @@ python3 NetVendor.py \
 ```
 
 **What it does:**
+- Creates the history directory if it doesn't exist
 - Archives `vendor_summary.txt` to `history/vendor_summary-YYYYMMDD-HHMMSS.txt`
 - Creates companion `.metadata.json` file with `run_timestamp`, `site`, `change_ticket_id`
 - Generates `history/vendor_drift.csv` with metadata rows and vendor percentage trends
@@ -411,7 +412,7 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
   - Vendor summary: ~50 bytes per vendor
   - SIEM export: ~500 bytes per device (JSONL format)
 - **Multiple runs**: Output files are overwritten by default. Previous outputs are not preserved unless manually backed up.
-- **History directory**: When using `NetVendor.py` with `--history-dir`, timestamped copies of `vendor_summary.txt` and companion `.metadata.json` files are stored there. The `vendor_drift.csv` is created when `--analyze-drift` is enabled.
+- **History directory**: When using `NetVendor.py` with `--history-dir`, the directory is automatically created if it doesn't exist. Timestamped copies of `vendor_summary.txt` and companion `.metadata.json` files are stored there. The `vendor_drift.csv` is created when `--analyze-drift` is enabled.
 - **SIEM export directory**: When using `--siem-export`, both `netvendor_siem.csv` and `netvendor_siem.json` are created in the `output/siem/` directory. Each file contains one record per device with all required fields for SIEM correlation. The `siem/` directory is automatically created if it doesn't exist.
 
 ### Error Handling
