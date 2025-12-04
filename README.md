@@ -55,6 +55,25 @@ Devices that are not already present in the local OUI cache will appear as `Unkn
 python3 NetVendor.py --offline input_file.txt
 ```
 
+### Historical Drift Analysis (vendor trends over time)
+
+When you run `NetVendor.py`, a human-readable `vendor_summary.txt` is always written to `output/`.  
+If you want to track how vendor composition changes over time, you can:
+
+- Automatically archive summaries to a history directory and run drift analysis in one step:
+
+```bash
+python3 NetVendor.py \
+  --history-dir history \
+  --analyze-drift \
+  input_file.txt
+```
+
+This will:
+- Save the usual outputs under `output/` (CSVs, HTML dashboard, summary).
+- Copy `output/vendor_summary.txt` to `history/vendor_summary-YYYYMMDD-HHMMSS.txt`.
+- Generate `history/vendor_drift.csv`, showing vendor percentages across all archived runs.
+
 ### Windows Usage
 
 ```powershell
@@ -119,6 +138,7 @@ NETVENDOR_VERBOSE=1 netvendor input_file.txt
   - HTML dashboard: ~30-80KB base + ~0.5KB per vendor
   - Vendor summary: ~50 bytes per vendor
 - **Multiple runs**: Output files are overwritten by default. Previous outputs are not preserved unless manually backed up.
+- **History directory**: When using `NetVendor.py` with `--history-dir`, timestamped copies of `vendor_summary.txt` are stored there, and `vendor_drift.csv` is created when `--analyze-drift` is enabled.
 
 ### Error Handling
 
