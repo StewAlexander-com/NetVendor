@@ -42,9 +42,23 @@ pip install -e .
 
 ### Basic Command
 
+There are two ways to run NetVendor:
+
+**1. Package entry point (simple, no flags):**
 ```bash
 netvendor input_file.txt
 ```
+or
+```bash
+python3 -m netvendor input_file.txt
+```
+
+**2. Standalone script (full feature set with all flags):**
+```bash
+python3 NetVendor.py input_file.txt
+```
+
+**Note:** The standalone script (`NetVendor.py`) supports all advanced features including `--offline`, `--siem-export`, `--history-dir`, `--analyze-drift`, `--site`, `--environment`, and `--change-ticket` flags. The package entry point (`netvendor`) is a simple wrapper that only accepts an input file argument.
 
 ### Offline Mode (cache-only lookup)
 
@@ -142,10 +156,10 @@ python3 NetVendor.py \
 In this case, the tool will:
 
 - Run without external vendor lookups (`--offline`)
-- Generate all standard outputs under `output/`
-- Archive `vendor_summary-YYYYMMDD-HHMMSS.txt` into `history/`
-- Update `history/vendor_drift.csv` with the new snapshot
-- Emit SIEM-ready `netvendor_siem.csv` and `netvendor_siem.json` tagged with `site=DC1`
+- Generate all standard outputs under `output/` (Device CSV, Port CSV, HTML dashboard, Vendor Summary)
+- Archive `vendor_summary-YYYYMMDD-HHMMSS.txt` and its companion `.metadata.json` into `history/`
+- Update `history/vendor_drift.csv` with the new snapshot (if `--analyze-drift` is used)
+- Emit SIEM-ready `netvendor_siem.csv` and `netvendor_siem.json` tagged with `site=DC1` and `environment=prod`
 
 ### Windows Usage
 
@@ -192,15 +206,22 @@ python3 -m netvendor input_file.txt
 
 ### Verbose Output
 
-Control debug output with the `NETVENDOR_VERBOSE` environment variable:
+Control debug output with the `NETVENDOR_VERBOSE` environment variable (only supported by `NetVendor.py`, not the `netvendor` package entry point):
 
 ```bash
 # Quiet mode (default) - only essential output
-netvendor input_file.txt
+python3 NetVendor.py input_file.txt
 
 # Verbose mode - detailed processing information
-NETVENDOR_VERBOSE=1 netvendor input_file.txt
+NETVENDOR_VERBOSE=1 python3 NetVendor.py input_file.txt
 ```
+
+When verbose mode is enabled, you'll see:
+- File type detection details
+- Per-line processing information
+- Sample device entries
+- CSV writing progress
+- Output file content preview
 
 ### Disk Space & Output Files
 
@@ -211,7 +232,8 @@ NETVENDOR_VERBOSE=1 netvendor input_file.txt
   - HTML dashboard: ~30-80KB base + ~0.5KB per vendor
   - Vendor summary: ~50 bytes per vendor
 - **Multiple runs**: Output files are overwritten by default. Previous outputs are not preserved unless manually backed up.
-- **History directory**: When using `NetVendor.py` with `--history-dir`, timestamped copies of `vendor_summary.txt` are stored there, and `vendor_drift.csv` is created when `--analyze-drift` is enabled.
+- **History directory**: When using `NetVendor.py` with `--history-dir`, timestamped copies of `vendor_summary.txt` and companion `.metadata.json` files are stored there. The `vendor_drift.csv` is created when `--analyze-drift` is enabled.
+- **SIEM export files**: When using `--siem-export`, both `netvendor_siem.csv` and `netvendor_siem.json` are created in the `output/` directory. Each file contains one record per device with all required fields for SIEM correlation.
 
 ### Error Handling
 
@@ -312,17 +334,24 @@ Internet  192.168.1.1      -          0011.2233.4455  ARPA   Vlan10
 
 All results are saved in the `output` directory:
 
-- **Device Information CSV:** MAC, Vendor, VLAN, Port
-- **Port Report CSV:** Port utilization and device mapping
-- **Vendor Distribution HTML:** Interactive dashboard with charts
+- **Device Information CSV** (`{input_file}-Devices.csv`): MAC, Vendor, VLAN, Port - one row per device
+- **Port Report CSV** (`{input_file}-Ports.csv`): Port utilization and device mapping (only generated for MAC address tables, not ARP or simple lists)
+- **Vendor Distribution HTML** (`vendor_distribution.html`): Interactive dashboard with charts showing vendor distribution and VLAN analysis
+- **Vendor Summary Text** (`vendor_summary.txt`): Plain text summary with vendor counts and percentages
+
+**Optional outputs (when using `NetVendor.py` with flags):**
+
+- **SIEM Export CSV** (`netvendor_siem.csv`): Line-delimited CSV for SIEM ingestion (requires `--siem-export`)
+- **SIEM Export JSONL** (`netvendor_siem.json`): JSON Lines format for SIEM ingestion (requires `--siem-export`)
+- **History Archive** (`history/vendor_summary-YYYYMMDD-HHMMSS.txt`): Timestamped vendor summary snapshots (requires `--history-dir`)
+- **History Metadata** (`history/vendor_summary-YYYYMMDD-HHMMSS.metadata.json`): Companion metadata file with run_timestamp, site, change_ticket_id (created automatically when archiving)
+- **Drift Analysis CSV** (`history/vendor_drift.csv`): Vendor percentage trends across all archived runs (requires `--analyze-drift`)
 
 ![Security Dashboard](docs/images/security-dashboard.png)
 *🔒 Interactive security dashboard showing device distribution and potential security concerns*
 
 ![Vendor Dashboard](docs/images/vendor-dashboard.png)
 *📊 Vendor distribution dashboard showing device types and network segments*
-
-- **Vendor Summary Text:** Quick reference for documentation
 
 ### 📈 Sample Vendor Distribution Graph
 
