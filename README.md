@@ -228,6 +228,23 @@ NETVENDOR_VERBOSE=1 python3 NetVendor.py input_file.txt
 
 When verbose mode is enabled, you'll see file type detection details, per-line processing information, sample device entries, CSV writing progress, and output file content preview.
 
+### Runtime Logging
+
+For troubleshooting and performance analysis, NetVendor can log runtime behavior to a structured log file:
+
+```bash
+# Enable runtime logging
+NETVENDOR_LOG=1 python3 NetVendor.py input_file.txt
+```
+
+When enabled, a log file is created at `output/netvendor_runtime.log` in JSONL format (one JSON object per line). Each entry includes:
+- `timestamp`: UTC ISO-8601 timestamp
+- `event_type`: Type of event (e.g., "processing_start", "file_type_detection", "error")
+- `event_data`: Event-specific data
+- `context`: Additional context information
+
+The logger captures key runtime events including file processing, error conditions, output generation, and performance metrics. Logging is disabled by default and has no performance impact when not enabled.
+
 ---
 
 ## 📥 Supported Input Formats
@@ -414,6 +431,7 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 - **Multiple runs**: Output files are overwritten by default. Previous outputs are not preserved unless manually backed up.
 - **History directory**: When using `NetVendor.py` with `--history-dir`, the directory is automatically created if it doesn't exist. Timestamped copies of `vendor_summary.txt` and companion `.metadata.json` files are stored there. The `vendor_drift.csv` is created when `--analyze-drift` is enabled.
 - **SIEM export directory**: When using `--siem-export`, both `netvendor_siem.csv` and `netvendor_siem.json` are created in the `output/siem/` directory. Each file contains one record per device with all required fields for SIEM correlation. The `siem/` directory is automatically created if it doesn't exist.
+- **Runtime log file**: When `NETVENDOR_LOG=1` is set, `output/netvendor_runtime.log` is created with structured JSONL entries for troubleshooting and performance analysis.
 
 ### Error Handling
 
@@ -450,6 +468,8 @@ NetVendor is actively maintained and regularly updated.
 - Real-world OUI test coverage
 - Historical drift analysis with metadata correlation
 - SIEM export with stable schema for posture-change detection
+- Runtime logging for troubleshooting and performance analysis
+- Enhanced error handling with user-friendly messages
 - All tests pass and program output confirmed
 
 **Planned:**
