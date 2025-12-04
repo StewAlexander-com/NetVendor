@@ -58,13 +58,15 @@ python3 NetVendor.py --offline input_file.txt
 ### Historical Drift Analysis (vendor trends over time)
 
 When you run `NetVendor.py`, a human-readable `vendor_summary.txt` is always written to `output/`.  
-If you want to track how vendor composition changes over time, you can:
+If you want to track how vendor composition changes over time and correlate with change windows/incidents, you can:
 
-- Automatically archive summaries to a history directory and run drift analysis in one step:
+- Automatically archive summaries with metadata and run drift analysis:
 
 ```bash
 python3 NetVendor.py \
   --history-dir history \
+  --site DC1 \
+  --change-ticket CHG-12345 \
   --analyze-drift \
   input_file.txt
 ```
@@ -72,7 +74,19 @@ python3 NetVendor.py \
 This will:
 - Save the usual outputs under `output/` (CSVs, HTML dashboard, summary).
 - Copy `output/vendor_summary.txt` to `history/vendor_summary-YYYYMMDD-HHMMSS.txt`.
-- Generate `history/vendor_drift.csv`, showing vendor percentages across all archived runs.
+- Create a companion `history/vendor_summary-YYYYMMDD-HHMMSS.metadata.json` file containing:
+  - `run_timestamp`: UTC ISO-8601 timestamp of the run
+  - `site`: Site/region identifier (from `--site` flag)
+  - `change_ticket_id`: Change ticket/incident ID (from `--change-ticket` flag)
+- Generate `history/vendor_drift.csv` with:
+  - **Metadata rows** at the top: `run_timestamp`, `site`, `change_ticket_id` for each snapshot
+  - **Vendor percentage rows**: One row per vendor showing percentage across all runs
+
+**SIEM Correlation & Incident Analysis:**
+The drift CSV metadata enables correlation with change windows and incidents in your SIEM, supporting 8D/5-why workflows. You can:
+- Join drift data with SIEM events using `run_timestamp` and `site`
+- Correlate vendor mix shifts with `change_ticket_id` to identify change-related impacts
+- Track vendor distribution changes across multiple sites and time periods
 
 ### SIEM-Friendly Export (CSV/JSONL)
 

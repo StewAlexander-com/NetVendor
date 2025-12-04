@@ -21,22 +21,26 @@ Typical workflow:
 from __future__ import annotations
 
 import csv
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 
 @dataclass
 class Snapshot:
-    """Represents a single vendor summary snapshot."""
+    """Represents a single vendor summary snapshot with metadata."""
     label: str  # e.g. filename or timestamp
     vendors: Dict[str, Tuple[int, float]]  # vendor -> (count, percentage)
+    run_timestamp: Optional[str] = None  # ISO-8601 timestamp of the run
+    site: Optional[str] = None  # Site/region identifier
+    change_ticket_id: Optional[str] = None  # Change ticket/incident ID for correlation
 
 
 def parse_vendor_summary_file(path: Path) -> Snapshot:
     """
-    Parse a `vendor_summary.txt` file produced by NetVendor.
+    Parse a `vendor_summary.txt` file produced by NetVendor and its companion metadata.
 
     The expected format is:
         Network Device Vendor Summary
@@ -45,8 +49,15 @@ def parse_vendor_summary_file(path: Path) -> Snapshot:
         ...
         Cisco Systems, Inc             95           19.0%
 
+    Also looks for a companion `{filename}.metadata.json` file containing:
+        {
+            "run_timestamp": "2025-10-31T16:23:45Z",
+            "site": "DC1",
+            "change_ticket_id": "CHG-12345"
+        }
+
     Returns:
-        Snapshot with vendor -> (count, percentage).
+        Snapshot with vendor -> (count, percentage) and optional metadata.
     """
     label = path.stem
     vendors: Dict[str, Tuple[int, float]] = {}
@@ -87,7 +98,29 @@ def parse_vendor_summary_file(path: Path) -> Snapshot:
         if vendor_name:
             vendors[vendor_name] = (count, percentage)
 
-    return Snapshot(label=label, vendors=vendors)
+    # Try to load companion metadata file
+    metadata_path = path.parent / f"{path.stem}.metadata.json"
+    run_timestamp = None
+    site = None
+    change_ticket_id = None
+
+    if metadata_path.exists():
+        try:
+            with metadata_path.open("r", encoding="utf-8") as f:
+                metadata = json.load(f)
+                run_timestamp = metadata.get("run_timestamp")
+                site = metadata.get("site")
+                change_ticket_id = metadata.get("change_ticket_id")
+        except (json.JSONDecodeError, IOError):
+            pass  # If metadata file is malformed, continue without it
+
+    return Snapshot(
+        label=label,
+        vendors=vendors,
+        run_timestamp=run_timestamp,
+        site=site,
+        change_ticket_id=change_ticket_id,
+    )
 
 
 def load_snapshots_from_directory(history_dir: Path) -> List[Snapshot]:
@@ -115,11 +148,14 @@ def load_snapshots_from_directory(history_dir: Path) -> List[Snapshot]:
 
 def write_vendor_drift_csv(snapshots: List[Snapshot], output_path: Path) -> None:
     """
-    Write a CSV summarizing vendor percentage drift over time.
+    Write a CSV summarizing vendor percentage drift over time with metadata.
 
     CSV structure:
-        Vendor, Snapshot1, Snapshot2, ..., SnapshotN
+        Run Metadata Row: run_timestamp, site, change_ticket_id, ...
+        Vendor, Snapshot1_Pct, Snapshot2_Pct, ..., SnapshotN_Pct
     where each cell is the percentage of that vendor in the corresponding snapshot.
+
+    Includes metadata rows for SIEM correlation and incident analysis (8D/5-why workflows).
     """
     if not snapshots:
         return
@@ -135,8 +171,29 @@ def write_vendor_drift_csv(snapshots: List[Snapshot], output_path: Path) -> None
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        header = ["Vendor"] + snapshot_labels
-        writer.writerow(header)
+        
+        # Write metadata header row
+        metadata_header = ["Metadata"] + snapshot_labels
+        writer.writerow(metadata_header)
+        
+        # Write run_timestamp metadata row
+        timestamp_row = ["run_timestamp"] + [s.run_timestamp or "" for s in snapshots]
+        writer.writerow(timestamp_row)
+        
+        # Write site metadata row
+        site_row = ["site"] + [s.site or "" for s in snapshots]
+        writer.writerow(site_row)
+        
+        # Write change_ticket_id metadata row
+        ticket_row = ["change_ticket_id"] + [s.change_ticket_id or "" for s in snapshots]
+        writer.writerow(ticket_row)
+        
+        # Write empty row separator
+        writer.writerow([])
+        
+        # Write vendor percentage data
+        vendor_header = ["Vendor"] + snapshot_labels
+        writer.writerow(vendor_header)
 
         for vendor in ordered_vendors:
             row = [vendor]

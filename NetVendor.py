@@ -7,7 +7,7 @@ import csv
 import argparse
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from rich.console import Console
 
 from netvendor.core.oui_manager import OUIManager
@@ -169,6 +169,12 @@ def main():
         "--environment",
         default=None,
         help="Optional environment identifier tag to include in SIEM exports (e.g., prod, dev, staging)."
+    )
+    parser.add_argument(
+        "--change-ticket",
+        default=None,
+        help="Optional change ticket/incident ID for drift analysis correlation (e.g., CHG-12345, INC-67890). "
+             "Stored in drift metadata for 8D/5-why incident analysis workflows."
     )
     parser.add_argument(
         "--siem-export",
@@ -362,7 +368,7 @@ def main():
             input_type=input_type,
         )
 
-    # Archive vendor summary for drift analysis
+    # Archive vendor summary for drift analysis with metadata
     history_dir = Path(args.history_dir)
     history_dir.mkdir(parents=True, exist_ok=True)
     summary_src = Path("output") / "vendor_summary.txt"
@@ -371,8 +377,20 @@ def main():
         summary_dst = history_dir / f"vendor_summary-{timestamp}.txt"
         try:
             shutil.copy2(summary_src, summary_dst)
+            
+            # Write companion metadata file for drift analysis correlation
+            metadata = {
+                "run_timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                "site": args.site,
+                "change_ticket_id": args.change_ticket,
+            }
+            metadata_path = history_dir / f"{summary_dst.stem}.metadata.json"
+            with metadata_path.open("w", encoding="utf-8") as f:
+                json.dump(metadata, f, indent=2)
+            
             if VERBOSE:
                 console.print(f"Archived vendor summary to [green]{summary_dst}[/green]")
+                console.print(f"Archived metadata to [green]{metadata_path}[/green]")
         except OSError as e:
             console.print(f"[yellow]Warning:[/yellow] Could not archive vendor summary: {e}")
 
