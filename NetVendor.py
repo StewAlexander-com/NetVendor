@@ -19,6 +19,7 @@ from netvendor.utils.vendor_output_handler import (
 )
 from netvendor.utils.drift_analysis import analyze_drift
 from netvendor.utils.siem_export import export_siem_events
+from netvendor.utils.runtime_logger import get_logger
 
 console = Console()
 VERBOSE = os.getenv("NETVENDOR_VERBOSE", "0") in ("1", "true", "True")
@@ -186,9 +187,29 @@ def main():
 
     args = parser.parse_args()
     input_file = args.input_file
+    
+    # Initialize runtime logger
+    logger = get_logger()
+    
+    # Log command-line arguments (excluding sensitive data)
+    logger.log_event("command_start", {
+        "input_file": str(input_file),
+        "offline_mode": args.offline,
+        "siem_export": args.siem_export,
+        "analyze_drift": args.analyze_drift,
+        "has_history_dir": bool(args.history_dir),
+        "has_site": bool(args.site),
+        "has_environment": bool(args.environment),
+        "has_change_ticket": bool(args.change_ticket),
+    })
 
     # Check if input file exists
     if not os.path.exists(input_file):
+        logger.log_error("file_not_found", f"Input file '{input_file}' not found", {
+            "input_file": str(input_file),
+            "is_absolute": os.path.isabs(input_file),
+            "current_directory": os.getcwd()
+        })
         console.print(f"[bold red]Error:[/bold red] Input file '{input_file}' not found.")
         console.print(f"[yellow]Hint:[/yellow] Please check that the file path is correct and the file exists.")
         if not os.path.isabs(input_file):
@@ -197,21 +218,38 @@ def main():
     
     # Check if input is a directory instead of a file
     if os.path.isdir(input_file):
+        logger.log_error("invalid_input", f"'{input_file}' is a directory, not a file", {
+            "input_file": str(input_file)
+        })
         console.print(f"[bold red]Error:[/bold red] '{input_file}' is a directory, not a file.")
         console.print(f"[yellow]Hint:[/yellow] Please provide the path to a file containing MAC addresses, ARP data, or MAC address tables.")
         sys.exit(1)
     
     # Check if file is readable
     if not os.access(input_file, os.R_OK):
+        logger.log_error("permission_denied", f"Cannot read file '{input_file}'", {
+            "input_file": str(input_file),
+            "error_type": "read_permission"
+        })
         console.print(f"[bold red]Error:[/bold red] Cannot read file '{input_file}' (permission denied).")
         console.print(f"[yellow]Hint:[/yellow] Please check file permissions or run with appropriate access.")
         sys.exit(1)
     
     # Check if file is empty
     if os.path.getsize(input_file) == 0:
+        logger.log_error("empty_file", f"Input file '{input_file}' is empty", {
+            "input_file": str(input_file)
+        })
         console.print(f"[bold red]Error:[/bold red] Input file '{input_file}' is empty.")
         console.print(f"[yellow]Hint:[/yellow] Please provide a file containing MAC addresses, ARP data, or MAC address tables.")
         sys.exit(1)
+    
+    # Log processing start
+    logger.log_processing_start(input_file, {
+        "offline": args.offline,
+        "site": args.site,
+        "environment": args.environment
+    })
 
     # Initialize OUI manager
     oui_manager = OUIManager(offline=args.offline)
@@ -248,6 +286,14 @@ def main():
                 "Internet" in second_line             # Second line for ARP tables
             )
             is_mac_table = not is_mac_list and not is_arp_table
+            
+            # Log file type detection
+            if is_mac_list:
+                logger.log_file_type_detection("mac_list", "first_line_mac_address")
+            elif is_arp_table:
+                logger.log_file_type_detection("arp_table", "protocol_header_or_internet_keyword")
+            else:
+                logger.log_file_type_detection("mac_table", "default_assumption")
             
             if VERBOSE:
                 console.print(f"\nFile Type Detection:")
@@ -336,7 +382,20 @@ def main():
     if VERBOSE:
         console.print(f"Total devices in dictionary: {len(devices)}")
     
+    # Log processing end with statistics
+    logger.log_processing_end({
+        "lines_processed": line_count,
+        "mac_addresses_found": mac_count,
+        "unique_devices": len(devices),
+        "ports_found": port_count,
+        "file_type": "mac_list" if is_mac_list else ("arp_table" if is_arp_table else "mac_table")
+    })
+    
     if len(devices) == 0:
+        logger.log_error("no_mac_addresses", "No MAC addresses found in input file", {
+            "lines_processed": line_count,
+            "file_type_detected": "mac_list" if is_mac_list else ("arp_table" if is_arp_table else "mac_table")
+        })
         console.print("[bold red]Error:[/bold red] No MAC addresses were found in the input file!")
         console.print(f"[yellow]Hint:[/yellow] Please verify that '{input_file}' contains:")
         console.print("  - MAC addresses (e.g., 00:11:22:33:44:55)")
@@ -392,12 +451,16 @@ def main():
     
     # Verify the file was written
     if os.path.exists(output_file):
+        logger.log_output_generation("device_csv", output_file, len(devices))
         if VERBOSE:
             with open(output_file, 'r') as f:
                 content = f.read()
                 console.print(f"\nOutput file content (first few lines):")
                 console.print(content[:500])  # Show first 500 characters
     else:
+        logger.log_error("output_creation_failed", f"Output file '{output_file}' was not created", {
+            "output_file": str(output_file)
+        })
         console.print("[bold red]Error:[/bold red] Output file was not created!")
     
     # Generate additional reports
@@ -490,9 +553,16 @@ def main():
             console.print(f"[yellow]Hint:[/yellow] Ensure you have archived at least one vendor summary using --history-dir before running drift analysis.")
             sys.exit(1)
         except Exception as e:
+            logger.log_error("drift_analysis_failed", str(e), {
+                "history_dir": str(history_dir),
+                "error_type": type(e).__name__
+            })
             console.print(f"[bold red]Error:[/bold red] Drift analysis failed: {e}")
             console.print(f"[yellow]Hint:[/yellow] Please check that the history directory '{history_dir}' is accessible and contains valid vendor summary files.")
             sys.exit(1)
+    
+    # Close logger
+    logger.close()
 
 if __name__ == "__main__":
     main()
