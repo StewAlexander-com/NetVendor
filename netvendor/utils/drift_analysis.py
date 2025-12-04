@@ -218,6 +218,9 @@ def analyze_drift(history_dir: Path, output_path: Path | None = None) -> Path:
     Returns:
         Path to the generated CSV file.
     """
+    # Ensure the history directory exists
+    history_dir.mkdir(parents=True, exist_ok=True)
+    
     snapshots = load_snapshots_from_directory(history_dir)
     if not snapshots:
         raise RuntimeError(
