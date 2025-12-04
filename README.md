@@ -271,6 +271,8 @@ The logger captures key runtime events including file processing, error conditio
 
 ## 📥 Supported Input Formats
 
+**Just paste your raw `show mac address-table` output into a file; NetVendor will auto-detect the format.** No heavy data cleaning required - the tool handles headers, whitespace, and various vendor formats automatically.
+
 NetVendor automatically detects and parses the following formats:
 
 ### 1. Simple MAC Address List
