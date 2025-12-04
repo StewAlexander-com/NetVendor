@@ -220,6 +220,47 @@ NETVENDOR_VERBOSE=1 netvendor input_file.txt
 - **API failures**: Failed vendor lookups are cached in `failed_lookups.json` to avoid repeated attempts. These appear as "Unknown" in output.
 - **Write failures**: If output directory cannot be created or files cannot be written, the tool exits with an error message.
 
+### Posture-Change Detection & Security Monitoring
+
+When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transforms from a static inventory tool into a **posture-change sensor** that enables proactive security monitoring and incident response.
+
+**Key Capabilities:**
+
+- **New Vendor Detection**: Identify when previously unseen vendors appear in your network, especially in sensitive VLANs or critical infrastructure segments.
+- **Vendor Drift Analysis**: Track vendor distribution changes over time and correlate with change tickets/incidents to identify unauthorized device introductions.
+- **Anomaly Detection**: Use SIEM correlation rules to alert on:
+  - New vendors appearing in production VLANs
+  - Vendor mix shifts coinciding with change windows
+  - Unauthorized device types in restricted network segments
+  - Vendor changes without corresponding change tickets
+
+**SIEM Integration Workflow:**
+
+1. **Regular Collection**: Schedule NetVendor runs (e.g., hourly/daily) with `--siem-export --site <SITE> --environment <ENV>` to generate normalized events.
+2. **SIEM Ingestion**: Configure Filebeat/Elastic Agent or similar to ingest `netvendor_siem.json` (JSONL format).
+3. **Correlation Rules**: Create SIEM rules that:
+   - Join current NetVendor events with historical baselines using `mac`, `vlan`, `site`
+   - Alert when `vendor` field changes for a known `mac` in a sensitive `vlan`
+   - Detect new `mac` addresses with previously unseen `vendor` values
+   - Correlate vendor changes with `change_ticket_id` from drift analysis metadata
+4. **Incident Response**: Use drift analysis metadata (`run_timestamp`, `site`, `change_ticket_id`) to:
+   - Link vendor mix shifts to specific change windows
+   - Support 8D/5-why root cause analysis
+   - Identify unauthorized device introductions during incident investigations
+
+**Example SIEM Queries:**
+
+- **New vendor in sensitive VLAN**: Find MACs where `vlan` matches sensitive VLANs and `vendor` is not in the historical baseline for that VLAN.
+- **Vendor change without change ticket**: Correlate drift analysis showing vendor percentage changes with missing `change_ticket_id` values.
+- **Cross-site vendor anomalies**: Compare vendor distributions across sites using `site` field to identify inconsistent device types.
+
+**Performance Considerations for Continuous Monitoring:**
+
+- **Collection Frequency**: For real-time posture monitoring, run NetVendor every 1-4 hours depending on network change velocity.
+- **Baseline Maintenance**: Archive vendor summaries with `--history-dir` and `--change-ticket` to maintain accurate baselines for comparison.
+- **SIEM Storage**: Each run generates ~500 bytes per device in JSONL format. For 10,000 devices, expect ~5MB per run. Plan SIEM retention accordingly.
+- **Query Performance**: Index `mac`, `vlan`, `site`, and `timestamp` fields in your SIEM for optimal correlation rule performance.
+
 ## 📥 Supported Input Formats
 
 NetVendor automatically detects and parses the following formats:
