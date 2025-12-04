@@ -46,6 +46,15 @@ pip install -e .
 netvendor input_file.txt
 ```
 
+### Offline Mode (cache-only lookup)
+
+Use the `--offline` flag with the standalone script when you want to avoid any external vendor lookups (for example, on air‑gapped networks).  
+Devices that are not already present in the local OUI cache will appear as `Unknown`.
+
+```bash
+python3 NetVendor.py --offline input_file.txt
+```
+
 ### Windows Usage
 
 ```powershell
@@ -87,7 +96,7 @@ python3 -m netvendor input_file.txt
 - **Internet connectivity required**: API vendor lookups require internet access. Without connectivity, only cached vendors (from `oui_cache.json`) are available.
 - **API timeout**: 5-second timeout per API request. Failed requests are retried with exponential backoff across multiple services.
 - **Rate limiting**: Automatic rate limiting (1-2 seconds between calls) prevents API throttling. Service rotation handles temporary failures gracefully.
-- **Offline operation**: After initial cache population, the tool works offline using cached data only. Un-cached MACs will appear as "Unknown" when offline.
+- **Offline operation**: After initial cache population, you can run without external lookups using the `--offline` flag (when invoking `NetVendor.py`). In this mode, uncached MACs will appear as `Unknown`.
 
 ### Verbose Output
 
