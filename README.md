@@ -3,6 +3,16 @@
 ![Overview](docs/images/overview.png)
 *NetVendor provides comprehensive network device analysis and visualization*
 
+## ⚡ TL;DR: Why You Should Care
+
+- **Turn MAC tables into dashboards**: Transform raw network device outputs into interactive HTML visualizations and CSV reports
+- **Detect new/unknown vendors**: Identify previously unseen devices and track vendor distribution changes over time
+- **Export SIEM events**: Generate normalized CSV/JSONL exports for Elastic, Splunk, and other SIEMs to enable posture-change detection
+
+**Quick start:** `python3 NetVendor.py input_file.txt` → Check `output/` for results
+
+---
+
 ## 📖 Introduction
 
 **NetVendor** is a Python tool for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of devices on a network. It processes MAC address tables and ARP data from a wide range of network devices (including Cisco, HP/Aruba, Juniper, Extreme, Brocade, and more), providing detailed insights into your network's composition.
@@ -24,64 +34,7 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), NetVendor transforms
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.8 or higher
-- Required packages: `requests`, `plotly`, `rich`, `tqdm`
-- Input file containing MAC addresses or ARP data from your network devices
-
-### Installation
-
-```bash
-git clone https://github.com/StewAlexander-com/NetVendor.git
-cd NetVendor
-pip install -e .
-```
-
----
-
-## 🔄 Workflow & Quick Start
-
-### Ways to Run NetVendor
-
-**1. Simple Package Entry Point** (basic usage, no flags):
-```bash
-netvendor input_file.txt
-# or
-python3 -m netvendor input_file.txt
-```
-
-**2. Standalone Script** (full feature set with all flags):
-```bash
-python3 NetVendor.py input_file.txt
-```
-
-**Note:** The standalone script (`NetVendor.py`) supports all advanced features. The package entry point (`netvendor`) is a simple wrapper that only accepts an input file argument.
-
-### Expected Outputs
-
-**Standard Outputs** (always generated in `output/` directory):
-
-| File | Description | When Generated |
-|------|-------------|----------------|
-| `{input_file}-Devices.csv` | Device information: MAC, Vendor, VLAN, Port | Always |
-| `{input_file}-Ports.csv` | Port utilization and device mapping | Only for MAC address tables |
-| `vendor_distribution.html` | Interactive dashboard with charts | Always |
-| `vendor_summary.txt` | Plain text summary with vendor counts/percentages | Always |
-
-**Optional Outputs** (when using `NetVendor.py` with flags):
-
-| File | Description | Required Flag |
-|------|-------------|---------------|
-| `siem/netvendor_siem.csv` | Line-delimited CSV for SIEM ingestion | `--siem-export` |
-| `siem/netvendor_siem.json` | JSON Lines format for SIEM ingestion | `--siem-export` |
-| `history/vendor_summary-*.txt` | Timestamped vendor summary snapshots | `--history-dir` |
-| `history/vendor_summary-*.metadata.json` | Companion metadata (timestamp, site, ticket) | `--history-dir` |
-| `history/vendor_drift.csv` | Vendor percentage trends across runs | `--analyze-drift` |
-
-### Common Workflows
+## 🔄 Common Workflows
 
 **Basic Analysis:**
 ```bash
@@ -129,6 +82,65 @@ python3 NetVendor.py \
   input_file.txt
 ```
 → Runs offline, generates all outputs, archives with metadata, creates drift analysis, and exports SIEM events
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.8 or higher
+- Required packages: `requests`, `plotly`, `rich`, `tqdm`
+- Input file containing MAC addresses or ARP data from your network devices
+
+### Installation
+
+```bash
+git clone https://github.com/StewAlexander-com/NetVendor.git
+cd NetVendor
+pip install -e .
+```
+
+---
+
+## 📋 Quick Reference
+
+### Ways to Run NetVendor
+
+**1. Simple Package Entry Point** (basic usage, no flags):
+```bash
+netvendor input_file.txt
+# or
+python3 -m netvendor input_file.txt
+```
+
+**2. Standalone Script** (full feature set with all flags):
+```bash
+python3 NetVendor.py input_file.txt
+```
+
+**Note:** The standalone script (`NetVendor.py`) supports all advanced features. The package entry point (`netvendor`) is a simple wrapper that only accepts an input file argument.
+
+### Expected Outputs
+
+**Standard Outputs** (always generated in `output/` directory):
+
+| File | Description | When Generated |
+|------|-------------|----------------|
+| `{input_file}-Devices.csv` | Device information: MAC, Vendor, VLAN, Port | Always |
+| `{input_file}-Ports.csv` | Port utilization and device mapping | Only for MAC address tables |
+| `vendor_distribution.html` | Interactive dashboard with charts | Always |
+| `vendor_summary.txt` | Plain text summary with vendor counts/percentages | Always |
+
+**Optional Outputs** (when using `NetVendor.py` with flags):
+
+| File | Description | Required Flag |
+|------|-------------|---------------|
+| `siem/netvendor_siem.csv` | Line-delimited CSV for SIEM ingestion | `--siem-export` |
+| `siem/netvendor_siem.json` | JSON Lines format for SIEM ingestion | `--siem-export` |
+| `history/vendor_summary-*.txt` | Timestamped vendor summary snapshots | `--history-dir` |
+| `history/vendor_summary-*.metadata.json` | Companion metadata (timestamp, site, ticket) | `--history-dir` |
+| `history/vendor_drift.csv` | Vendor percentage trends across runs | `--analyze-drift` |
 
 ---
 
