@@ -11,6 +11,13 @@
 
 **Quick start:** `python3 NetVendor.py input_file.txt` → Check `output/` for results
 
+## 👥 Who is This For?
+
+- **SOC analysts**: Detect new vendors and track device changes for security monitoring
+- **Network engineers**: Analyze MAC address tables and ARP data to understand network composition
+- **Asset/CMDB owners**: Maintain accurate device inventories with vendor identification
+- **Security architects**: Integrate posture-change detection into SIEM workflows
+
 ---
 
 ## 📖 Introduction
@@ -113,13 +120,14 @@ netvendor input_file.txt
 # or
 python3 -m netvendor input_file.txt
 ```
+*Limited to basic analysis only - no advanced features*
 
 **2. Standalone Script** (full feature set with all flags):
 ```bash
 python3 NetVendor.py input_file.txt
 ```
 
-**Note:** The standalone script (`NetVendor.py`) supports all advanced features. The package entry point (`netvendor`) is a simple wrapper that only accepts an input file argument.
+**Important:** For all advanced features (offline mode, history tracking, SIEM export, drift analysis), use `python3 NetVendor.py`. The package entry point (`netvendor`) is a simple wrapper that only accepts an input file argument and does not support flags.
 
 ### Expected Outputs
 
