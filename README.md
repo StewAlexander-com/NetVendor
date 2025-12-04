@@ -30,6 +30,34 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), NetVendor transforms
 
 ---
 
+## 📑 Table of Contents
+
+- [✨ Features](#-features)
+- [🔄 Common Workflows](#-common-workflows)
+- [🚀 Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [📋 Quick Reference](#-quick-reference)
+  - [Ways to Run NetVendor](#ways-to-run-netvendor)
+  - [Expected Outputs](#expected-outputs)
+- [📋 Detailed Usage](#-detailed-usage)
+  - [Command-Line Flags](#command-line-flags)
+  - [Offline Mode](#offline-mode)
+  - [Historical Drift Analysis](#historical-drift-analysis)
+  - [SIEM-Friendly Export](#siem-friendly-export)
+  - [Windows Usage](#windows-usage)
+  - [Verbose Output](#verbose-output)
+  - [Runtime Logging](#runtime-logging)
+- [📥 Supported Input Formats](#-supported-input-formats)
+- [📊 Output Details](#-output-details)
+- [🔒 Posture-Change Detection & Security Monitoring](#-posture-change-detection--security-monitoring)
+- [✅ Operational Best Practices](#-operational-best-practices)
+- [⚙️ Runtime Considerations](#️-runtime-considerations)
+- [🧪 Testing & Quality](#-testing--quality)
+- [📈 Project Status](#-project-status)
+
+---
+
 ## ✨ Features
 
 - **Multi-vendor MAC address parsing:** Supports Cisco, HP/Aruba, Juniper, Extreme, Brocade, and more.
