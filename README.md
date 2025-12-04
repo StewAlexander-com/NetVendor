@@ -515,14 +515,16 @@ mypy netvendor
 
 NetVendor is actively maintained and regularly updated.  
 **Recent improvements:**
-- Enhanced MAC address parsing for Juniper, Aruba, Extreme, Brocade, and more
-- Improved OUIManager logic and normalization
-- Real-world OUI test coverage
-- Historical drift analysis with metadata correlation
-- SIEM export with stable schema for posture-change detection
-- Runtime logging for troubleshooting and performance analysis
-- Enhanced error handling with user-friendly messages
-- All tests pass and program output confirmed
+- ✅ Enhanced MAC address parsing for Juniper, Aruba, Extreme, Brocade, and more
+- ✅ Improved OUIManager logic and normalization
+- ✅ Real-world OUI test coverage
+- ✅ Historical drift analysis with metadata correlation (timestamp, site, change_ticket_id)
+- ✅ SIEM export with stable schema for posture-change detection (CSV/JSONL in `output/siem/`)
+- ✅ Runtime logging for troubleshooting and performance analysis (JSONL format)
+- ✅ Enhanced error handling with user-friendly messages and actionable hints
+- ✅ Offline mode support for air-gapped networks (`--offline` flag)
+- ✅ Comprehensive README with TL;DR, workflows, table of contents, and quick-start examples
+- ✅ All tests pass and program output confirmed
 
 **Planned:**
 - More vendor format support
