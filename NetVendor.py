@@ -163,13 +163,19 @@ def main():
     parser.add_argument(
         "--site",
         default=None,
-        help="Optional site identifier tag to include in SIEM exports (e.g., DC1, HQ)."
+        help="Optional site/region identifier tag to include in SIEM exports (e.g., DC1, HQ, us-east-1)."
+    )
+    parser.add_argument(
+        "--environment",
+        default=None,
+        help="Optional environment identifier tag to include in SIEM exports (e.g., prod, dev, staging)."
     )
     parser.add_argument(
         "--siem-export",
         action="store_true",
         help="Export normalized CSV/JSONL events for SIEM ingestion "
-             "(netvendor_siem.csv / netvendor_siem.json in the output directory)."
+             "(netvendor_siem.csv / netvendor_siem.json in the output directory). "
+             "Each record includes: timestamp, site, environment, mac, vendor, device_name, vlan, interface, input_type, source_file."
     )
 
     args = parser.parse_args()
@@ -352,6 +358,7 @@ def main():
             oui_manager=oui_manager,
             input_file=input_file,
             site=args.site,
+            environment=args.environment,
             input_type=input_type,
         )
 

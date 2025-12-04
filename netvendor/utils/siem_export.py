@@ -29,21 +29,35 @@ def export_siem_events(
     oui_manager,
     input_file: str | Path,
     site: str | None = None,
+    environment: str | None = None,
     input_type: str | None = None,
 ) -> None:
     """
-    Export normalized events for SIEM ingestion.
+    Export normalized events for SIEM ingestion with stable schema.
 
     Args:
         devices: Mapping of MAC -> {'vlan': str, 'port': str}.
         oui_manager: OUIManager instance used for vendor lookups.
         input_file: Original input file path.
-        site: Optional site identifier (e.g. "DC1", "HQ").
+        site: Optional site/region identifier (e.g. "DC1", "HQ", "us-east-1").
+        environment: Optional environment identifier (e.g. "prod", "dev", "staging").
         input_type: Optional logical input type ("mac_list", "mac_table", "arp_table").
 
     Outputs (created in the existing `output/` directory):
-        - output/netvendor_siem.csv
-        - output/netvendor_siem.json
+        - output/netvendor_siem.csv (line-delimited CSV)
+        - output/netvendor_siem.json (JSONL, one JSON object per line)
+
+    Schema (stable, SIEM-friendly field names):
+        - timestamp: UTC ISO-8601 collection time (e.g., "2025-10-31T16:23:45Z")
+        - site: Site/region identifier
+        - environment: Environment identifier (prod/dev/staging)
+        - mac: Normalized MAC address (xx:xx:xx:xx:xx:xx)
+        - vendor: Vendor name from OUI lookup
+        - device_name: Device identifier (derived from MAC if not available)
+        - vlan: VLAN ID or "N/A"
+        - interface: Network interface/port identifier
+        - input_type: Source data type (mac_list/mac_table/arp_table)
+        - source_file: Original input filename
     """
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
@@ -54,48 +68,62 @@ def export_siem_events(
     csv_path = output_dir / "netvendor_siem.csv"
     json_path = output_dir / "netvendor_siem.json"
 
+    # Stable schema with SIEM-friendly field names
     fieldnames = [
         "timestamp",
         "site",
-        "vlan",
-        "port",
+        "environment",
         "mac",
         "vendor",
+        "device_name",
+        "vlan",
+        "interface",
         "input_type",
         "source_file",
     ]
 
-    # Write CSV
+    # Write CSV (line-delimited, one record per line)
     with csv_path.open("w", newline="", encoding="utf-8") as f_csv:
         writer = csv.DictWriter(f_csv, fieldnames=fieldnames)
         writer.writeheader()
 
         for mac, info in devices.items():
             vendor = oui_manager.get_vendor(mac)
+            # Derive device_name from MAC if not explicitly provided
+            device_name = f"device-{mac.replace(':', '-')}" if not info.get("device_name") else info.get("device_name")
+            interface = info.get("port", "N/A")
+            
             row = {
                 "timestamp": timestamp,
                 "site": site or "",
-                "vlan": info.get("vlan", "N/A"),
-                "port": info.get("port", "N/A"),
+                "environment": environment or "",
                 "mac": mac,
-                "vendor": vendor or "",
-                "input_type": input_type or "",
+                "vendor": vendor or "Unknown",
+                "device_name": device_name,
+                "vlan": info.get("vlan", "N/A"),
+                "interface": interface,
+                "input_type": input_type or "unknown",
                 "source_file": source_file,
             }
             writer.writerow(row)
 
-    # Write JSONL
+    # Write JSONL (one JSON object per line, line-delimited)
     with json_path.open("w", encoding="utf-8") as f_json:
         for mac, info in devices.items():
             vendor = oui_manager.get_vendor(mac)
+            device_name = f"device-{mac.replace(':', '-')}" if not info.get("device_name") else info.get("device_name")
+            interface = info.get("port", "N/A")
+            
             event: Dict[str, Any] = {
                 "timestamp": timestamp,
-                "site": site,
-                "vlan": info.get("vlan", "N/A"),
-                "port": info.get("port", "N/A"),
+                "site": site or "",
+                "environment": environment or "",
                 "mac": mac,
-                "vendor": vendor,
-                "input_type": input_type,
+                "vendor": vendor or "Unknown",
+                "device_name": device_name,
+                "vlan": info.get("vlan", "N/A"),
+                "interface": interface,
+                "input_type": input_type or "unknown",
                 "source_file": source_file,
             }
             f_json.write(json.dumps(event, ensure_ascii=False) + "\n")

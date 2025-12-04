@@ -82,21 +82,35 @@ For SIEM integration (Elastic, Splunk, etc.), `NetVendor.py` can emit normalized
 python3 NetVendor.py \
   --siem-export \
   --site DC1 \
+  --environment prod \
   input_file.txt
 ```
 
 This will add the following files under `output/`:
 
-- `netvendor_siem.csv`
-- `netvendor_siem.json` (JSON lines, one event per line)
+- `netvendor_siem.csv` (line-delimited CSV with header)
+- `netvendor_siem.json` (JSONL format, one JSON object per line)
 
-Each event includes:
+**Stable Schema** (all fields present in every record for reliable correlation):
 
-- `timestamp`: UTC time when the run started (same for all events in that run)
-- `site`: `--site` value (e.g. `DC1`), or empty if not provided
-- `vlan`, `port`, `mac`, `vendor`
-- `input_type`: `mac_list`, `mac_table`, or `arp_table`
-- `source_file`: basename of the input file
+Each event includes the following SIEM-friendly fields:
+
+- `timestamp`: UTC ISO-8601 collection time (e.g., `2025-10-31T16:23:45Z`)
+- `site`: Site/region identifier from `--site` flag (e.g., `DC1`, `HQ`, `us-east-1`)
+- `environment`: Environment identifier from `--environment` flag (e.g., `prod`, `dev`, `staging`)
+- `mac`: Normalized MAC address in standard format (`xx:xx:xx:xx:xx:xx`)
+- `vendor`: Vendor name from OUI lookup (or `Unknown` if not found)
+- `device_name`: Device identifier (derived from MAC as `device-xx-xx-xx-xx-xx-xx` if not explicitly provided)
+- `vlan`: VLAN ID (or `N/A` if not available)
+- `interface`: Network interface/port identifier (e.g., `Gi1/0/1`, `ge-0/0/0`)
+- `input_type`: Source data type (`mac_list`, `mac_table`, `arp_table`, or `unknown`)
+- `source_file`: Original input filename
+
+**Correlation-friendly design:**
+- All fields are consistently named and present in every record
+- MAC addresses are normalized for reliable joins
+- Timestamps are UTC ISO-8601 for time-based correlation
+- Site and environment tags enable multi-site/environment dashboards
 
 You can safely combine flags in a single run, for example:
 
@@ -107,6 +121,7 @@ python3 NetVendor.py \
   --analyze-drift \
   --siem-export \
   --site DC1 \
+  --environment prod \
   input_file.txt
 ```
 
