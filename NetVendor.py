@@ -180,7 +180,7 @@ def main():
         "--siem-export",
         action="store_true",
         help="Export normalized CSV/JSONL events for SIEM ingestion "
-             "(netvendor_siem.csv / netvendor_siem.json in the output directory). "
+             "(netvendor_siem.csv / netvendor_siem.json in output/siem/ directory). "
              "Each record includes: timestamp, site, environment, mac, vendor, device_name, vlan, interface, input_type, source_file."
     )
 

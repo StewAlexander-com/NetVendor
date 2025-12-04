@@ -43,9 +43,9 @@ def export_siem_events(
         environment: Optional environment identifier (e.g. "prod", "dev", "staging").
         input_type: Optional logical input type ("mac_list", "mac_table", "arp_table").
 
-    Outputs (created in the existing `output/` directory):
-        - output/netvendor_siem.csv (line-delimited CSV)
-        - output/netvendor_siem.json (JSONL, one JSON object per line)
+    Outputs (created in `output/siem/` directory):
+        - output/siem/netvendor_siem.csv (line-delimited CSV)
+        - output/siem/netvendor_siem.json (JSONL, one JSON object per line)
 
     Schema (stable, SIEM-friendly field names):
         - timestamp: UTC ISO-8601 collection time (e.g., "2025-10-31T16:23:45Z")
@@ -59,14 +59,15 @@ def export_siem_events(
         - input_type: Source data type (mac_list/mac_table/arp_table)
         - source_file: Original input filename
     """
-    output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True)
+    # Create dedicated SIEM output directory
+    siem_dir = Path("output") / "siem"
+    siem_dir.mkdir(parents=True, exist_ok=True)
 
     source_file = Path(input_file).name
     timestamp = _current_timestamp()
 
-    csv_path = output_dir / "netvendor_siem.csv"
-    json_path = output_dir / "netvendor_siem.json"
+    csv_path = siem_dir / "netvendor_siem.csv"
+    json_path = siem_dir / "netvendor_siem.json"
 
     # Stable schema with SIEM-friendly field names
     fieldnames = [

@@ -75,8 +75,8 @@ python3 NetVendor.py input_file.txt
 
 | File | Description | Required Flag |
 |------|-------------|---------------|
-| `netvendor_siem.csv` | Line-delimited CSV for SIEM ingestion | `--siem-export` |
-| `netvendor_siem.json` | JSON Lines format for SIEM ingestion | `--siem-export` |
+| `siem/netvendor_siem.csv` | Line-delimited CSV for SIEM ingestion | `--siem-export` |
+| `siem/netvendor_siem.json` | JSON Lines format for SIEM ingestion | `--siem-export` |
 | `history/vendor_summary-*.txt` | Timestamped vendor summary snapshots | `--history-dir` |
 | `history/vendor_summary-*.metadata.json` | Companion metadata (timestamp, site, ticket) | `--history-dir` |
 | `history/vendor_drift.csv` | Vendor percentage trends across runs | `--analyze-drift` |
@@ -306,9 +306,9 @@ Internet  192.168.1.1      -          0011.2233.4455  ARPA   Vlan10
 
 ### Optional Outputs
 
-**SIEM Export Files** (requires `--siem-export`):
-- `netvendor_siem.csv`: Line-delimited CSV with header
-- `netvendor_siem.json`: JSONL format (one JSON object per line)
+**SIEM Export Files** (requires `--siem-export`, written to `output/siem/` directory):
+- `siem/netvendor_siem.csv`: Line-delimited CSV with header
+- `siem/netvendor_siem.json`: JSONL format (one JSON object per line)
 - Both contain identical data with stable schema for SIEM correlation
 
 **History Archive Files** (requires `--history-dir`):
@@ -342,7 +342,7 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 ### SIEM Integration Workflow
 
 1. **Regular Collection**: Schedule NetVendor runs (e.g., hourly/daily) with `--siem-export --site <SITE> --environment <ENV>` to generate normalized events.
-2. **SIEM Ingestion**: Configure Filebeat/Elastic Agent or similar to ingest `netvendor_siem.json` (JSONL format).
+2. **SIEM Ingestion**: Configure Filebeat/Elastic Agent or similar to ingest `output/siem/netvendor_siem.json` (JSONL format).
 3. **Correlation Rules**: Create SIEM rules that:
    - Join current NetVendor events with historical baselines using `mac`, `vlan`, `site`
    - Alert when `vendor` field changes for a known `mac` in a sensitive `vlan`
@@ -412,6 +412,7 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
   - SIEM export: ~500 bytes per device (JSONL format)
 - **Multiple runs**: Output files are overwritten by default. Previous outputs are not preserved unless manually backed up.
 - **History directory**: When using `NetVendor.py` with `--history-dir`, timestamped copies of `vendor_summary.txt` and companion `.metadata.json` files are stored there. The `vendor_drift.csv` is created when `--analyze-drift` is enabled.
+- **SIEM export directory**: When using `--siem-export`, both `netvendor_siem.csv` and `netvendor_siem.json` are created in the `output/siem/` directory. Each file contains one record per device with all required fields for SIEM correlation. The `siem/` directory is automatically created if it doesn't exist.
 
 ### Error Handling
 
