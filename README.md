@@ -11,7 +11,7 @@
 
 **Quick start:** `python3 NetVendor.py input_file.txt` → Check `output/` for results
 
-**Try it in 60 seconds:** `python3 NetVendor.py tests/data/test-mac-table.txt` → See dashboards without touching your own network data
+**Try it in 60 seconds:** `python3 NetVendor.py tests/data/test-mac-table.txt` (then open `output/vendor_distribution.html` in your browser) → See dashboards without touching your own network data
 
 ## 👥 Who is This For?
 
