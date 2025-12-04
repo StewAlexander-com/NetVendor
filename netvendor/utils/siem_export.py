@@ -61,7 +61,15 @@ def export_siem_events(
     """
     # Create dedicated SIEM output directory
     siem_dir = Path("output") / "siem"
-    siem_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        siem_dir.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        raise PermissionError(
+            f"Cannot create SIEM output directory '{siem_dir}' (permission denied). "
+            "Please check directory permissions or run with appropriate access."
+        )
+    except Exception as e:
+        raise RuntimeError(f"Cannot create SIEM output directory '{siem_dir}': {e}")
 
     source_file = Path(input_file).name
     timestamp = _current_timestamp()
