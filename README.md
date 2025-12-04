@@ -11,6 +11,8 @@
 
 **Quick start:** `python3 NetVendor.py input_file.txt` → Check `output/` for results
 
+**Try it in 60 seconds:** `python3 NetVendor.py tests/data/test-mac-table.txt` → See dashboards without touching your own network data
+
 ## 👥 Who is This For?
 
 - **SOC analysts**: Detect new vendors and track device changes for security monitoring
