@@ -74,6 +74,50 @@ This will:
 - Copy `output/vendor_summary.txt` to `history/vendor_summary-YYYYMMDD-HHMMSS.txt`.
 - Generate `history/vendor_drift.csv`, showing vendor percentages across all archived runs.
 
+### SIEM-Friendly Export (CSV/JSONL)
+
+For SIEM integration (Elastic, Splunk, etc.), `NetVendor.py` can emit normalized CSV and JSONL events:
+
+```bash
+python3 NetVendor.py \
+  --siem-export \
+  --site DC1 \
+  input_file.txt
+```
+
+This will add the following files under `output/`:
+
+- `netvendor_siem.csv`
+- `netvendor_siem.json` (JSON lines, one event per line)
+
+Each event includes:
+
+- `timestamp`: UTC time when the run started (same for all events in that run)
+- `site`: `--site` value (e.g. `DC1`), or empty if not provided
+- `vlan`, `port`, `mac`, `vendor`
+- `input_type`: `mac_list`, `mac_table`, or `arp_table`
+- `source_file`: basename of the input file
+
+You can safely combine flags in a single run, for example:
+
+```bash
+python3 NetVendor.py \
+  --offline \
+  --history-dir history \
+  --analyze-drift \
+  --siem-export \
+  --site DC1 \
+  input_file.txt
+```
+
+In this case, the tool will:
+
+- Run without external vendor lookups (`--offline`)
+- Generate all standard outputs under `output/`
+- Archive `vendor_summary-YYYYMMDD-HHMMSS.txt` into `history/`
+- Update `history/vendor_drift.csv` with the new snapshot
+- Emit SIEM-ready `netvendor_siem.csv` and `netvendor_siem.json` tagged with `site=DC1`
+
 ### Windows Usage
 
 ```powershell

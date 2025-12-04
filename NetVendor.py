@@ -4,6 +4,10 @@ import os
 import sys
 import json
 import csv
+import argparse
+import shutil
+from pathlib import Path
+from datetime import datetime
 from rich.console import Console
 
 from netvendor.core.oui_manager import OUIManager
@@ -13,6 +17,8 @@ from netvendor.utils.vendor_output_handler import (
     create_vendor_distribution,
     save_vendor_summary
 )
+from netvendor.utils.drift_analysis import analyze_drift
+from netvendor.utils.siem_export import export_siem_events
 
 console = Console()
 VERBOSE = os.getenv("NETVENDOR_VERBOSE", "0") in ("1", "true", "True")
@@ -128,22 +134,59 @@ def main():
     """
     # Check if required modules are installed
     check_dependencies()
-    
-    # Check if input file is provided
-    if len(sys.argv) != 2:
-        console.print("[bold red]Error:[/bold red] Please provide an input file.")
-        console.print("Usage: netvendor <input_file>")
-        sys.exit(1)
-    
-    input_file = sys.argv[1]
-    
+
+    parser = argparse.ArgumentParser(
+        description="Analyze network MAC/ARP data and generate vendor distribution reports."
+    )
+    parser.add_argument(
+        "input_file",
+        help="Path to MAC address list, MAC table, or ARP table file."
+    )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Disable external vendor lookups and use only the local OUI cache. "
+             "Uncached devices will appear as 'Unknown'."
+    )
+    parser.add_argument(
+        "--history-dir",
+        default="history",
+        help="Directory to archive vendor_summary snapshots for drift analysis "
+             "(default: ./history)."
+    )
+    parser.add_argument(
+        "--analyze-drift",
+        action="store_true",
+        help="After archiving the latest vendor_summary snapshot, run drift analysis "
+             "over all archived summaries and write vendor_drift.csv."
+    )
+    parser.add_argument(
+        "--site",
+        default=None,
+        help="Optional site identifier tag to include in SIEM exports (e.g., DC1, HQ)."
+    )
+    parser.add_argument(
+        "--siem-export",
+        action="store_true",
+        help="Export normalized CSV/JSONL events for SIEM ingestion "
+             "(netvendor_siem.csv / netvendor_siem.json in the output directory)."
+    )
+
+    args = parser.parse_args()
+    input_file = args.input_file
+
     # Check if input file exists
     if not os.path.exists(input_file):
         console.print(f"[bold red]Error:[/bold red] Input file '{input_file}' not found.")
         sys.exit(1)
-    
+
     # Initialize OUI manager
-    oui_manager = OUIManager()
+    oui_manager = OUIManager(offline=args.offline)
+    if args.offline:
+        console.print(
+            "[yellow]Offline mode enabled:[/yellow] external vendor lookups are disabled. "
+            "Devices not present in the local cache will appear as 'Unknown'."
+        )
     if VERBOSE:
         console.print(f"Loaded OUI cache with {len(oui_manager.cache)} entries")
     
@@ -293,6 +336,46 @@ def main():
     
     create_vendor_distribution(devices, oui_manager, input_file)
     save_vendor_summary(devices, oui_manager, input_file)
+
+    # Optional SIEM export
+    if args.siem_export:
+        if is_mac_list:
+            input_type = "mac_list"
+        elif is_arp_table:
+            input_type = "arp_table"
+        elif is_mac_table:
+            input_type = "mac_table"
+        else:
+            input_type = "unknown"
+        export_siem_events(
+            devices=devices,
+            oui_manager=oui_manager,
+            input_file=input_file,
+            site=args.site,
+            input_type=input_type,
+        )
+
+    # Archive vendor summary for drift analysis
+    history_dir = Path(args.history_dir)
+    history_dir.mkdir(parents=True, exist_ok=True)
+    summary_src = Path("output") / "vendor_summary.txt"
+    if summary_src.exists():
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        summary_dst = history_dir / f"vendor_summary-{timestamp}.txt"
+        try:
+            shutil.copy2(summary_src, summary_dst)
+            if VERBOSE:
+                console.print(f"Archived vendor summary to [green]{summary_dst}[/green]")
+        except OSError as e:
+            console.print(f"[yellow]Warning:[/yellow] Could not archive vendor summary: {e}")
+
+    # Optionally run drift analysis over archived summaries
+    if args.analyze_drift:
+        try:
+            drift_csv = analyze_drift(history_dir)
+            console.print(f"Vendor drift analysis written to [green]{drift_csv}[/green]")
+        except Exception as e:
+            console.print(f"[yellow]Warning:[/yellow] Drift analysis failed: {e}")
 
 if __name__ == "__main__":
     main()

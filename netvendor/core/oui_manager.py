@@ -31,9 +31,15 @@ from rich import print
 from rich.progress import Progress
 
 class OUIManager:
-    def __init__(self, oui_file: str = None):
-        """Initialize the OUI manager with pre-seeded cache and API fallback."""
+    def __init__(self, oui_file: str = None, offline: bool = False):
+        """Initialize the OUI manager with pre-seeded cache and API fallback.
+
+        Args:
+            oui_file: Optional path to a pre-seeded OUI file.
+            offline: When True, disables external API lookups and uses cache only.
+        """
         self.oui_file = oui_file
+        self.offline = offline
         self.cache = {}
         self.failed_lookups = set()
         self._file_metadata = None
@@ -193,17 +199,24 @@ class OUIManager:
         """
         if not mac:
             return None
-            
+
         oui = self._normalize_mac(mac)
         
         # Check failed lookups first
         if oui in self.failed_lookups:
+            # Previously failed lookups are treated as unknown
             return None
             
         # Check cache
         if oui in self.cache:
             return self.cache[oui]
-            
+
+        # In offline mode, never attempt external lookups
+        if getattr(self, "offline", False):
+            self.failed_lookups.add(oui)
+            self.save_failed_lookups()
+            return None
+
         # Try API lookup
         original_service_index = self.current_service_index
         retries = 0
