@@ -513,6 +513,8 @@ mypy netvendor
 
 ## 📈 Project Status
 
+**Latest Release: [v12.5](https://github.com/StewAlexander-com/NetVendor/releases/tag/v12.5)** - SIEM Integration, Drift Analysis, Runtime Logging & Enhanced UX
+
 NetVendor is actively maintained and regularly updated.  
 **Recent improvements:**
 - ✅ Enhanced MAC address parsing for Juniper, Aruba, Extreme, Brocade, and more
