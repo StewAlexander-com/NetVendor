@@ -1,7 +1,7 @@
 # 🚀 NetVendor
 
 ![Overview](docs/images/overview.png)
-*NetVendor provides comprehensive network device analysis and visualization*
+*Interactive vendor distribution pie chart with detailed hover information - see device counts, percentages, and VLAN presence at a glance*
 
 ## ⚡ TL;DR: Why You Should Care
 
@@ -365,10 +365,10 @@ Internet  192.168.1.1      -          0011.2233.4455  ARPA   Vlan10
 ### Standard Outputs
 
 ![Security Dashboard](docs/images/security-dashboard.png)
-*🔒 Interactive security dashboard showing device distribution and potential security concerns*
+*🔒 Device count analysis per VLAN - quickly identify VLANs with high device concentrations for security monitoring*
 
 ![Vendor Dashboard](docs/images/vendor-dashboard.png)
-*📊 Vendor distribution dashboard showing device types and network segments*
+*📊 Comprehensive multi-panel VLAN analysis dashboard - view device counts, vendor diversity, heatmaps, and top vendor distributions across your network segments*
 
 **Device Information CSV** (`{input_file}-Devices.csv`):
 - One row per device
