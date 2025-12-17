@@ -517,19 +517,22 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 
 - **Memory usage**: All devices are loaded into memory as a dictionary. Typical runs with thousands of MACs use minimal memory (<100MB). Very large inputs (100K+ MACs) may require 500MB-1GB RAM.
 - **Processing time**: 
-  - Cached lookups: ~0.5-1 second per 1,000 MACs
-  - With API lookups: ~2-5 seconds per 1,000 MACs (depends on rate limits and network latency)
-  - Visualization generation: Additional 1-3 seconds for HTML generation
+  - **Offline mode** (`--offline`): ~0.3-0.5 seconds per 1,000 MACs (no network latency, cache-only lookups)
+  - **Online mode with cached OUIs**: ~0.5-1 second per 1,000 MACs (cache hits only)
+  - **Online mode with API lookups**: ~2-5 seconds per 1,000 MACs (depends on rate limits and network latency for uncached OUIs)
+  - **Visualization generation**: Additional 1-3 seconds for HTML generation (same for both modes)
+- **Network dependency**: With `--offline`, there is zero network dependency. Processing speed is consistent and predictable regardless of network conditions. Online mode performance varies based on network latency and API availability.
 - **Duplicate MAC handling**: Duplicate MAC addresses in input files are automatically deduplicated (last occurrence overwrites earlier ones).
-- **File size limits**: No hard limits, but processing files with >100K unique MACs may be slow. Consider splitting very large files into batches.
+- **File size limits**: No hard limits, but processing files with >100K unique MACs may be slow. Consider splitting very large files into batches. Offline mode handles large files more efficiently due to no network overhead.
 
 ### Network & API Behavior
 
-- **Internet connectivity required**: API vendor lookups require internet access. Without connectivity, only cached vendors (from `oui_cache.json`) are available.
-- **API timeout**: 5-second timeout per API request prevents hangs on slow/unreliable networks. Failed requests are retried with exponential backoff across multiple services (maximum 2 retry cycles per service).
-- **Rate limiting**: Automatic rate limiting (1-2 seconds between calls) prevents API throttling. Service rotation handles temporary failures gracefully.
-- **Offline operation**: After initial cache population, you can run without external lookups using the `--offline` flag (when invoking `NetVendor.py`). In this mode, uncached MACs will appear as `Unknown`.
-- **No infinite hangs**: All network operations are bounded by timeouts. Even if all API services are unavailable, the tool will complete within a reasonable time (worst case: ~30 seconds for 100 uncached MACs with all retries).
+- **Internet connectivity**: API vendor lookups require internet access only when new OUIs are encountered. With `--offline` flag, the tool operates entirely without network access, using only the local OUI cache. This makes NetVendor suitable for air-gapped networks and ensures consistent, fast results.
+- **Offline mode performance**: When using `--offline`, processing is significantly faster (no network latency) and completely deterministic. All vendor lookups come from `output/data/oui_cache.json`. Uncached MACs will appear as `Unknown` in this mode.
+- **Online mode behavior**: Without `--offline`, the tool will attempt API lookups for unknown OUIs. API requests have a 5-second timeout per request to prevent hangs on slow/unreliable networks. Failed requests are retried with exponential backoff across multiple services (maximum 2 retry cycles per service).
+- **Rate limiting**: When online, automatic rate limiting (1-2 seconds between calls) prevents API throttling. Service rotation handles temporary failures gracefully.
+- **No infinite hangs**: All network operations are bounded by timeouts. Even if all API services are unavailable, the tool will complete within a reasonable time (worst case: ~30 seconds for 100 uncached MACs with all retries). With `--offline`, there are no network operations, so execution time is purely based on processing speed.
+- **Recommended workflow**: For production environments, run once with internet access to populate the cache, then use `--offline` for all subsequent runs. This eliminates network dependencies and ensures consistent, fast execution.
 
 ### Disk Space & Output Files
 
