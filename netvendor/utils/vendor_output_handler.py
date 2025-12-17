@@ -371,31 +371,91 @@ def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager, 
                 <title>Network Vendor Distribution Analysis</title>
                 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
                 <style>
+                    * {{
+                        box-sizing: border-box;
+                    }}
                     body {{
-                        font-family: Arial, sans-serif;
-                        margin: 20px;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                        margin: 0;
+                        padding: 30px 20px;
                         background-color: #f5f5f5;
+                        line-height: 1.6;
+                        color: #333;
+                    }}
+                    .container {{
+                        max-width: 1400px;
+                        margin: 0 auto;
+                    }}
+                    h1 {{
+                        color: #2c3e50;
+                        text-align: center;
+                        margin: 0 0 40px 0;
+                        padding: 20px 0;
+                        font-size: 2.2em;
+                        font-weight: 600;
+                        letter-spacing: -0.5px;
                     }}
                     .chart-container {{
                         background-color: white;
-                        padding: 20px;
-                        margin: 20px 0;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        padding: 35px 30px;
+                        margin: 0 0 30px 0;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                        transition: box-shadow 0.3s ease;
                     }}
-                    h1 {{
-                        color: #333;
-                        text-align: center;
+                    .chart-container:hover {{
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+                    }}
+                    .chart-container h2 {{
+                        margin: 0 0 25px 0;
+                        padding: 0;
+                        color: #34495e;
+                        font-size: 1.4em;
+                        font-weight: 500;
+                    }}
+                    #vendor-distribution {{
+                        width: 100%;
+                        height: 600px;
+                        padding: 10px 0;
+                    }}
+                    #vlan-analysis {{
+                        width: 100%;
+                        height: 1000px;
+                        padding: 10px 0;
+                    }}
+                    @media (max-width: 768px) {{
+                        body {{
+                            padding: 15px 10px;
+                        }}
+                        h1 {{
+                            font-size: 1.6em;
+                            margin-bottom: 25px;
+                            padding: 15px 0;
+                        }}
+                        .chart-container {{
+                            padding: 20px 15px;
+                            margin-bottom: 20px;
+                        }}
+                        #vendor-distribution {{
+                            height: 500px;
+                        }}
+                        #vlan-analysis {{
+                            height: 800px;
+                        }}
                     }}
                 </style>
             </head>
             <body>
-                <h1>Network Vendor Distribution Analysis</h1>
-                <div class="chart-container">
-                    <div id="vendor-distribution" style="width: 100%; height: 600px;"></div>
-                </div>
-                <div class="chart-container">
-                    <div id="vlan-analysis" style="width: 100%; height: 1000px;"></div>
+                <div class="container">
+                    <h1>Network Vendor Distribution Analysis</h1>
+                    <div class="chart-container">
+                        <h2>Vendor Distribution</h2>
+                        <div id="vendor-distribution"></div>
+                    </div>
+                    <div class="chart-container">
+                        <h2>VLAN Analysis</h2>
+                        <div id="vlan-analysis"></div>
+                    </div>
                 </div>
                 <script>
                     var fig1 = {json.dumps(fig1.to_dict())};
