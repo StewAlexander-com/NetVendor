@@ -110,3 +110,17 @@ Desktop.ini
 *.temp
 *.bak
 *~
+
+# Test artifacts and history directories
+test_*/
+*_history/
+history/
+test_all_flags.py
+test_*.py
+*_test.py
+!tests/test_*.py
+
+# Generated test output directories
+test_empty_history/
+test_history/
+test_verify/
