@@ -533,7 +533,7 @@ mypy netvendor
 
 ## 📈 Project Status
 
-**Latest Release: [v12.7](https://github.com/StewAlexander-com/NetVendor/releases/tag/v12.7)** - Cross-Platform Compatibility & Bug Fixes
+**Latest Release: [v12.8](https://github.com/StewAlexander-com/NetVendor/releases/tag/v12.8)** - Enhanced HTML Dashboard Readability
 
 NetVendor is actively maintained and regularly updated.  
 **Recent improvements:**
