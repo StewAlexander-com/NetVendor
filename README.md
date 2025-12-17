@@ -457,15 +457,57 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 
 ## ✅ Operational Best Practices
 
-- **Prefer offline vendor lookups**: The OUI cache is seeded and persisted under `output/data/oui_cache.json`. Run once on representative data to warm the cache; subsequent runs avoid external requests and are faster.
-- **Avoid parallel CLI runs**: OUI API lookups are rate-limited with backoff and service rotation. For batch processing, run files sequentially to prevent throttling.
-- **Let the tool normalize MACs**: Inputs in colon, hyphen, dot, or mask/prefix forms are accepted; output is consistently `xx:xx:xx:xx:xx:xx`.
-- **Large input handling**: Use unedited device outputs. The parser skips headers and tolerates mixed casing. Ensure `output/` is writable and on local storage for speed.
-- **Port reports**: Generated only for MAC address tables (not ARP or simple lists).
-- **Output hygiene**: Clean `output/` between runs in CI or keep it out of version control to avoid stale artifacts.
-- **Windows encoding**: Use the environment variables above to prevent encoding issues with device outputs.
-- **Security**: Treat MAC/ARP dumps as sensitive. Review `output/data/failed_lookups.json` before sharing artifacts.
-- **Reproducibility**: Pin and install dependencies from this repo. Archive `output/data/oui_cache.json` with reports for future re-runs.
+### Vendor Lookup & Caching
+
+- **Prefer offline vendor lookups**: The OUI cache is seeded and persisted under `output/data/oui_cache.json`. Run once on representative data to warm the cache; subsequent runs avoid external requests and are faster. Use `--offline` flag for air-gapped networks or to ensure consistent results without network dependencies.
+- **Avoid parallel CLI runs**: OUI API lookups are rate-limited with backoff and service rotation. For batch processing, run files sequentially to prevent throttling. If running multiple analyses, use `--offline` mode after initial cache population.
+- **Cache management**: The OUI cache grows over time as new vendors are discovered. Archive `output/data/oui_cache.json` with reports for reproducibility. Failed lookups are tracked in `output/data/failed_lookups.json` to avoid repeated API calls.
+
+### Input & Processing
+
+- **Let the tool normalize MACs**: Inputs in colon, hyphen, dot, or mask/prefix forms are accepted; output is consistently `xx:xx:xx:xx:xx:xx`. No manual formatting required.
+- **Large input handling**: Use unedited device outputs. The parser skips headers and tolerates mixed casing. Ensure `output/` is writable and on local storage for speed. Files with >100K unique MACs may be slow; consider splitting very large files into batches.
+- **Port reports**: Generated only for MAC address tables (not ARP or simple lists). Ensure your input file contains port information if you need port-level analysis.
+
+### Output Management
+
+- **Output hygiene**: Clean `output/` between runs in CI or keep it out of version control to avoid stale artifacts. Standard outputs are overwritten by default; only history archives and SIEM exports accumulate.
+- **History directory management**: When using `--history-dir`, the directory is created automatically. Regularly review and archive old snapshots to manage disk space. Each snapshot includes both the summary text file and metadata JSON for correlation.
+- **SIEM export organization**: SIEM exports are written to `output/siem/` directory. For continuous monitoring, configure your SIEM agent to ingest from this directory and rotate files after ingestion. Each run generates new files that overwrite previous exports.
+
+### Historical Drift Tracking
+
+- **Consistent site/environment tags**: Always use `--site` and `--environment` flags for drift analysis and SIEM exports. Consistent tagging enables accurate multi-site comparisons and correlation across environments.
+- **Change ticket correlation**: Use `--change-ticket` when running drift analysis during change windows. This enables correlation of vendor mix shifts with specific change tickets, supporting 8D/5-why incident analysis workflows.
+- **Drift analysis frequency**: Run `--analyze-drift` regularly (e.g., after each scheduled collection) to maintain up-to-date trend analysis. The drift CSV accumulates metadata rows and vendor percentage trends across all archived runs.
+
+### SIEM Integration
+
+- **Stable schema usage**: SIEM exports use a stable schema with all fields present in every record. Design your SIEM correlation rules to leverage `mac`, `vlan`, `site`, `environment`, and `timestamp` fields for reliable joins and filtering.
+- **Collection scheduling**: For posture-change detection, schedule regular NetVendor runs (e.g., hourly/daily) with `--siem-export --site <SITE> --environment <ENV>`. Consistent collection intervals enable accurate baseline comparisons.
+- **SIEM storage planning**: Each device generates ~500 bytes in JSONL format. Plan SIEM retention based on collection frequency and device count. Index `mac`, `vlan`, `site`, and `timestamp` fields for optimal query performance.
+
+### Troubleshooting & Debugging
+
+- **Runtime logging**: Enable `NETVENDOR_LOG=1` for structured JSONL logging to `output/netvendor_runtime.log`. Use logs for troubleshooting performance issues, error conditions, and understanding processing flow.
+- **Verbose output**: Use `NETVENDOR_VERBOSE=1` for detailed processing information during development or debugging. Verbose mode shows file type detection, per-line processing, and output file previews.
+- **Error review**: Check `output/data/failed_lookups.json` periodically to identify MACs that couldn't be resolved. These may indicate new vendors or data quality issues.
+
+### Cross-Platform Considerations
+
+- **Windows encoding**: Set `PYTHONIOENCODING=utf-8` and `PYTHONUTF8=1` environment variables to prevent encoding issues with device outputs on Windows.
+- **File path handling**: All paths use `pathlib.Path` for cross-platform compatibility. The tool handles `/` vs `\` automatically on Windows/Linux/Mac.
+- **Atomic file operations**: Cache writes use atomic operations (write to temp file, then rename) to prevent corruption if multiple processes run simultaneously or if the process is interrupted.
+
+### Security & Privacy
+
+- **Sensitive data handling**: Treat MAC/ARP dumps as sensitive. Review `output/data/failed_lookups.json` and `output/data/oui_cache.json` before sharing artifacts. Consider excluding these files from shared reports.
+- **Air-gapped networks**: Use `--offline` mode for air-gapped networks. Pre-populate the OUI cache on a connected system, then copy `output/data/oui_cache.json` to the air-gapped system for consistent vendor identification.
+
+### Reproducibility
+
+- **Dependency pinning**: Pin and install dependencies from this repo. Archive `output/data/oui_cache.json` with reports for future re-runs to ensure consistent vendor identification.
+- **Version tracking**: Include NetVendor version and commit hash in your reports or SIEM metadata for reproducibility. Document the flags used for each analysis run.
 
 ---
 
