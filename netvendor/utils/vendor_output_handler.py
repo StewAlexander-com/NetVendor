@@ -57,6 +57,8 @@ def make_csv(input_file: Union[Path, str], devices: Dict[str, Dict[str, str]], o
             
             for mac, info in devices.items():
                 vendor = oui_manager.get_vendor(mac)
+                # Handle None vendor (occurs in offline mode for uncached MACs)
+                vendor = vendor if vendor is not None else "Unknown"
                 vlan = info.get('vlan', 'N/A')
                 port = info.get('port', 'N/A')
                 writer.writerow([mac, vendor, vlan, port])
@@ -107,14 +109,17 @@ def generate_port_report(input_file: str, devices: Dict[str, Dict[str, str]], ou
         port_info = port_data[port]
         port_info['total_devices'] += 1
         port_info['vlans'].add(device.get('vlan', ''))
-        port_info['vendors'].add(oui_manager.get_vendor(mac))
+        vendor = oui_manager.get_vendor(mac)
+        # Handle None vendor (occurs in offline mode for uncached MACs)
+        vendor = vendor if vendor is not None else "Unknown"
+        port_info['vendors'].add(vendor)
         port_info['devices'].append(mac)
         
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     
     # Write to CSV
-    with open(output_file, 'w', newline='') as f:
+    with open(output_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['Port', 'Total Devices', 'VLANs', 'Vendors', 'Devices'])
         for port, info in port_data.items():
@@ -186,6 +191,8 @@ def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager, 
         
         for mac, info in devices.items():
             vendor = oui_manager.get_vendor(mac)
+            # Handle None vendor (occurs in offline mode for uncached MACs)
+            vendor = vendor if vendor is not None else "Unknown"
             vlan = info.get('vlan', 'N/A')
             
             # Update counters
@@ -442,6 +449,8 @@ def save_vendor_summary(devices: Dict[str, Dict[str, str]], oui_manager, input_f
     vendor_counts = Counter()
     for mac in devices:
         vendor = oui_manager.get_vendor(mac)
+        # Handle None vendor (occurs in offline mode for uncached MACs)
+        vendor = vendor if vendor is not None else "Unknown"
         vendor_counts[vendor] += 1
     
     # Calculate total devices

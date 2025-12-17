@@ -426,12 +426,14 @@ def main():
         sys.exit(1)
     
     # Generate reports
-    output_file = os.path.join('output', os.path.basename(input_file).replace('.txt', '-Devices.csv'))
+    # Use Path for cross-platform compatibility
+    input_path = Path(input_file)
+    output_file = Path('output') / f"{input_path.stem}-Devices.csv"
     if VERBOSE:
         console.print(f"\nWriting to CSV file: {output_file}")
     
     try:
-        with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        with output_file.open('w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(['MAC', 'Vendor', 'VLAN', 'Port'])
             for mac, info in devices.items():
@@ -450,10 +452,10 @@ def main():
         sys.exit(1)
     
     # Verify the file was written
-    if os.path.exists(output_file):
-        logger.log_output_generation("device_csv", output_file, len(devices))
+    if output_file.exists():
+        logger.log_output_generation("device_csv", str(output_file), len(devices))
         if VERBOSE:
-            with open(output_file, 'r') as f:
+            with output_file.open('r', encoding='utf-8') as f:
                 content = f.read()
                 console.print(f"\nOutput file content (first few lines):")
                 console.print(content[:500])  # Show first 500 characters

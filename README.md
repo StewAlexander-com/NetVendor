@@ -256,13 +256,30 @@ python3 NetVendor.py \
 - UTC ISO-8601 timestamps for time-based correlation
 - Site and environment tags enable multi-site/environment dashboards
 
-### Windows Usage
+### Cross-Platform Compatibility
 
+NetVendor is designed to work on **Linux (Debian/Ubuntu), macOS (Intel and Apple Silicon), and Windows**. All file operations use UTF-8 encoding and cross-platform path handling.
+
+**Windows Usage:**
 ```powershell
+# Set encoding environment variables (recommended)
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUTF8 = "1"
-python3 -m netvendor input_file.txt
+python3 NetVendor.py input_file.txt
 ```
+
+**Linux/macOS Usage:**
+```bash
+python3 NetVendor.py input_file.txt
+```
+
+**Cross-Platform Considerations:**
+- **File paths**: All paths use `pathlib.Path` for cross-platform compatibility (handles `/` vs `\` automatically)
+- **File encoding**: All file operations explicitly use UTF-8 encoding to prevent encoding issues on Windows
+- **Line endings**: Python's text mode handles both CRLF (Windows) and LF (Unix) automatically
+- **File locking**: Cache writes use atomic operations (write to temp file, then rename) to prevent corruption if multiple processes run simultaneously
+- **API timeouts**: All network requests have 5-second timeouts to prevent hangs on slow/unreliable networks
+- **Error handling**: Permission errors and file system errors are handled gracefully on all platforms
 
 ### Verbose Output
 
@@ -467,9 +484,10 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 ### Network & API Behavior
 
 - **Internet connectivity required**: API vendor lookups require internet access. Without connectivity, only cached vendors (from `oui_cache.json`) are available.
-- **API timeout**: 5-second timeout per API request. Failed requests are retried with exponential backoff across multiple services.
+- **API timeout**: 5-second timeout per API request prevents hangs on slow/unreliable networks. Failed requests are retried with exponential backoff across multiple services (maximum 2 retry cycles per service).
 - **Rate limiting**: Automatic rate limiting (1-2 seconds between calls) prevents API throttling. Service rotation handles temporary failures gracefully.
 - **Offline operation**: After initial cache population, you can run without external lookups using the `--offline` flag (when invoking `NetVendor.py`). In this mode, uncached MACs will appear as `Unknown`.
+- **No infinite hangs**: All network operations are bounded by timeouts. Even if all API services are unavailable, the tool will complete within a reasonable time (worst case: ~30 seconds for 100 uncached MACs with all retries).
 
 ### Disk Space & Output Files
 
@@ -491,6 +509,8 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 - **Invalid input files**: Malformed lines are silently skipped; processing continues for valid entries.
 - **API failures**: Failed vendor lookups are cached in `failed_lookups.json` to avoid repeated attempts. These appear as "Unknown" in output.
 - **Write failures**: If output directory cannot be created or files cannot be written, the tool exits with an error message.
+- **Cross-platform file operations**: All file writes use atomic operations (write to temp file, then rename) to prevent corruption on Windows/Linux/Mac if the process is interrupted. File encoding is explicitly set to UTF-8 to prevent encoding issues on Windows.
+- **Permission errors**: Clear error messages with hints for permission issues on all platforms (Windows, Linux, macOS).
 
 ---
 

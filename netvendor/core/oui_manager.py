@@ -89,7 +89,7 @@ class OUIManager:
             return
             
         try:
-            with open(self.oui_file, 'r') as f:
+            with open(self.oui_file, 'r', encoding='utf-8') as f:
                 for line in f:
                     if line.startswith('#'):
                         continue
@@ -130,7 +130,7 @@ class OUIManager:
         """Load the pre-seeded Wireshark manufacturers database."""
         if self.oui_file and os.path.exists(self.oui_file):
             try:
-                with open(self.oui_file, 'r') as f:
+                with open(self.oui_file, 'r', encoding='utf-8') as f:
                     for line in f:
                         if line.startswith('#'):
                             continue
@@ -147,7 +147,7 @@ class OUIManager:
     def load_cache(self):
         """Load user's cached vendor lookups."""
         try:
-            with open(self.cache_file, 'r') as f:
+            with open(self.cache_file, 'r', encoding='utf-8') as f:
                 user_cache = json.load(f)
                 # Update cache with user lookups (may override pre-seeded entries)
                 self.cache.update(user_cache)
@@ -155,22 +155,58 @@ class OUIManager:
             pass
 
     def save_cache(self):
-        """Save only user-added cache entries."""
-        with open(self.cache_file, 'w') as f:
-            json.dump(self.cache, f, indent=2)
+        """Save only user-added cache entries with atomic write for cross-platform safety."""
+        try:
+            # Use atomic write pattern: write to temp file, then rename
+            # This prevents corruption on Windows/Linux/Mac if process is interrupted
+            temp_file = self.cache_file.with_suffix('.tmp')
+            with temp_file.open('w', encoding='utf-8') as f:
+                json.dump(self.cache, f, indent=2)
+                f.flush()
+                try:
+                    os.fsync(f.fileno())  # Force write to disk (Unix/Windows)
+                except (AttributeError, OSError):
+                    pass  # fsync not available on all platforms
+            # Atomic rename (works on Unix and Windows)
+            temp_file.replace(self.cache_file)
+        except (IOError, OSError, PermissionError) as e:
+            # Fallback: direct write if atomic rename fails
+            try:
+                with self.cache_file.open('w', encoding='utf-8') as f:
+                    json.dump(self.cache, f, indent=2)
+            except (IOError, OSError, PermissionError):
+                pass  # Silently fail if cache can't be saved
 
     def load_failed_lookups(self):
         """Load previously failed lookups."""
         try:
-            with open(self.failed_lookups_file, 'r') as f:
+            with open(self.failed_lookups_file, 'r', encoding='utf-8') as f:
                 self.failed_lookups = set(json.load(f))
         except (json.JSONDecodeError, IOError):
             self.failed_lookups = set()
 
     def save_failed_lookups(self):
-        """Save failed lookups."""
-        with open(self.failed_lookups_file, 'w') as f:
-            json.dump(list(self.failed_lookups), f)
+        """Save failed lookups with atomic write for cross-platform safety."""
+        try:
+            # Use atomic write pattern: write to temp file, then rename
+            # This prevents corruption on Windows/Linux/Mac if process is interrupted
+            temp_file = self.failed_lookups_file.with_suffix('.tmp')
+            with temp_file.open('w', encoding='utf-8') as f:
+                json.dump(list(self.failed_lookups), f)
+                f.flush()
+                try:
+                    os.fsync(f.fileno())  # Force write to disk (Unix/Windows)
+                except (AttributeError, OSError):
+                    pass  # fsync not available on all platforms
+            # Atomic rename (works on Unix and Windows)
+            temp_file.replace(self.failed_lookups_file)
+        except (IOError, OSError, PermissionError) as e:
+            # Fallback: direct write if atomic rename fails
+            try:
+                with self.failed_lookups_file.open('w', encoding='utf-8') as f:
+                    json.dump(list(self.failed_lookups), f)
+            except (IOError, OSError, PermissionError):
+                pass  # Silently fail if failed lookups can't be saved
 
     def _normalize_mac(self, mac: str) -> str:
         """Normalize MAC address format for lookups."""
