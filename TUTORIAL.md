@@ -1083,14 +1083,26 @@ This section provides step-by-step guides for extending NetVendor's functionalit
 
 ## Test Strategy
 
-NetVendor's test suite is located in `tests/` and provides comprehensive coverage of all execution paths, core functionality, and edge cases.
+NetVendor's test suite is located in `tests/` and provides comprehensive coverage of all execution paths, core functionality, and edge cases. This section explains **how the testing process works**, from running tests to understanding results.
+
+### Understanding the Test Process
+
+**What happens when you run tests:**
+
+1. **Test Discovery**: pytest automatically finds all test files (files starting with `test_`) and test functions (functions starting with `test_`)
+2. **Fixture Setup**: Before each test, pytest runs fixtures (like `temp_dir`, `sample_mac_table_file`) to set up test data
+3. **Test Execution**: Each test function runs in isolation with its own temporary directory
+4. **Assertion Validation**: Tests use `assert` statements to verify expected behavior
+5. **Cleanup**: Temporary files and directories are automatically cleaned up after each test
+
+**Test isolation**: Each test runs in its own temporary directory (`tempfile.TemporaryDirectory()`), so tests don't interfere with each other or pollute your workspace.
 
 ### Test Structure
 
 ```
 tests/
 ├── __init__.py
-├── conftest.py                      # Shared fixtures
+├── conftest.py                      # Shared fixtures (temp_dir, sample files)
 ├── test_execution_paths.py         # All execution paths (20+ tests)
 ├── test_netvendor.py                # Parsing and format detection tests
 ├── test_oui_manager.py              # Vendor lookup and caching tests
@@ -1098,9 +1110,16 @@ tests/
 ├── test_api.py                      # Python API tests
 └── data/                            # Sample input files
     ├── test-mac-list.txt            # 100 MAC addresses
-    ├── test-mac-table.txt           # 500+ MAC table entries
+    ├── test-mac-table.txt            # 500+ MAC table entries
     └── test-arp-table.txt           # ARP table format
 ```
+
+**Key components:**
+
+- **`conftest.py`**: Defines shared fixtures (test data setup) used across all test files
+- **`test_*.py`**: Individual test files organized by functionality
+- **`data/`**: Mock input files representing real-world network device outputs
+- **Fixtures**: Reusable test data (e.g., `temp_dir` creates temporary directories, `sample_mac_table_file` creates test input files)
 
 ### Execution Path Testing
 
@@ -1169,12 +1188,16 @@ See **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** for detailed execution path doc
 
 ### Running Tests
 
-```bash
-# Run all tests (quick)
-pytest -q
+**Basic test execution:**
 
-# Run all tests (verbose)
+```bash
+# Run all tests (quick summary)
+pytest -q
+# Output: Shows pass/fail count, e.g., "20 passed in 2.34s"
+
+# Run all tests (verbose - shows each test name)
 pytest -v
+# Output: Lists each test with PASSED/FAILED status
 
 # Run execution path tests (comprehensive validation)
 pytest tests/test_execution_paths.py -v
@@ -1182,21 +1205,121 @@ pytest tests/test_execution_paths.py -v
 # Run specific test file
 pytest tests/test_netvendor.py -v
 
-# Run specific test
+# Run specific test function
 pytest tests/test_netvendor.py::test_is_mac_address -v
 
-# Run with coverage report
+# Run with coverage report (shows which code is tested)
 pytest --cov=netvendor --cov-report=html
+# Opens htmlcov/index.html in browser showing line-by-line coverage
 ```
+
+**Understanding test output:**
+
+- **PASSED**: Test completed successfully, all assertions passed
+- **FAILED**: An assertion failed or an exception occurred
+- **SKIPPED**: Test was skipped (e.g., missing optional dependency)
+- **ERROR**: Test setup/fixture failed before test could run
+
+**Example test run output:**
+```
+tests/test_execution_paths.py::test_package_entry_point_basic PASSED     [  5%]
+tests/test_execution_paths.py::test_module_execution PASSED              [ 10%]
+tests/test_execution_paths.py::test_standalone_script_basic PASSED       [ 15%]
+...
+============================= 20 passed in 22.42s ==============================
+```
+
+### How Tests Work: Step-by-Step Example
+
+Let's walk through what happens when a test runs:
+
+**Example: `test_standalone_script_basic()`**
+
+```python
+def test_standalone_script_basic(sample_mac_table_file, temp_dir):
+    """Test: python3 NetVendor.py input_file.txt (basic, no flags)."""
+    from NetVendor import main
+    import sys
+    
+    with patch('sys.argv', ['NetVendor.py', str(sample_mac_table_file)]):
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(temp_dir)
+            main()
+            
+            # Verify standard outputs
+            assert (temp_dir / "output" / f"{sample_mac_table_file.stem}-Devices.csv").exists()
+            assert (temp_dir / "output" / "vendor_distribution.html").exists()
+        finally:
+            os.chdir(old_cwd)
+```
+
+**Test execution flow:**
+
+1. **Fixture execution**: pytest calls `sample_mac_table_file(temp_dir)` and `temp_dir()` fixtures
+   - `temp_dir()` creates a temporary directory (e.g., `/tmp/tmpXYZ123`)
+   - `sample_mac_table_file()` creates a test MAC table file in that directory
+
+2. **Test setup**: 
+   - `patch('sys.argv', ...)` mocks command-line arguments
+   - `os.chdir(temp_dir)` changes to the temporary directory
+
+3. **Test execution**:
+   - `main()` runs NetVendor with the mocked arguments
+   - NetVendor processes the test file and generates outputs
+
+4. **Assertion validation**:
+   - `assert (temp_dir / "output" / "...-Devices.csv").exists()` checks if CSV was created
+   - `assert (temp_dir / "output" / "vendor_distribution.html").exists()` checks if HTML was created
+   - If any assertion fails, the test fails
+
+5. **Cleanup**:
+   - `finally` block restores original working directory
+   - Temporary directory is automatically deleted when test completes
+
+**Why this approach works:**
+- **Isolation**: Each test has its own temporary directory, so tests don't interfere
+- **Reproducibility**: Tests use controlled mock data, so results are consistent
+- **Validation**: Assertions verify both that code runs AND produces expected outputs
+- **Cleanup**: Automatic cleanup ensures no leftover files from test runs
 
 ### Test Data
 
-Sample input files in `tests/data/` represent real-world formats:
+**Mock data files** in `tests/data/` represent real-world network device formats:
 - `test-mac-table.txt` - Cisco-style MAC address table (500+ entries)
 - `test-arp-table.txt` - Standard ARP table format
 - `test-mac-list.txt` - Simple MAC address list (100 MACs)
 
-**Adding test data**: Add new files to `tests/data/` and reference them in test cases. Tests use temporary directories to avoid polluting the workspace.
+**How test data is used:**
+
+1. **Static test data**: Files in `tests/data/` are read-only reference files
+2. **Dynamic test data**: Tests create temporary files using fixtures (e.g., `sample_mac_table_file`)
+3. **Isolation**: Each test creates its own copy of test data in a temporary directory
+
+**Adding new test data:**
+
+1. Add a new file to `tests/data/` (e.g., `test-juniper-mac-table.txt`)
+2. Create a fixture in `conftest.py` or the test file:
+   ```python
+   @pytest.fixture
+   def sample_juniper_file(temp_dir):
+       """Create a sample Juniper MAC table file."""
+       test_file = temp_dir / "test_juniper.txt"
+       test_file.write_text("... Juniper format content ...")
+       return test_file
+   ```
+3. Use the fixture in your test:
+   ```python
+   def test_juniper_format(sample_juniper_file, temp_dir):
+       result = analyze_file(sample_juniper_file, offline=True)
+       assert result['device_count'] > 0
+   ```
+
+**Why temporary directories?**
+- Tests don't pollute your workspace with output files
+- Multiple tests can run in parallel without conflicts
+- Automatic cleanup ensures no leftover files
+- Each test starts with a clean slate
 
 ### Testing Philosophy
 
@@ -1207,7 +1330,57 @@ NetVendor's testing approach ensures:
 - **Reproducibility**: All tests use controlled mock data
 - **Cross-platform**: Tests validate Windows/Linux/macOS compatibility
 
-**Test validation checklist**:
+### Writing New Tests
+
+**Step-by-step guide for adding a new test:**
+
+1. **Identify what to test**: Decide what functionality needs validation
+   - New parser format? → Add to `test_netvendor.py`
+   - New execution path? → Add to `test_execution_paths.py`
+   - New output format? → Add to `test_vendor_output_handler.py`
+
+2. **Create test data** (if needed):
+   ```python
+   @pytest.fixture
+   def my_test_file(temp_dir):
+       test_file = temp_dir / "my_input.txt"
+       test_file.write_text("... test data ...")
+       return test_file
+   ```
+
+3. **Write the test function**:
+   ```python
+   def test_my_feature(my_test_file, temp_dir):
+       """Test: Description of what this test validates."""
+       # Setup
+       from NetVendor import main
+       
+       # Execute
+       with patch('sys.argv', ['NetVendor.py', str(my_test_file)]):
+           main()
+       
+       # Verify
+       assert (temp_dir / "output" / "vendor_summary.txt").exists()
+       # Add more assertions as needed
+   ```
+
+4. **Run the test**:
+   ```bash
+   pytest tests/test_my_file.py::test_my_feature -v
+   ```
+
+5. **Verify it passes**: Test should show `PASSED` status
+
+**Test best practices:**
+- **One assertion per concept**: Test one thing at a time
+- **Descriptive names**: Test function names should explain what they test
+- **Use fixtures**: Reuse test data setup via fixtures
+- **Clean assertions**: Verify both that code runs AND produces correct outputs
+- **Test edge cases**: Don't just test the happy path
+
+### Test Validation Checklist
+
+**Current test coverage:**
 - ✅ All execution paths tested (package entry, standalone, Python API)
 - ✅ All input file types tested (MAC list, MAC table, ARP table)
 - ✅ All feature flags tested (offline, SIEM, drift, history)
@@ -1218,7 +1391,22 @@ NetVendor's testing approach ensures:
 - ✅ Tests isolated (use temporary directories)
 - ✅ All tests passing (20+ execution path tests + core functionality tests)
 
-For detailed test coverage information, see **[TEST_COVERAGE.md](TEST_COVERAGE.md)**.
+**How to verify test coverage:**
+
+```bash
+# Run all tests and see summary
+pytest -q
+
+# Run with coverage report
+pytest --cov=netvendor --cov-report=term-missing
+# Shows which lines of code are not covered by tests
+
+# Generate HTML coverage report
+pytest --cov=netvendor --cov-report=html
+# Opens htmlcov/index.html showing line-by-line coverage
+```
+
+For detailed test coverage information, see **[TEST_COVERAGE.md](TEST_COVERAGE.md)** and **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)**.
 
 ---
 
