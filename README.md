@@ -461,6 +461,8 @@ NetVendor is actively maintained and regularly updated.
 - More vendor format support
 - Additional visualization options
 - Network topology mapping
+- GitHub Discussions for community questions and discussions
+- Community chat channels (Slack/Discord)
 
 ---
 
@@ -492,8 +494,8 @@ Contributions are welcome! To contribute:
 
 ### Community Channels
 
-- **GitHub Discussions**: *Coming soon - GitHub Discussions will be enabled for community questions and discussions*
-- **Community chat**: *Coming soon - community Slack/Discord links will be added here as they become available*
+- **GitHub Discussions**: See [Planned](#-project-status) section for upcoming community features
+- **Community chat**: See [Planned](#-project-status) section for upcoming community features
 
 ---
 
