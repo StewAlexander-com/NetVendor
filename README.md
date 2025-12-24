@@ -54,6 +54,7 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), NetVendor transforms
 - [🔧 Advanced Topics](#-advanced-topics)
 - [🧪 Testing & Quality](#-testing--quality)
 - [📈 Project Status](#-project-status)
+- [🤝 Community](#-community)
 
 ---
 
@@ -408,7 +409,7 @@ NetVendor is used in production environments for network monitoring, security po
 - **Air-gapped networks**: Offline mode enables vendor identification in isolated environments without external API dependencies
 - **Change management workflows**: Historical drift analysis with change ticket correlation supports incident response and root cause analysis
 
-**Have a success story to share?** We'd love to hear how you're using NetVendor! Please open an issue or submit a pull request with your use case (anonymized as needed).
+**Have a success story to share?** We'd love to hear how you're using NetVendor! See the [Community section](#-community) for details on how to contribute your success story.
 
 ---
 
@@ -463,9 +464,38 @@ NetVendor is actively maintained and regularly updated.
 
 ---
 
-## 🤝 Contributing
+## 🤝 Community
 
-Contributions are welcome! Please open issues or submit pull requests.
+NetVendor is an open-source project, and we welcome contributions from the community!
+
+### Getting Help & Reporting Issues
+
+- **Report bugs or request features**: Open an [issue on GitHub](https://github.com/StewAlexander-com/NetVendor/issues)
+- **Ask questions**: Use [GitHub Discussions](https://github.com/StewAlexander-com/NetVendor/discussions) (if enabled) for general questions, use cases, and community discussions
+- **Security issues**: Please report security vulnerabilities privately through GitHub's security advisory system
+
+### Contributing Success Stories
+
+We'd love to hear how you're using NetVendor! Share your success stories by:
+- Opening a [GitHub Discussion](https://github.com/StewAlexander-com/NetVendor/discussions) with your use case (anonymized as needed)
+- Submitting a pull request to add your deployment to the [Success Stories section](#-success-stories--known-deployments)
+- Sharing your experience in an issue or discussion thread
+
+### Contributing Code
+
+Contributions are welcome! To contribute:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request with a clear description of your changes
+
+### Community Channels
+
+- **GitHub Discussions**: [Join the discussion](https://github.com/StewAlexander-com/NetVendor/discussions) (if enabled)
+- **Community chat**: *Coming soon - community Slack/Discord links will be added here as they become available*
+
+---
 
 ## 📄 License
 
