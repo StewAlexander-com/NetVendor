@@ -2,23 +2,76 @@
 
 **A Deep Dive into How NetVendor Works**
 
-This document provides a comprehensive technical tutorial for understanding NetVendor's architecture, design decisions, and implementation. Whether you're a developer looking to contribute, a security analyst wanting to understand the internals, or a network engineer curious about the processing pipeline, this guide will walk you through the "what, why, when, and how" of NetVendor.
+## Audience & Goals
+
+This tutorial is designed for:
+
+- **Contributors**: Developers who want to modify parsers, add features, or extend functionality
+- **SOC Engineers**: Security professionals who need to understand behavior in production, trust offline mode, and integrate with SIEM systems
+- **Network Engineers**: Professionals evaluating the tool for enterprise deployment who need to understand reliability and operational characteristics
+
+**After reading this tutorial, you should be able to:**
+- Understand the complete data flow from input file to output generation
+- Modify parsers to support new MAC table formats
+- Trust the tool's behavior in production (offline mode, atomic writes, error handling)
+- Debug issues by knowing which components to inspect
+- Extend functionality by understanding extension points
+- Integrate NetVendor into SIEM workflows with confidence
+
+---
+
+## 🗺️ Quick Reference Cheat Sheet
+
+**If you're here to...**
+
+- **Understand parsing logic** → See [File Type Detection](#file-type-detection) and [MAC Address Normalization](#mac-address-normalization)
+- **Debug vendor lookups** → See [Vendor Lookup System](#vendor-lookup-system) and [Debugging Playbook](#debugging-playbook)
+- **Add a new vendor format** → See [Extension Points: Adding a New MAC-Table Vendor Format](#adding-a-new-mac-table-vendor-format)
+- **Integrate with SIEM** → See [SIEM Export](#siem-export) and [README SIEM Integration](README.md#siem-friendly-export)
+- **Understand offline mode** → See [Vendor Lookup System](#vendor-lookup-system) and [Why It Works This Way](#why-it-works-this-way)
+- **Modify output generation** → See [Output Generation](#output-generation) and [Extension Points: Adding a New Output Type](#adding-a-new-output-type)
+- **Contribute code** → See [For Contributors](#for-contributors) section below
+
+---
+
+## For Contributors
+
+**If you want to contribute code, read these sections first:**
+
+1. **[Architecture Overview](#architecture-overview)** - Understand the modular structure
+2. **[Processing Pipeline](#processing-pipeline)** - See how data flows through the system
+3. **[Vendor Lookup System](#vendor-lookup-system)** - Core OUI management logic
+4. **[Output Generation](#output-generation)** - How outputs are created
+
+**Then:**
+- Run `pytest -q` to see existing tests
+- Look at `tests/data/` for sample input files
+- Review `tests/test_netvendor.py` for parsing tests
+- Check `tests/test_oui_manager.py` for vendor lookup tests
+
+**Key extension points:**
+- Adding new MAC table formats: See [Extension Points](#extension-points) below
+- Adding OUI API backends: See [Extension Points: Adding Another OUI API Backend](#adding-another-oui-api-backend)
+- Adding output types: See [Extension Points: Adding a New Output Type](#adding-a-new-output-type)
 
 ---
 
 ## 📑 Table of Contents
 
 - [What NetVendor Does](#what-netvendor-does)
+- [Architecture Overview](#architecture-overview)
+- [Processing Pipeline](#processing-pipeline)
 - [Why It Works This Way](#why-it-works-this-way)
 - [When to Use Different Features](#when-to-use-different-features)
 - [How the Code Operates](#how-the-code-operates)
-  - [Architecture Overview](#architecture-overview)
-  - [Processing Pipeline](#processing-pipeline)
   - [File Type Detection](#file-type-detection)
   - [MAC Address Normalization](#mac-address-normalization)
   - [Vendor Lookup System](#vendor-lookup-system)
   - [Output Generation](#output-generation)
   - [Advanced Features](#advanced-features)
+- [Extension Points](#extension-points)
+- [Test Strategy](#test-strategy)
+- [Debugging Playbook](#debugging-playbook)
 
 ---
 
@@ -54,136 +107,7 @@ Vlan    Mac Address       Type        Ports
 
 ---
 
-## Why It Works This Way
-
-### Design Philosophy
-
-NetVendor was designed with several key principles:
-
-1. **Vendor-Agnostic Parsing**: Network devices from different manufacturers output data in different formats. NetVendor uses pattern matching and heuristics rather than rigid format requirements, making it flexible and robust.
-
-2. **Offline-First Architecture**: The tool prioritizes local caching and can operate entirely offline. This is critical for air-gapped networks and ensures consistent, fast results.
-
-3. **Progressive Enhancement**: Basic functionality works out-of-the-box, with advanced features (SIEM export, drift analysis) available via flags. This keeps the tool accessible while supporting enterprise use cases.
-
-4. **Atomic Operations**: File writes use atomic patterns (write to temp file, then rename) to prevent corruption if the process is interrupted. This is especially important on Windows.
-
-5. **Cross-Platform Compatibility**: All file operations use `pathlib.Path` and explicit UTF-8 encoding to work seamlessly on Linux, macOS, and Windows.
-
-### Key Design Decisions
-
-#### Why Multiple File Type Detection?
-
-Different network teams use different data sources:
-- **MAC Lists**: Simple, portable, vendor-agnostic
-- **MAC Tables**: Rich context (VLANs, ports) from switches
-- **ARP Tables**: Router/L3 device data with IP context
-
-NetVendor auto-detects the format, eliminating manual preprocessing.
-
-#### Why OUI Caching?
-
-Vendor lookups can be slow (network latency) and rate-limited (API restrictions). By caching OUI lookups:
-- **Speed**: Subsequent runs are 10-100x faster
-- **Reliability**: Works offline after initial cache population
-- **Cost**: Reduces API calls and respects rate limits
-
-#### Why Multiple Output Formats?
-
-Different stakeholders need different views:
-- **CSV**: For spreadsheet analysis and automation
-- **HTML Dashboard**: For interactive exploration and presentations
-- **Text Summary**: For quick CLI review
-- **SIEM Export**: For security monitoring integration
-
----
-
-## When to Use Different Features
-
-### Basic Analysis (Default)
-
-**When**: Quick one-off analysis, exploring the tool, testing with sample data
-
-```bash
-python3 NetVendor.py input_file.txt
-```
-
-**What happens**:
-- Parses input file
-- Looks up vendors (uses cache, falls back to API if needed)
-- Generates standard outputs (CSV, HTML, text summary)
-
-**Use case**: "I have a MAC table dump and want to see vendor distribution"
-
-### Offline Mode (`--offline`)
-
-**When**: 
-- Air-gapped networks
-- Consistent results without network dependencies
-- Production environments where network calls are undesirable
-
-```bash
-python3 NetVendor.py --offline input_file.txt
-```
-
-**What happens**:
-- Skips all external API calls
-- Uses only local OUI cache (`output/data/oui_cache.json`)
-- Uncached MACs appear as "Unknown"
-
-**Use case**: "I'm on an isolated network and need vendor identification"
-
-### Historical Drift Analysis (`--history-dir --analyze-drift`)
-
-**When**:
-- Tracking network changes over time
-- Correlating vendor mix shifts with change windows
-- Incident response and root cause analysis
-
-```bash
-python3 NetVendor.py \
-  --history-dir history \
-  --site DC1 \
-  --change-ticket CHG-12345 \
-  --analyze-drift \
-  input_file.txt
-```
-
-**What happens**:
-- Archives current vendor summary with timestamp
-- Creates metadata file with site, change ticket, timestamp
-- Analyzes all archived summaries to generate drift CSV
-- Enables correlation of vendor changes with change tickets
-
-**Use case**: "I want to track how vendor distribution changes after network changes"
-
-### SIEM Integration (`--siem-export`)
-
-**When**:
-- Continuous security monitoring
-- Posture-change detection
-- Integration with Elastic, Splunk, QRadar, etc.
-
-```bash
-python3 NetVendor.py \
-  --siem-export \
-  --site DC1 \
-  --environment prod \
-  input_file.txt
-```
-
-**What happens**:
-- Generates normalized CSV/JSONL files in `output/siem/`
-- Each device becomes a SIEM event with stable schema
-- Includes metadata (timestamp, site, environment) for correlation
-
-**Use case**: "I need to feed network posture data into my SIEM for anomaly detection"
-
----
-
-## How the Code Operates
-
-### Architecture Overview
+## Architecture Overview
 
 NetVendor follows a modular architecture with clear separation of concerns:
 
@@ -201,7 +125,16 @@ NetVendor.py (Main Entry Point)
         └── runtime_logger.py        # Structured logging
 ```
 
-**Data Flow Diagram:**
+**Key Design Principles:**
+- **Separation of concerns**: Parsing, lookup, and output generation are separate modules
+- **Single responsibility**: Each module has one clear purpose
+- **Dependency injection**: OUI manager is passed to output handlers, enabling testing and offline mode
+
+---
+
+## Processing Pipeline
+
+**Data Flow Diagram:** *This diagram shows how a single input file transforms into multiple outputs through normalization, vendor enrichment, and parallel output generation.*
 
 ```
 ┌─────────────────┐
@@ -260,9 +193,86 @@ NetVendor.py (Main Entry Point)
 └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
-### Processing Pipeline
+**Processing Steps:**
 
-Let's walk through the complete processing flow using code examples:
+1. **Entry Point** (`NetVendor.py`): Parses CLI arguments, initializes logger and OUI manager
+2. **File Type Detection**: Reads first 2 lines to determine format (MAC list, ARP table, or MAC table)
+3. **Line-by-Line Parsing**: Extracts MAC addresses, VLANs, and ports based on detected format
+4. **MAC Normalization**: Converts all MAC formats to `xx:xx:xx:xx:xx:xx`
+5. **Vendor Lookup**: Enriches devices with vendor information via OUI lookup
+6. **Output Generation**: Creates CSV, HTML, text, and optionally SIEM exports in parallel
+
+---
+
+## Why It Works This Way
+
+### Design Philosophy
+
+NetVendor was designed with several key principles:
+
+1. **Vendor-Agnostic Parsing**: Network devices from different manufacturers output data in different formats. NetVendor uses pattern matching and heuristics rather than rigid format requirements, making it flexible and robust.
+
+2. **Offline-First Architecture**: The tool prioritizes local caching and can operate entirely offline. This is critical for air-gapped networks and ensures consistent, fast results.
+
+3. **Progressive Enhancement**: Basic functionality works out-of-the-box, with advanced features (SIEM export, drift analysis) available via flags. This keeps the tool accessible while supporting enterprise use cases.
+
+4. **Atomic Operations**: File writes use atomic patterns (write to temp file, then rename) to prevent corruption if the process is interrupted. This is especially important on Windows.
+
+5. **Cross-Platform Compatibility**: All file operations use `pathlib.Path` and explicit UTF-8 encoding to work seamlessly on Linux, macOS, and Windows.
+
+### Key Design Decisions
+
+#### Why Multiple File Type Detection?
+
+Different network teams use different data sources:
+- **MAC Lists**: Simple, portable, vendor-agnostic
+- **MAC Tables**: Rich context (VLANs, ports) from switches
+- **ARP Tables**: Router/L3 device data with IP context
+
+NetVendor auto-detects the format, eliminating manual preprocessing.
+
+#### Why OUI Caching?
+
+Vendor lookups can be slow (network latency) and rate-limited (API restrictions). By caching OUI lookups:
+- **Speed**: Subsequent runs are 10-100x faster
+- **Reliability**: Works offline after initial cache population
+- **Cost**: Reduces API calls and respects rate limits
+
+#### Why Multiple Output Formats?
+
+Different stakeholders need different views:
+- **CSV**: For spreadsheet analysis and automation
+- **HTML Dashboard**: For interactive exploration and presentations
+- **Text Summary**: For quick CLI review
+- **SIEM Export**: For security monitoring integration
+
+---
+
+## When to Use Different Features
+
+For detailed usage instructions and examples, see the [README.md Common Workflows section](README.md#-common-workflows). This section provides a brief technical overview of what happens internally when each feature is used.
+
+### Basic Analysis (Default)
+
+**Technical behavior**: Standard parsing pipeline with vendor lookups using cache-first strategy, falling back to API for uncached OUIs. See [Vendor Lookup System](#vendor-lookup-system) for details.
+
+### Offline Mode (`--offline`)
+
+**Technical behavior**: Sets `OUIManager(offline=True)`, which skips all API calls and uses only the local cache. Uncached MACs are added to `failed_lookups` set and appear as "Unknown". See [Vendor Lookup System: Architecture](#architecture) for implementation details.
+
+### Historical Drift Analysis (`--history-dir --analyze-drift`)
+
+**Technical behavior**: Archives `vendor_summary.txt` with timestamp, creates companion `.metadata.json`, then calls `analyze_drift()` to parse all archived summaries and generate `vendor_drift.csv`. See [Advanced Features: Historical Drift Analysis](#historical-drift-analysis) for implementation.
+
+### SIEM Integration (`--siem-export`)
+
+**Technical behavior**: Calls `export_siem_events()` which generates normalized CSV/JSONL files with stable schema. Each device becomes a SIEM event with all required fields. See [Advanced Features: SIEM Export](#siem-export) for schema details.
+
+---
+
+## How the Code Operates
+
+The following sections dive deep into each component of the processing pipeline:
 
 #### Step 1: Entry Point and Initialization
 
@@ -954,6 +964,280 @@ def export_siem_events(
 ```
 
 **Why stable schema**: SIEM correlation rules depend on consistent field names and presence. Every record has all fields, even if empty.
+
+---
+
+## Extension Points
+
+This section provides step-by-step guides for extending NetVendor's functionality.
+
+### Adding a New MAC-Table Vendor Format
+
+**When**: You encounter a switch vendor whose MAC table format isn't recognized.
+
+**Steps**:
+
+1. **Add header pattern** in `netvendor/core/netvendor.py`, function `is_mac_address_table()`:
+   ```python
+   header_patterns = [
+       # ... existing patterns ...
+       ["VLAN", "MAC", "Type", "YourVendorHeader"],  # Add your pattern
+   ]
+   ```
+
+2. **Test detection** by adding a test case in `tests/test_netvendor.py`:
+   ```python
+   def test_your_vendor_format():
+       assert is_mac_address_table("VLAN MAC Type YourVendorHeader")
+   ```
+
+3. **Verify parsing** - The existing parsing logic in `NetVendor.py` (lines 320-335) should handle most formats, but if your vendor uses a different column order, modify the parsing logic there.
+
+4. **Run tests**: `pytest tests/test_netvendor.py::test_your_vendor_format -v`
+
+**Files to modify**: `netvendor/core/netvendor.py`, `tests/test_netvendor.py`
+
+### Adding Another OUI API Backend
+
+**When**: You want to add a fallback API service or replace an existing one.
+
+**Steps**:
+
+1. **Add service configuration** in `netvendor/core/oui_manager.py`, `__init__()` method:
+   ```python
+   self.api_services = [
+       # ... existing services ...
+       {
+           'name': 'your_api',
+           'url': 'https://api.example.com/{oui}',
+           'headers': {'Authorization': 'Bearer YOUR_KEY'},  # If needed
+           'rate_limit': 1.0,  # Seconds between calls
+           'last_call': 0
+       }
+   ]
+   ```
+
+2. **Add response parsing** in `get_vendor()` method (around line 270):
+   ```python
+   if service['name'] == 'your_api':
+       data = response.json()  # Or response.text, depending on format
+       vendor = data.get('vendor_name', 'Unknown')
+   ```
+
+3. **Test with offline mode disabled** to verify API integration.
+
+**Files to modify**: `netvendor/core/oui_manager.py`
+
+### Adding a New Output Type
+
+**When**: You want to generate a different output format (e.g., JSON, XML, database export).
+
+**Steps**:
+
+1. **Create new function** in `netvendor/utils/vendor_output_handler.py`:
+   ```python
+   def generate_your_format(devices: Dict, oui_manager: OUIManager, input_file: Path) -> None:
+       """Generate your custom output format."""
+       output_file = Path("output") / f"{input_file.stem}.yourformat"
+       # Your generation logic here
+   ```
+
+2. **Call from main script** in `NetVendor.py`, after other output generation:
+   ```python
+   from netvendor.utils.vendor_output_handler import generate_your_format
+   # ... existing outputs ...
+   generate_your_format(devices, oui_manager, input_file)
+   ```
+
+3. **Add tests** in `tests/test_vendor_output_handler.py`:
+   ```python
+   def test_generate_your_format(temp_output_dir, sample_device_data, monkeypatch):
+       # Test your format generation
+   ```
+
+**Files to modify**: `netvendor/utils/vendor_output_handler.py`, `NetVendor.py`, `tests/test_vendor_output_handler.py`
+
+---
+
+## Test Strategy
+
+NetVendor's test suite is located in `tests/` and covers key components:
+
+### Test Structure
+
+```
+tests/
+├── __init__.py
+├── conftest.py              # Shared fixtures
+├── test_netvendor.py        # Parsing and format detection tests
+├── test_oui_manager.py      # Vendor lookup and caching tests
+├── test_vendor_output_handler.py  # Output generation tests
+└── data/                    # Sample input files
+    ├── test-mac-list.txt
+    ├── test-mac-table.txt
+    └── test-arp-table.txt
+```
+
+### Key Test Coverage
+
+**Parsing Functions** (`test_netvendor.py`):
+- `test_is_mac_address()` - Validates MAC address detection across formats
+- `test_is_mac_address_table()` - Tests MAC table format detection
+- `test_format_mac_address()` - Ensures normalization works correctly
+
+**Vendor Lookup** (`test_oui_manager.py`):
+- `test_oui_manager_cache()` - Verifies caching behavior
+- `test_oui_manager_failed_lookups()` - Tests failure handling
+- `test_get_vendor_ouis()` - Validates OUI extraction
+
+**Output Generation** (`test_vendor_output_handler.py`):
+- `test_make_csv()` - CSV generation with various data
+- `test_generate_port_report()` - Port report creation
+- `test_create_vendor_distribution()` - HTML dashboard generation
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest -q
+
+# Run specific test file
+pytest tests/test_netvendor.py -v
+
+# Run specific test
+pytest tests/test_netvendor.py::test_is_mac_address -v
+
+# Run with coverage
+pytest --cov=netvendor --cov-report=html
+```
+
+### Test Data
+
+Sample input files in `tests/data/` represent real-world formats:
+- `test-mac-table.txt` - Cisco-style MAC address table
+- `test-arp-table.txt` - Standard ARP table format
+- `test-mac-list.txt` - Simple MAC address list
+
+**Adding test data**: Add new files to `tests/data/` and reference them in test cases.
+
+---
+
+## Debugging Playbook
+
+Common issues and how to debug them using the knowledge from this tutorial.
+
+### Issue: Suspicious Vendor Results
+
+**Symptoms**: MAC addresses showing incorrect vendors or "Unknown" when they should be identified.
+
+**Debugging steps**:
+
+1. **Check OUI cache**: Inspect `output/data/oui_cache.json` to see if the OUI is cached
+   ```bash
+   grep "00:11:22" output/data/oui_cache.json
+   ```
+
+2. **Check failed lookups**: See if the OUI was previously marked as failed
+   ```bash
+   cat output/data/failed_lookups.json
+   ```
+
+3. **Verify MAC normalization**: Test the MAC format
+   ```python
+   from netvendor.core.netvendor import format_mac_address
+   print(format_mac_address("your-mac-format"))
+   ```
+
+4. **Test OUI extraction**: Verify the OUI portion is correct
+   ```python
+   from netvendor.core.oui_manager import OUIManager
+   oui_manager = OUIManager()
+   print(oui_manager._normalize_mac("00:11:22:33:44:55"))  # Should output "00:11:22"
+   ```
+
+5. **Enable verbose mode**: Run with `NETVENDOR_VERBOSE=1` to see lookup details
+
+**Files to inspect**: `netvendor/core/oui_manager.py` (lines 228-302), `output/data/oui_cache.json`
+
+### Issue: Very Slow First Run
+
+**Symptoms**: First run takes minutes, subsequent runs are fast.
+
+**Root cause**: Uncached OUIs require API lookups with rate limiting.
+
+**Solutions**:
+
+1. **Pre-populate cache**: Run once on representative data, then use `--offline` for production
+2. **Check API status**: Verify API services are responding (see `netvendor/core/oui_manager.py` lines 68-83)
+3. **Review rate limits**: Check if rate limits are too conservative (lines 219-226)
+
+**Files to inspect**: `netvendor/core/oui_manager.py` (rate limiting logic)
+
+### Issue: No SIEM Outputs Created
+
+**Symptoms**: `--siem-export` flag used but `output/siem/` directory is empty or missing.
+
+**Debugging steps**:
+
+1. **Check flag parsing**: Verify `args.siem_export` is True in `NetVendor.py`
+2. **Check directory creation**: Look for errors in `netvendor/utils/siem_export.py` (lines 63-72)
+3. **Check permissions**: Ensure write access to `output/siem/` directory
+4. **Enable runtime logging**: Run with `NETVENDOR_LOG=1` and check `output/netvendor_runtime.log`
+
+**Files to inspect**: `NetVendor.py` (SIEM export call), `netvendor/utils/siem_export.py` (lines 27-141)
+
+### Issue: File Type Not Detected Correctly
+
+**Symptoms**: MAC table treated as MAC list, or ARP table not recognized.
+
+**Debugging steps**:
+
+1. **Check first lines**: Inspect the first 2 lines of your input file
+   ```python
+   with open('your_file.txt') as f:
+       print(f.readline())
+       print(f.readline())
+   ```
+
+2. **Test detection functions**: Use the detection functions directly
+   ```python
+   from netvendor.core.netvendor import is_mac_address, is_arp_table, is_mac_address_table
+   # Test with your file's first line
+   ```
+
+3. **Add debug output**: Temporarily add print statements in `NetVendor.py` file type detection (lines 271-296)
+
+**Files to inspect**: `NetVendor.py` (file type detection), `netvendor/core/netvendor.py` (detection functions)
+
+### Issue: Port Information Missing
+
+**Symptoms**: Port column shows "N/A" for MAC table inputs.
+
+**Debugging steps**:
+
+1. **Verify input format**: Check if your MAC table includes port information
+2. **Test port parsing**: Use `parse_port_info()` function
+   ```python
+   from netvendor.core.netvendor import parse_port_info
+   print(parse_port_info("your-mac-table-line"))
+   ```
+
+3. **Check parsing logic**: Review MAC table parsing in `NetVendor.py` (lines 320-335)
+
+**Files to inspect**: `NetVendor.py` (MAC table parsing), `netvendor/core/netvendor.py` (parse_port_info)
+
+### Issue: Cache Not Persisting
+
+**Symptoms**: Vendor lookups repeated on every run despite successful API calls.
+
+**Debugging steps**:
+
+1. **Check file permissions**: Ensure `output/data/` is writable
+2. **Check atomic write**: Review `save_cache()` in `oui_manager.py` (lines 157-178)
+3. **Verify cache file**: Check if `output/data/oui_cache.json` exists and has entries
+4. **Check for errors**: Look for permission errors in console output
+
+**Files to inspect**: `netvendor/core/oui_manager.py` (save_cache, load_cache)
 
 ---
 
