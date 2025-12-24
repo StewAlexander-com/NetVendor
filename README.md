@@ -52,6 +52,7 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), NetVendor transforms
 - [📊 Output Details](#-output-details)
 - [🌟 Success Stories & Known Deployments](#-success-stories--known-deployments)
 - [🔧 Advanced Topics](#-advanced-topics)
+  - [Technical Tutorial](#technical-tutorial)
 - [🧪 Testing & Quality](#-testing--quality)
 - [📈 Project Status](#-project-status)
 - [🤝 Community](#-community)
@@ -420,6 +421,14 @@ For detailed information on advanced topics, see **[ADVANCED.md](ADVANCED.md)**:
 - **Posture-Change Detection & Security Monitoring**: SIEM integration workflows, correlation rules, and continuous monitoring strategies
 - **Operational Best Practices**: Vendor lookup optimization, cache management, output organization, troubleshooting, and cross-platform considerations
 - **Runtime Considerations**: Performance benchmarks, network behavior, disk space planning, and error handling details
+
+### Technical Tutorial
+
+**Want to understand how NetVendor works under the hood?** See **[TUTORIAL.md](TUTORIAL.md)** for a comprehensive technical deep-dive covering:
+- Architecture and design decisions
+- Code walkthroughs with examples
+- Data flow diagrams
+- Implementation details for each component
 
 ---
 

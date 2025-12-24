@@ -1,0 +1,978 @@
+# 🔍 NetVendor Technical Tutorial
+
+**A Deep Dive into How NetVendor Works**
+
+This document provides a comprehensive technical tutorial for understanding NetVendor's architecture, design decisions, and implementation. Whether you're a developer looking to contribute, a security analyst wanting to understand the internals, or a network engineer curious about the processing pipeline, this guide will walk you through the "what, why, when, and how" of NetVendor.
+
+---
+
+## 📑 Table of Contents
+
+- [What NetVendor Does](#what-netvendor-does)
+- [Why It Works This Way](#why-it-works-this-way)
+- [When to Use Different Features](#when-to-use-different-features)
+- [How the Code Operates](#how-the-code-operates)
+  - [Architecture Overview](#architecture-overview)
+  - [Processing Pipeline](#processing-pipeline)
+  - [File Type Detection](#file-type-detection)
+  - [MAC Address Normalization](#mac-address-normalization)
+  - [Vendor Lookup System](#vendor-lookup-system)
+  - [Output Generation](#output-generation)
+  - [Advanced Features](#advanced-features)
+
+---
+
+## What NetVendor Does
+
+NetVendor is a network analysis tool that transforms raw network device outputs (MAC address tables, ARP tables, or simple MAC lists) into structured, actionable intelligence. At its core, it:
+
+1. **Parses** network device outputs from multiple vendors (Cisco, Juniper, HP/Aruba, Extreme, Brocade, etc.)
+2. **Normalizes** MAC addresses to a consistent format (`xx:xx:xx:xx:xx:xx`)
+3. **Identifies** device vendors using IEEE OUI (Organizationally Unique Identifier) lookups
+4. **Extracts** network context (VLANs, ports, interfaces)
+5. **Generates** multiple output formats (CSV, HTML dashboards, text summaries)
+6. **Enables** advanced features like historical drift analysis and SIEM integration
+
+### Core Data Transformation
+
+```
+Raw Network Output → Parsed Devices → Vendor-Enriched Data → Multiple Output Formats
+```
+
+**Input Example:**
+```
+Vlan    Mac Address       Type        Ports
+10      0011.2233.4455    DYNAMIC     Gi1/0/1
+20      00:0E:83:11:22:33 DYNAMIC     ge-0/0/0
+```
+
+**Output:**
+- Device CSV with vendor information
+- Interactive HTML dashboard
+- Port utilization reports
+- Vendor distribution summaries
+
+---
+
+## Why It Works This Way
+
+### Design Philosophy
+
+NetVendor was designed with several key principles:
+
+1. **Vendor-Agnostic Parsing**: Network devices from different manufacturers output data in different formats. NetVendor uses pattern matching and heuristics rather than rigid format requirements, making it flexible and robust.
+
+2. **Offline-First Architecture**: The tool prioritizes local caching and can operate entirely offline. This is critical for air-gapped networks and ensures consistent, fast results.
+
+3. **Progressive Enhancement**: Basic functionality works out-of-the-box, with advanced features (SIEM export, drift analysis) available via flags. This keeps the tool accessible while supporting enterprise use cases.
+
+4. **Atomic Operations**: File writes use atomic patterns (write to temp file, then rename) to prevent corruption if the process is interrupted. This is especially important on Windows.
+
+5. **Cross-Platform Compatibility**: All file operations use `pathlib.Path` and explicit UTF-8 encoding to work seamlessly on Linux, macOS, and Windows.
+
+### Key Design Decisions
+
+#### Why Multiple File Type Detection?
+
+Different network teams use different data sources:
+- **MAC Lists**: Simple, portable, vendor-agnostic
+- **MAC Tables**: Rich context (VLANs, ports) from switches
+- **ARP Tables**: Router/L3 device data with IP context
+
+NetVendor auto-detects the format, eliminating manual preprocessing.
+
+#### Why OUI Caching?
+
+Vendor lookups can be slow (network latency) and rate-limited (API restrictions). By caching OUI lookups:
+- **Speed**: Subsequent runs are 10-100x faster
+- **Reliability**: Works offline after initial cache population
+- **Cost**: Reduces API calls and respects rate limits
+
+#### Why Multiple Output Formats?
+
+Different stakeholders need different views:
+- **CSV**: For spreadsheet analysis and automation
+- **HTML Dashboard**: For interactive exploration and presentations
+- **Text Summary**: For quick CLI review
+- **SIEM Export**: For security monitoring integration
+
+---
+
+## When to Use Different Features
+
+### Basic Analysis (Default)
+
+**When**: Quick one-off analysis, exploring the tool, testing with sample data
+
+```bash
+python3 NetVendor.py input_file.txt
+```
+
+**What happens**:
+- Parses input file
+- Looks up vendors (uses cache, falls back to API if needed)
+- Generates standard outputs (CSV, HTML, text summary)
+
+**Use case**: "I have a MAC table dump and want to see vendor distribution"
+
+### Offline Mode (`--offline`)
+
+**When**: 
+- Air-gapped networks
+- Consistent results without network dependencies
+- Production environments where network calls are undesirable
+
+```bash
+python3 NetVendor.py --offline input_file.txt
+```
+
+**What happens**:
+- Skips all external API calls
+- Uses only local OUI cache (`output/data/oui_cache.json`)
+- Uncached MACs appear as "Unknown"
+
+**Use case**: "I'm on an isolated network and need vendor identification"
+
+### Historical Drift Analysis (`--history-dir --analyze-drift`)
+
+**When**:
+- Tracking network changes over time
+- Correlating vendor mix shifts with change windows
+- Incident response and root cause analysis
+
+```bash
+python3 NetVendor.py \
+  --history-dir history \
+  --site DC1 \
+  --change-ticket CHG-12345 \
+  --analyze-drift \
+  input_file.txt
+```
+
+**What happens**:
+- Archives current vendor summary with timestamp
+- Creates metadata file with site, change ticket, timestamp
+- Analyzes all archived summaries to generate drift CSV
+- Enables correlation of vendor changes with change tickets
+
+**Use case**: "I want to track how vendor distribution changes after network changes"
+
+### SIEM Integration (`--siem-export`)
+
+**When**:
+- Continuous security monitoring
+- Posture-change detection
+- Integration with Elastic, Splunk, QRadar, etc.
+
+```bash
+python3 NetVendor.py \
+  --siem-export \
+  --site DC1 \
+  --environment prod \
+  input_file.txt
+```
+
+**What happens**:
+- Generates normalized CSV/JSONL files in `output/siem/`
+- Each device becomes a SIEM event with stable schema
+- Includes metadata (timestamp, site, environment) for correlation
+
+**Use case**: "I need to feed network posture data into my SIEM for anomaly detection"
+
+---
+
+## How the Code Operates
+
+### Architecture Overview
+
+NetVendor follows a modular architecture with clear separation of concerns:
+
+```
+NetVendor.py (Main Entry Point)
+    │
+    ├── netvendor/core/
+    │   ├── netvendor.py          # Core parsing logic
+    │   └── oui_manager.py         # Vendor lookup system
+    │
+    └── netvendor/utils/
+        ├── vendor_output_handler.py  # CSV, HTML, text generation
+        ├── drift_analysis.py        # Historical analysis
+        ├── siem_export.py           # SIEM event generation
+        └── runtime_logger.py        # Structured logging
+```
+
+**Data Flow Diagram:**
+
+```
+┌─────────────────┐
+│  Input File     │
+│  (MAC/ARP data) │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ File Type        │
+│ Detection        │
+│ (netvendor.py)   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Line-by-Line     │
+│ Parsing          │
+│ (netvendor.py)   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ MAC Address      │
+│ Normalization    │
+│ (format_mac)     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Device Dictionary│
+│ {mac: {vlan,     │
+│       port}}     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Vendor Lookup    │
+│ (OUIManager)     │
+│ Cache → API      │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Enriched Devices │
+│ {mac: {vlan,     │
+│       port,       │
+│       vendor}}   │
+└────────┬────────┘
+         │
+         ├──────────────────┬──────────────────┬──────────────┐
+         ▼                  ▼                  ▼              ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│ Device CSV   │  │ HTML         │  │ Text         │  │ SIEM Export  │
+│              │  │ Dashboard    │  │ Summary      │  │ (optional)   │
+└──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
+```
+
+### Processing Pipeline
+
+Let's walk through the complete processing flow using code examples:
+
+#### Step 1: Entry Point and Initialization
+
+**File**: `NetVendor.py`
+
+```python
+def main():
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(...)
+    args = parser.parse_args()
+    
+    # Initialize runtime logger
+    logger = get_logger()
+    
+    # Initialize OUI manager (with offline flag if specified)
+    oui_manager = OUIManager(offline=args.offline)
+```
+
+**Why**: The main script handles CLI argument parsing, logging initialization, and sets up the OUI manager. The `OUIManager` is initialized early because it loads caches that may take a moment.
+
+#### Step 2: File Type Detection
+
+**File**: `NetVendor.py` (lines 271-296)
+
+```python
+with open(input_file, 'r', encoding='utf-8') as f:
+    first_line = f.readline().strip()
+    second_line = f.readline().strip() if first_line else ""
+    
+    # Determine file type
+    is_mac_list = is_mac_address(first_line)
+    is_arp_table = not is_mac_list and (
+        first_line.startswith("Protocol") or
+        "Internet" in first_line or
+        "Internet" in second_line
+    )
+    is_mac_table = not is_mac_list and not is_arp_table
+```
+
+**How it works**:
+1. Reads first two lines to peek at file structure
+2. Checks if first line is a valid MAC address → `mac_list`
+3. Checks for ARP table headers/keywords → `arp_table`
+4. Defaults to `mac_table` if neither matches
+
+**Why this approach**: 
+- **Fast**: Only reads 2 lines for detection
+- **Robust**: Handles files that start with headers or data
+- **Flexible**: Works even if headers are slightly different
+
+#### Step 3: Line-by-Line Parsing
+
+**File**: `NetVendor.py` (lines 290-335)
+
+The parsing logic differs based on detected file type:
+
+**MAC List Processing:**
+```python
+if is_mac_list:
+    mac = line.lower()
+    if is_mac_address(mac):
+        mac_formatted = format_mac_address(mac)
+        if mac_formatted:
+            devices[mac_formatted] = {'vlan': 'N/A', 'port': 'N/A'}
+```
+
+**ARP Table Processing:**
+```python
+elif is_arp:
+    parts = line.split(None, 5)  # Split into max 6 parts
+    if len(parts) >= 6 and parts[0] == "Internet":
+        mac = parts[3].strip()  # Hardware address is 4th field
+        interface = parts[5].strip()  # Interface is last field
+        
+        mac_formatted = format_mac_address(mac)
+        if mac_formatted:
+            vlan = interface.replace('Vlan', '') if 'Vlan' in interface else 'N/A'
+            devices[mac_formatted] = {'vlan': vlan, 'port': 'N/A'}
+```
+
+**MAC Table Processing:**
+```python
+else:  # MAC table
+    parts = line.split(None, 4)  # Preserve spacing
+    if len(parts) >= 4:
+        try:
+            vlan = str(int(parts[0]))  # Validate VLAN is numeric
+            mac = parts[1]
+            port = parts[3]
+            
+            mac_formatted = format_mac_address(mac)
+            if mac_formatted:
+                devices[mac_formatted] = {'vlan': vlan, 'port': port}
+```
+
+**Key Design Decisions**:
+- **Dictionary as data structure**: `devices[mac] = {vlan, port}` allows deduplication (last occurrence wins)
+- **Normalized MACs as keys**: Ensures consistent lookups regardless of input format
+- **Graceful error handling**: Invalid lines are skipped, processing continues
+
+### File Type Detection
+
+NetVendor uses multiple heuristics to detect file types:
+
+#### MAC Address Validation
+
+**File**: `netvendor/core/netvendor.py` (lines 22-71)
+
+```python
+def is_mac_address(mac: str) -> bool:
+    """
+    Check if a string is a valid MAC address.
+    Supports formats:
+    - 00:11:22:33:44:55 (standard)
+    - 00-11-22-33-44-55 (standard)
+    - 001122334455 (no separators)
+    - 0011.2233.4455 (dot notation)
+    - 00:11:22:33:44:55/ff:ff:ff:ff:ff:ff (Juniper mask)
+    """
+    if not mac:
+        return False
+    
+    # Split on common separators to handle mask formats
+    parts = re.split(r'[/\s]', mac.strip())
+    mac_part = parts[0].lower()
+    
+    # Remove all separators from MAC part
+    mac_clean = mac_part.replace(':', '').replace('-', '').replace('.', '')
+    
+    # Check length
+    if len(mac_clean) != 12:
+        return False
+    
+    # Check if all characters are valid hex
+    try:
+        int(mac_clean, 16)
+        return True
+    except ValueError:
+        return False
+```
+
+**Why this approach**:
+- **Flexible**: Handles all common MAC formats
+- **Vendor-agnostic**: Works with Cisco dots, Juniper masks, etc.
+- **Robust**: Validates hex characters, not just format
+
+#### ARP Table Detection
+
+**File**: `netvendor/core/netvendor.py` (lines 121-141)
+
+```python
+def is_arp_table(line: str) -> bool:
+    """Check if a line is from an ARP table."""
+    # Check for header
+    if "Protocol" in line and "Address" in line and "Hardware Addr" in line:
+        return True
+    
+    # Check for data line format
+    parts = line.split(None, 5)  # Split into max 6 parts
+    if len(parts) >= 6:
+        if parts[0] != "Internet":
+            return False
+        
+        # Check if fourth field (hardware address) is in MAC format
+        mac = parts[3].strip()
+        return is_arp_table_mac(mac)
+    
+    return False
+```
+
+**Why**: ARP tables have a specific structure (Protocol, Address, Age, Hardware Addr, Type, Interface). The function checks for both header patterns and data line structure.
+
+#### MAC Table Detection
+
+**File**: `netvendor/core/netvendor.py` (lines 143-194)
+
+```python
+def is_mac_address_table(line: str) -> bool:
+    """Check if a line is from a MAC address table."""
+    # Check for header line variations
+    header_patterns = [
+        ["Vlan", "Mac Address"],
+        ["VLAN", "MAC Address"],
+        ["VLAN ID", "MAC Address"],
+        # ... more patterns
+    ]
+    
+    if any(all(word.lower() in line.lower() for word in header) for header in header_patterns):
+        return True
+    
+    # Check data line: VLAN number + MAC address
+    words = line.strip().split()
+    if len(words) < 2:
+        return False
+    
+    # Try to extract VLAN - different vendors use different positions
+    vlan = None
+    for word in words[:2]:
+        try:
+            vlan_num = int(word)
+            if 1 <= vlan_num <= 4094:  # Valid VLAN range
+                vlan = vlan_num
+                break
+        except ValueError:
+            continue
+    
+    if vlan is None:
+        return False
+    
+    # Find MAC address - it's usually after VLAN
+    mac_index = words.index(str(vlan)) + 1
+    if mac_index >= len(words):
+        return False
+    
+    return is_mac_address(words[mac_index])
+```
+
+**Why**: MAC tables vary significantly between vendors. The function uses multiple header patterns and validates that the line contains a valid VLAN (1-4094) followed by a valid MAC address.
+
+### MAC Address Normalization
+
+**File**: `netvendor/core/netvendor.py` (lines 94-119)
+
+```python
+def format_mac_address(mac: str) -> str:
+    """
+    Format a MAC address consistently.
+    Input can be any format, output will be xx:xx:xx:xx:xx:xx
+    Handles all vendor-specific formats including masks.
+    """
+    if not mac:
+        return None
+    
+    # Split on common separators to handle mask formats
+    parts = re.split(r'[/\s]', mac.strip())
+    mac_part = parts[0]
+    
+    # Handle dot notation (ARP table format)
+    if '.' in mac_part:
+        parts = mac_part.strip().split('.')
+        mac_clean = ''.join(parts)[:12]
+    else:
+        # Handle standard formats
+        mac_clean = mac_part.strip().lower().replace(':', '').replace('-', '')
+    
+    # Take first 12 characters and format with colons
+    if len(mac_clean) >= 12:
+        mac_clean = mac_clean[:12]
+        return ':'.join([mac_clean[i:i+2] for i in range(0, 12, 2)])
+    return None
+```
+
+**Example Transformations**:
+
+| Input Format | Output |
+|--------------|--------|
+| `0011.2233.4455` | `00:11:22:33:44:55` |
+| `00:11:22:33:44:55` | `00:11:22:33:44:55` |
+| `00-11-22-33-44-55` | `00:11:22:33:44:55` |
+| `001122334455` | `00:11:22:33:44:55` |
+| `00:11:22:33:44:55/ff:ff:ff:ff:ff:ff` | `00:11:22:33:44:55` |
+| `D8.C7.C8.14C17B` | `d8:c7:c8:14:c1:7b` |
+
+**Why normalization**:
+- **Consistency**: All MACs in output use same format
+- **Deduplication**: Same device with different input formats becomes one entry
+- **Lookup efficiency**: OUI cache uses normalized format as keys
+
+### Vendor Lookup System
+
+The `OUIManager` class is the heart of vendor identification. Let's explore how it works:
+
+#### Architecture
+
+**File**: `netvendor/core/oui_manager.py`
+
+```python
+class OUIManager:
+    def __init__(self, oui_file: str = None, offline: bool = False):
+        self.oui_file = oui_file
+        self.offline = offline
+        self.cache = {}  # In-memory cache
+        self.failed_lookups = set()  # Track failed lookups
+        
+        # Setup cache directories
+        self.output_dir = Path("output")
+        self.data_dir = self.output_dir / "data"
+        self.cache_file = self.data_dir / "oui_cache.json"
+        self.failed_lookups_file = self.data_dir / "failed_lookups.json"
+        
+        # Load caches
+        self.load_preseeded_cache()  # Wireshark manufacturers database
+        if self.cache_file.exists():
+            self.load_cache()  # User's previous lookups
+        if self.failed_lookups_file.exists():
+            self.load_failed_lookups()
+```
+
+#### Lookup Strategy
+
+The vendor lookup follows a multi-tier strategy:
+
+```
+1. Check failed_lookups set
+   └─> If found: Return None (don't retry failed lookups)
+   
+2. Check in-memory cache
+   └─> If found: Return vendor name
+   
+3. If offline mode: Add to failed_lookups, return None
+   
+4. Try API lookup (with rate limiting and retries)
+   ├─> Success: Cache result, return vendor
+   └─> Failure: Add to failed_lookups, return None
+```
+
+**Code Flow**:
+
+```python
+def get_vendor(self, mac: str) -> str:
+    """Look up vendor for MAC address using cache first, then API."""
+    if not mac:
+        return None
+
+    oui = self._normalize_mac(mac)  # Extract first 6 hex chars (OUI)
+    
+    # Check failed lookups first (don't retry)
+    if oui in self.failed_lookups:
+        return None
+    
+    # Check cache
+    if oui in self.cache:
+        return self.cache[oui]
+
+    # In offline mode, never attempt external lookups
+    if self.offline:
+        self.failed_lookups.add(oui)
+        self.save_failed_lookups()
+        return None
+
+    # Try API lookup with service rotation and retries
+    # ... (see API lookup section below)
+```
+
+#### OUI Normalization
+
+**File**: `netvendor/core/oui_manager.py` (lines 211-217)
+
+```python
+def _normalize_mac(self, mac: str) -> str:
+    """Normalize MAC address format for lookups."""
+    # Remove any separators and convert to uppercase
+    mac = re.sub(r'[.:-]', '', mac.upper())
+    # Keep only first 6 characters (OUI portion) and format with colons
+    oui = mac[:6]
+    return f"{oui[:2]}:{oui[2:4]}:{oui[4:]}"
+```
+
+**Example**: `00:11:22:33:44:55` → `00:11:22` (OUI portion)
+
+**Why**: The first 6 hex characters (3 bytes) of a MAC address are the OUI, which identifies the vendor. The remaining 6 characters are device-specific.
+
+#### API Lookup with Rate Limiting
+
+**File**: `netvendor/core/oui_manager.py` (lines 256-302)
+
+```python
+# Try API lookup
+original_service_index = self.current_service_index
+retries = 0
+max_retries = len(self.api_services) * 2
+
+while retries < max_retries:
+    service = self.api_services[self.current_service_index]
+    
+    try:
+        self._rate_limit(service)  # Enforce rate limit
+        url = service['url'].format(oui=oui)
+        response = requests.get(url, headers=service['headers'], timeout=5)
+        
+        if response.status_code == 200:
+            # Parse response based on service
+            if service['name'] == 'maclookup':
+                data = response.json()
+                vendor = data.get('company', 'Unknown')
+            else:
+                vendor = response.text.strip()
+            
+            if vendor and vendor != "Unknown":
+                # Cache the result
+                self.cache[oui] = vendor
+                self.save_cache()
+                return vendor
+                
+        elif response.status_code == 429:  # Rate limit
+            service['rate_limit'] *= 1.5  # Increase backoff
+            
+        elif response.status_code == 404:  # Not found
+            self.failed_lookups.add(oui)
+            self.save_failed_lookups()
+            return None
+
+    except (requests.RequestException, json.JSONDecodeError):
+        pass  # Try next service
+
+    # Rotate to next service
+    self.current_service_index = (self.current_service_index + 1) % len(self.api_services)
+    retries += 1
+    
+    # Wait before retry cycle
+    if self.current_service_index == original_service_index:
+        time.sleep(1)
+
+# If all retries failed
+self.failed_lookups.add(oui)
+self.save_failed_lookups()
+return None
+```
+
+**Key Features**:
+- **Service Rotation**: Tries multiple API services (macvendors.com, maclookup.app)
+- **Rate Limiting**: Enforces delays between API calls to respect rate limits
+- **Exponential Backoff**: Increases delay on rate limit errors
+- **Timeout Protection**: 5-second timeout prevents hangs
+- **Failure Tracking**: Records failed lookups to avoid retries
+
+#### Rate Limiting Implementation
+
+**File**: `netvendor/core/oui_manager.py` (lines 219-226)
+
+```python
+def _rate_limit(self, service):
+    """Implement rate limiting for API calls."""
+    current_time = time.time()
+    time_since_last_call = current_time - service['last_call']
+    if time_since_last_call < service['rate_limit']:
+        sleep_time = service['rate_limit'] - time_since_last_call
+        time.sleep(sleep_time)
+    service['last_call'] = time.time()
+```
+
+**Why**: Different API services have different rate limits. The manager tracks the last call time per service and enforces delays accordingly.
+
+#### Cache Persistence
+
+**File**: `netvendor/core/oui_manager.py` (lines 157-178)
+
+```python
+def save_cache(self):
+    """Save only user-added cache entries with atomic write."""
+    try:
+        # Use atomic write pattern: write to temp file, then rename
+        temp_file = self.cache_file.with_suffix('.tmp')
+        with temp_file.open('w', encoding='utf-8') as f:
+            json.dump(self.cache, f, indent=2)
+            f.flush()
+            try:
+                os.fsync(f.fileno())  # Force write to disk
+            except (AttributeError, OSError):
+                pass
+        # Atomic rename (works on Unix and Windows)
+        temp_file.replace(self.cache_file)
+    except (IOError, OSError, PermissionError) as e:
+        # Fallback: direct write if atomic rename fails
+        try:
+            with self.cache_file.open('w', encoding='utf-8') as f:
+                json.dump(self.cache, f, indent=2)
+        except (IOError, OSError, PermissionError):
+            pass  # Silently fail if cache can't be saved
+```
+
+**Why atomic writes**:
+- **Prevents corruption**: If process is interrupted, cache file isn't left in partial state
+- **Cross-platform**: Works on Windows, Linux, macOS
+- **Thread-safe**: Multiple processes can run without corrupting cache
+
+### Output Generation
+
+NetVendor generates multiple output formats, each serving different use cases:
+
+#### Device CSV Generation
+
+**File**: `netvendor/utils/vendor_output_handler.py` (lines 26-67)
+
+```python
+def make_csv(input_file: Union[Path, str], devices: Dict[str, Dict[str, str]], oui_manager: OUIManager) -> None:
+    """Creates a CSV file with device information."""
+    output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True)
+    
+    if isinstance(input_file, str):
+        input_file = Path(input_file)
+    
+    output_file = output_dir / f"{input_file.stem}-Devices.csv"
+    
+    with Progress(...) as progress:
+        task = progress.add_task("[cyan]Writing device information...", total=len(devices))
+        
+        with open(output_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['MAC', 'Vendor', 'VLAN', 'Port'])
+            
+            for mac, info in devices.items():
+                vendor = oui_manager.get_vendor(mac)
+                vendor = vendor if vendor is not None else "Unknown"
+                vlan = info.get('vlan', 'N/A')
+                port = info.get('port', 'N/A')
+                writer.writerow([mac, vendor, vlan, port])
+                progress.advance(task)
+```
+
+**Why**:
+- **Progress bar**: Shows user that processing is happening (important for large files)
+- **UTF-8 encoding**: Ensures special characters work on all platforms
+- **None handling**: Converts None vendors to "Unknown" (happens in offline mode)
+
+#### HTML Dashboard Generation
+
+**File**: `netvendor/utils/vendor_output_handler.py` (lines 134-391)
+
+The HTML dashboard uses Plotly to create interactive visualizations:
+
+```python
+def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager, input_file: Path) -> None:
+    """Creates interactive visualizations of vendor and VLAN distributions."""
+    
+    # Collect vendor data
+    vendor_counts = Counter()
+    for mac, info in devices.items():
+        vendor = oui_manager.get_vendor(mac)
+        vendor = vendor if vendor is not None else "Unknown"
+        vendor_counts[vendor] += 1
+    
+    # Create subplots
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=('Vendor Distribution', 'VLAN Device Count', ...),
+        specs=[[{"type": "pie"}, {"type": "bar"}],
+               [{"type": "bar"}, {"type": "heatmap"}]]
+    )
+    
+    # Add pie chart
+    fig.add_trace(
+        go.Pie(labels=list(vendor_counts.keys()), 
+               values=list(vendor_counts.values()),
+               hovertemplate='<b>%{label}</b><br>Count: %{value}<br>Percent: %{percent}<extra></extra>'),
+        row=1, col=1
+    )
+    
+    # ... more charts ...
+    
+    # Save as HTML
+    fig.write_html('output/vendor_distribution.html')
+```
+
+**Why Plotly**:
+- **Interactive**: Users can hover, zoom, filter
+- **Self-contained**: HTML file includes all JavaScript, no external dependencies
+- **Professional**: Publication-quality visualizations
+
+#### Port Report Generation
+
+**File**: `netvendor/utils/vendor_output_handler.py` (lines 69-132)
+
+```python
+def generate_port_report(input_file: str, devices: Dict[str, Dict[str, str]], oui_manager, is_mac_table: bool = True) -> None:
+    """Generate a CSV report analyzing devices connected to each network port."""
+    
+    # Group devices by port
+    port_data = {}
+    for mac, device in devices.items():
+        port = device.get('port', '')
+        if port not in port_data:
+            port_data[port] = {
+                'total_devices': 0,
+                'vlans': set(),
+                'vendors': set(),
+                'devices': []
+            }
+        
+        port_info = port_data[port]
+        port_info['total_devices'] += 1
+        port_info['vlans'].add(device.get('vlan', ''))
+        vendor = oui_manager.get_vendor(mac)
+        vendor = vendor if vendor is not None else "Unknown"
+        port_info['vendors'].add(vendor)
+        port_info['devices'].append(mac)
+    
+    # Write to CSV
+    with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Port', 'Total Devices', 'VLANs', 'Vendors', 'Devices'])
+        for port, info in port_data.items():
+            writer.writerow([
+                port,
+                info['total_devices'],
+                ','.join(sorted(info['vlans'])),
+                ','.join(sorted(info['vendors'])),
+                ','.join(info['devices'])
+            ])
+```
+
+**Why**: Port reports help network engineers understand:
+- Which ports have the most devices (potential issues)
+- VLAN distribution per port
+- Vendor diversity per port
+
+### Advanced Features
+
+#### Historical Drift Analysis
+
+**File**: `netvendor/utils/drift_analysis.py`
+
+Drift analysis tracks how vendor distributions change over time:
+
+```python
+def analyze_drift(history_dir: Path, site: str = None, change_ticket_id: str = None) -> None:
+    """
+    Analyze vendor distribution changes across archived summaries.
+    
+    Creates vendor_drift.csv with:
+    - Metadata rows (run_timestamp, site, change_ticket_id)
+    - Vendor percentage rows showing changes over time
+    """
+    # Find all vendor summary files
+    summary_files = sorted(history_dir.glob("vendor_summary-*.txt"))
+    
+    snapshots = []
+    for summary_file in summary_files:
+        snapshot = parse_vendor_summary_file(summary_file)
+        # Load companion metadata if exists
+        metadata_file = summary_file.with_suffix('.metadata.json')
+        if metadata_file.exists():
+            with metadata_file.open('r') as f:
+                metadata = json.load(f)
+                snapshot.run_timestamp = metadata.get('run_timestamp')
+                snapshot.site = metadata.get('site')
+                snapshot.change_ticket_id = metadata.get('change_ticket_id')
+        snapshots.append(snapshot)
+    
+    # Generate drift CSV
+    # ... (calculates percentage changes)
+```
+
+**Use Case**: Track vendor mix changes and correlate with change tickets for incident analysis.
+
+#### SIEM Export
+
+**File**: `netvendor/utils/siem_export.py`
+
+SIEM export creates normalized events for security monitoring:
+
+```python
+def export_siem_events(
+    devices: Dict[str, Dict[str, str]],
+    oui_manager,
+    input_file: str | Path,
+    site: str | None = None,
+    environment: str | None = None,
+    input_type: str | None = None,
+) -> None:
+    """Export normalized events for SIEM ingestion with stable schema."""
+    
+    timestamp = _current_timestamp()  # UTC ISO-8601
+    source_file = Path(input_file).name
+    
+    # Write CSV and JSONL
+    with csv_path.open("w", newline="", encoding="utf-8") as f_csv:
+        writer = csv.DictWriter(f_csv, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for mac, info in devices.items():
+            vendor = oui_manager.get_vendor(mac)
+            vendor = vendor if vendor is not None else "Unknown"
+            
+            record = {
+                "timestamp": timestamp,
+                "site": site or "",
+                "environment": environment or "",
+                "mac": mac,
+                "vendor": vendor,
+                "device_name": f"device_{mac.replace(':', '')}",
+                "vlan": info.get('vlan', 'N/A'),
+                "interface": info.get('port', 'N/A'),
+                "input_type": input_type or "unknown",
+                "source_file": source_file,
+            }
+            writer.writerow(record)
+```
+
+**Why stable schema**: SIEM correlation rules depend on consistent field names and presence. Every record has all fields, even if empty.
+
+---
+
+## Summary
+
+NetVendor's architecture is designed for:
+
+1. **Flexibility**: Handles multiple input formats without preprocessing
+2. **Performance**: Caching and offline mode ensure fast, consistent results
+3. **Reliability**: Atomic operations, error handling, and cross-platform compatibility
+4. **Extensibility**: Modular design makes it easy to add new features
+5. **Transparency**: Clear data flow and well-documented code
+
+The tool transforms raw network data into actionable intelligence through a carefully orchestrated pipeline of parsing, normalization, enrichment, and output generation. Each design decision prioritizes user experience, reliability, and operational flexibility.
+
+---
+
+**💡 For more information:**
+- See [README.md](README.md) for user documentation
+- See [ADVANCED.md](ADVANCED.md) for operational best practices
+- Explore the codebase: `netvendor/core/` and `netvendor/utils/`
+
