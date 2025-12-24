@@ -517,18 +517,113 @@ For detailed information on advanced topics, see **[ADVANCED.md](ADVANCED.md)**:
 
 ## 🧪 Testing & Quality
 
-- Run tests:
+NetVendor includes a comprehensive test suite that validates all execution paths, input formats, and features to ensure reliability and correctness.
+
+### Running Tests
+
+**Quick test run:**
 ```bash
 pytest -q
 ```
 
-- Optional linting/type checks (if configured locally):
+**Detailed test output:**
+```bash
+pytest -v
+```
+
+**Run specific test categories:**
+```bash
+# Test all execution paths (package entry, standalone script, Python API)
+pytest tests/test_execution_paths.py -v
+
+# Test core parsing and format detection
+pytest tests/test_netvendor.py -v
+
+# Test vendor lookup and caching
+pytest tests/test_oui_manager.py -v
+
+# Test output generation
+pytest tests/test_vendor_output_handler.py -v
+
+# Test Python API
+pytest tests/test_api.py -v
+```
+
+**Test with coverage report:**
+```bash
+pytest --cov=netvendor --cov-report=html
+```
+
+### Test Coverage
+
+NetVendor's test suite includes **20+ execution path tests** that validate every way users can run the tool:
+
+- ✅ **Package entry point** (`netvendor input_file.txt`) - Basic analysis
+- ✅ **Standalone script** (`python3 NetVendor.py`) - All flag combinations
+- ✅ **Python API** (`from netvendor import analyze_file`) - Programmatic usage
+- ✅ **Configuration-driven** - Config files and environment variables
+- ✅ **Input type detection** - MAC lists, MAC tables, ARP tables
+- ✅ **Error handling** - Missing files, empty files, invalid inputs
+- ✅ **Feature combinations** - Offline mode, SIEM export, drift analysis, history tracking
+
+**Test data**: Sample inputs for validation are in `tests/data/`:
+- `test-mac-list.txt` - 100 MAC addresses
+- `test-mac-table.txt` - 500+ MAC table entries (Cisco format)
+- `test-arp-table.txt` - ARP table format
+
+### What Gets Tested
+
+**Execution Paths** (`tests/test_execution_paths.py`):
+- All ways to run NetVendor (package entry, standalone, Python API)
+- All flag combinations (offline, SIEM, drift, history)
+- Configuration file loading (INI, YAML, TOML)
+- Environment variable overrides
+- Input type detection and parsing
+- Error handling and edge cases
+
+**Core Functionality** (`tests/test_netvendor.py`):
+- MAC address validation and normalization
+- File type detection (MAC list, MAC table, ARP table)
+- Port information parsing
+- Format type detection
+
+**Vendor Lookup** (`tests/test_oui_manager.py`):
+- OUI cache functionality
+- Failed lookup tracking
+- API integration and rate limiting
+
+**Output Generation** (`tests/test_vendor_output_handler.py`):
+- CSV file generation
+- HTML dashboard creation
+- Port report generation
+- Vendor summary formatting
+
+**Python API** (`tests/test_api.py`):
+- API function signatures
+- Return value validation
+- Error handling
+
+### Testing Philosophy
+
+NetVendor's testing approach prioritizes:
+- **Comprehensive coverage**: Every execution path is tested
+- **Real-world data**: Tests use realistic network device outputs
+- **Isolation**: Tests use temporary directories to avoid side effects
+- **Mock data**: All tests use controlled mock data for reproducibility
+- **Cross-platform**: Tests validate Windows/Linux/macOS compatibility
+
+For detailed testing documentation, see:
+- **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** - Complete execution path documentation and behavior graphs
+- **[TEST_COVERAGE.md](TEST_COVERAGE.md)** - Detailed test coverage summary
+- **[TUTORIAL.md](TUTORIAL.md#test-strategy)** - Test strategy and debugging guide
+
+### Optional Linting/Type Checks
+
+If configured locally:
 ```bash
 ruff check .
 mypy netvendor
 ```
-
-- Sample inputs for validation are in `tests/data/`.
 
 ---
 

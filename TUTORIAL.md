@@ -1083,45 +1083,101 @@ This section provides step-by-step guides for extending NetVendor's functionalit
 
 ## Test Strategy
 
-NetVendor's test suite is located in `tests/` and covers key components:
+NetVendor's test suite is located in `tests/` and provides comprehensive coverage of all execution paths, core functionality, and edge cases.
 
 ### Test Structure
 
 ```
 tests/
 ├── __init__.py
-├── conftest.py              # Shared fixtures
-├── test_netvendor.py        # Parsing and format detection tests
-├── test_oui_manager.py      # Vendor lookup and caching tests
-├── test_vendor_output_handler.py  # Output generation tests
-└── data/                    # Sample input files
-    ├── test-mac-list.txt
-    ├── test-mac-table.txt
-    └── test-arp-table.txt
+├── conftest.py                      # Shared fixtures
+├── test_execution_paths.py         # All execution paths (20+ tests)
+├── test_netvendor.py                # Parsing and format detection tests
+├── test_oui_manager.py              # Vendor lookup and caching tests
+├── test_vendor_output_handler.py    # Output generation tests
+├── test_api.py                      # Python API tests
+└── data/                            # Sample input files
+    ├── test-mac-list.txt            # 100 MAC addresses
+    ├── test-mac-table.txt           # 500+ MAC table entries
+    └── test-arp-table.txt           # ARP table format
 ```
 
-### Key Test Coverage
+### Execution Path Testing
+
+**Comprehensive execution path validation** (`test_execution_paths.py` - 20 tests):
+
+NetVendor validates every way users can run the tool:
+
+1. **Package Entry Point** (2 tests):
+   - `test_package_entry_point_basic()` - `netvendor input_file.txt`
+   - `test_module_execution()` - `python3 -m netvendor input_file.txt`
+
+2. **Standalone Script** (5 tests):
+   - `test_standalone_script_basic()` - No flags
+   - `test_standalone_script_offline()` - Offline mode
+   - `test_standalone_script_siem_export()` - SIEM export
+   - `test_standalone_script_history_drift()` - History + drift analysis
+   - `test_standalone_script_all_features()` - All features combined
+
+3. **Python API** (2 tests):
+   - `test_python_api_basic()` - Basic `analyze_file()` usage
+   - `test_python_api_all_features()` - Full feature set
+
+4. **Configuration** (5 tests):
+   - Config file loading (INI, YAML, TOML)
+   - Environment variable overrides
+   - Configuration precedence validation
+
+5. **Input Types** (3 tests):
+   - MAC list detection and parsing
+   - MAC table detection and parsing
+   - ARP table detection and parsing
+
+6. **Error Handling** (3 tests):
+   - Missing file errors
+   - Empty file errors
+   - Invalid input errors
+
+**Why this matters**: These tests ensure that whether users run NetVendor via CLI, Python API, or configuration files, all paths work correctly and produce expected outputs.
+
+See **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** for detailed execution path documentation and behavior graphs.
+
+### Core Functionality Testing
 
 **Parsing Functions** (`test_netvendor.py`):
-- `test_is_mac_address()` - Validates MAC address detection across formats
-- `test_is_mac_address_table()` - Tests MAC table format detection
-- `test_format_mac_address()` - Ensures normalization works correctly
+- `test_is_mac_address()` - Validates MAC address detection across formats (colon, hyphen, dot, mask formats)
+- `test_is_mac_address_table()` - Tests MAC table format detection (Cisco, HP/Aruba, Juniper, Extreme, Brocade)
+- `test_format_mac_address()` - Ensures normalization works correctly (all formats → `xx:xx:xx:xx:xx:xx`)
+- `test_parse_port_info()` - Port extraction from various formats
 
 **Vendor Lookup** (`test_oui_manager.py`):
-- `test_oui_manager_cache()` - Verifies caching behavior
-- `test_oui_manager_failed_lookups()` - Tests failure handling
-- `test_get_vendor_ouis()` - Validates OUI extraction
+- `test_oui_manager_cache()` - Verifies caching behavior with real OUIs
+- `test_oui_manager_failed_lookups()` - Tests failure handling and tracking
+- `test_get_vendor_ouis()` - Validates OUI extraction and normalization
 
 **Output Generation** (`test_vendor_output_handler.py`):
-- `test_make_csv()` - CSV generation with various data
-- `test_generate_port_report()` - Port report creation
+- `test_make_csv()` - CSV generation with various data scenarios
+- `test_generate_port_report()` - Port report creation and formatting
 - `test_create_vendor_distribution()` - HTML dashboard generation
+- `test_save_vendor_summary()` - Vendor summary text file creation
+- `test_empty_data_handling()` - Edge case handling
+
+**Python API** (`test_api.py`):
+- API function signatures and return values
+- Error handling and validation
+- Feature flag combinations
 
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (quick)
 pytest -q
+
+# Run all tests (verbose)
+pytest -v
+
+# Run execution path tests (comprehensive validation)
+pytest tests/test_execution_paths.py -v
 
 # Run specific test file
 pytest tests/test_netvendor.py -v
@@ -1129,18 +1185,40 @@ pytest tests/test_netvendor.py -v
 # Run specific test
 pytest tests/test_netvendor.py::test_is_mac_address -v
 
-# Run with coverage
+# Run with coverage report
 pytest --cov=netvendor --cov-report=html
 ```
 
 ### Test Data
 
 Sample input files in `tests/data/` represent real-world formats:
-- `test-mac-table.txt` - Cisco-style MAC address table
+- `test-mac-table.txt` - Cisco-style MAC address table (500+ entries)
 - `test-arp-table.txt` - Standard ARP table format
-- `test-mac-list.txt` - Simple MAC address list
+- `test-mac-list.txt` - Simple MAC address list (100 MACs)
 
-**Adding test data**: Add new files to `tests/data/` and reference them in test cases.
+**Adding test data**: Add new files to `tests/data/` and reference them in test cases. Tests use temporary directories to avoid polluting the workspace.
+
+### Testing Philosophy
+
+NetVendor's testing approach ensures:
+- **Complete coverage**: Every execution path is validated
+- **Real-world scenarios**: Tests use realistic network device outputs
+- **Isolation**: Tests use temporary directories and mock data
+- **Reproducibility**: All tests use controlled mock data
+- **Cross-platform**: Tests validate Windows/Linux/macOS compatibility
+
+**Test validation checklist**:
+- ✅ All execution paths tested (package entry, standalone, Python API)
+- ✅ All input file types tested (MAC list, MAC table, ARP table)
+- ✅ All feature flags tested (offline, SIEM, drift, history)
+- ✅ Configuration file support tested
+- ✅ Environment variable override tested
+- ✅ Error handling tested (missing file, empty file, invalid file)
+- ✅ Mock data used for all tests
+- ✅ Tests isolated (use temporary directories)
+- ✅ All tests passing (20+ execution path tests + core functionality tests)
+
+For detailed test coverage information, see **[TEST_COVERAGE.md](TEST_COVERAGE.md)**.
 
 ---
 

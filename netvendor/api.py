@@ -280,7 +280,7 @@ def analyze_file(
     
     # Drift analysis (if requested)
     if analyze_drift_flag and history_dir:
-        drift_csv = analyze_drift(Path(history_dir), site=site, change_ticket_id=change_ticket)
+        drift_csv = analyze_drift(Path(history_dir))
         output_files.append(Path(history_dir) / "vendor_drift.csv")
     
     # Close logger
