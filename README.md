@@ -471,15 +471,15 @@ NetVendor is an open-source project, and we welcome contributions from the commu
 ### Getting Help & Reporting Issues
 
 - **Report bugs or request features**: Open an [issue on GitHub](https://github.com/StewAlexander-com/NetVendor/issues)
-- **Ask questions**: Use [GitHub Discussions](https://github.com/StewAlexander-com/NetVendor/discussions) (if enabled) for general questions, use cases, and community discussions
+- **Ask questions**: Open a GitHub issue with the "question" label for general questions and use cases
 - **Security issues**: Please report security vulnerabilities privately through GitHub's security advisory system
 
 ### Contributing Success Stories
 
 We'd love to hear how you're using NetVendor! Share your success stories by:
-- Opening a [GitHub Discussion](https://github.com/StewAlexander-com/NetVendor/discussions) with your use case (anonymized as needed)
+- Opening a GitHub issue with your use case (anonymized as needed)
 - Submitting a pull request to add your deployment to the [Success Stories section](#-success-stories--known-deployments)
-- Sharing your experience in an issue or discussion thread
+- Sharing your experience in an issue thread
 
 ### Contributing Code
 
@@ -492,7 +492,7 @@ Contributions are welcome! To contribute:
 
 ### Community Channels
 
-- **GitHub Discussions**: [Join the discussion](https://github.com/StewAlexander-com/NetVendor/discussions) (if enabled)
+- **GitHub Discussions**: *Coming soon - GitHub Discussions will be enabled for community questions and discussions*
 - **Community chat**: *Coming soon - community Slack/Discord links will be added here as they become available*
 
 ---
