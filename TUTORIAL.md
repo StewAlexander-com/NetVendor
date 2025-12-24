@@ -20,6 +20,27 @@ This tutorial is designed for:
 
 ---
 
+## Design Decisions & Tradeoffs
+
+This table summarizes the key architectural decisions that shape NetVendor's implementation philosophy:
+
+| Design Decision | Rationale | Tradeoff/Consideration |
+|----------------|-----------|------------------------|
+| **Offline-first OUI cache** | Enables air-gapped operation, ensures consistent results, eliminates network dependencies | Initial cache population required; uncached MACs appear as "Unknown" in offline mode |
+| **Atomic file writes** | Prevents corruption if process is interrupted (critical for Windows/cross-platform) | Slightly more complex than direct writes; requires temp file + rename pattern |
+| **JSONL runtime logging** | Structured logs enable troubleshooting and performance analysis; one JSON object per line is SIEM-friendly | Logging disabled by default to avoid performance impact; requires explicit `NETVENDOR_LOG=1` |
+| **Rate-limited API lookups** | Respects API service limits, prevents throttling, enables service rotation | Adds latency for uncached lookups; requires careful timing management |
+| **Multi-tier vendor lookup** | Cache-first strategy maximizes speed and reliability; API fallback ensures coverage | Complex state management (cache, failed_lookups, service rotation); requires careful error handling |
+| **Vendor-agnostic parsing** | Pattern matching and heuristics handle diverse network device formats without rigid requirements | May misclassify edge cases; requires robust error handling for invalid lines |
+| **Progressive enhancement** | Basic functionality works out-of-the-box; advanced features (SIEM, drift) are opt-in via flags | Two entry points (`netvendor` vs `NetVendor.py`) can be confusing; flags required for advanced features |
+| **Stable SIEM schema** | All fields present in every record enables reliable correlation rules and joins | Slightly larger file size (empty fields); requires consistent field naming across versions |
+| **Cross-platform path handling** | `pathlib.Path` and explicit UTF-8 encoding ensure Windows/Linux/macOS compatibility | Must test on all platforms; some platform-specific edge cases (e.g., Windows file locking) |
+| **Dictionary-based device storage** | MAC addresses as keys enable automatic deduplication; last occurrence wins | No preservation of duplicate MAC order; requires normalized MAC format as keys |
+
+**Philosophy Summary**: NetVendor prioritizes **reliability** (offline-first, atomic operations), **performance** (caching, rate limiting), and **operational safety** (error handling, cross-platform compatibility) over convenience features that could compromise production readiness.
+
+---
+
 ## 🗺️ Quick Reference Cheat Sheet
 
 **If you're here to...**
@@ -58,6 +79,7 @@ This tutorial is designed for:
 
 ## 📑 Table of Contents
 
+- [Design Decisions & Tradeoffs](#design-decisions--tradeoffs)
 - [What NetVendor Does](#what-netvendor-does)
 - [Architecture Overview](#architecture-overview)
 - [Processing Pipeline](#processing-pipeline)
