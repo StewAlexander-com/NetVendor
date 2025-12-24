@@ -185,6 +185,8 @@ See [Output Details](#-output-details) below for complete file descriptions.
 | `--change-ticket ID` | Change ticket/incident ID for drift correlation | `--change-ticket CHG-12345` |
 | `--siem-export` | Generate SIEM-friendly CSV/JSONL exports | `--siem-export` |
 
+**Note**: Configuration file values and environment variables can provide defaults for these flags. See [Configuration](#configuration) section below.
+
 ### Offline Mode
 
 Use the `--offline` flag when you want to avoid any external vendor lookups (e.g., on air‑gapped networks). Devices that are not already present in the local OUI cache will appear as `Unknown`.
@@ -300,6 +302,87 @@ When enabled, a log file is created at `output/netvendor_runtime.log` in JSONL f
 - `context`: Additional context information
 
 The logger captures key runtime events including file processing, error conditions, output generation, and performance metrics. Logging is disabled by default and has no performance impact when not enabled.
+
+### Configuration
+
+NetVendor supports configuration files and environment variables to reduce CLI flag churn in recurring jobs.
+
+**Configuration file locations** (checked in order):
+1. Current directory: `./netvendor.conf` (or `.yaml`, `.toml`)
+2. User config: `~/.config/netvendor/netvendor.conf`
+3. System config: `/etc/netvendor/netvendor.conf`
+
+**Supported formats**: INI/ConfigParser (`.conf`, `.ini`), YAML (`.yaml`, `.yml` - requires PyYAML), TOML (`.toml` - requires tomli/tomllib)
+
+**Example INI config** (`netvendor.conf`):
+```ini
+[netvendor]
+offline = true
+history_dir = /var/lib/netvendor/history
+site = DC1
+environment = prod
+siem_export = true
+```
+
+**Example YAML config** (`netvendor.yaml`):
+```yaml
+netvendor:
+  offline: true
+  history_dir: /var/lib/netvendor/history
+  site: DC1
+  environment: prod
+  siem_export: true
+```
+
+**Environment variables** (override config file):
+- `NETVENDOR_OFFLINE=true`
+- `NETVENDOR_HISTORY_DIR=/var/lib/netvendor/history`
+- `NETVENDOR_SITE=DC1`
+- `NETVENDOR_ENVIRONMENT=prod`
+- `NETVENDOR_SIEM_EXPORT=true`
+
+**Precedence**: Command-line arguments > Environment variables > Config file > Defaults
+
+See `netvendor.conf.example` and `netvendor.yaml.example` for complete examples.
+
+### Python API
+
+NetVendor provides a programmatic Python API for integration into automation scripts and other tools:
+
+```python
+from netvendor import analyze_file
+
+# Basic usage
+result = analyze_file("mac_table.txt", offline=True)
+
+print(f"Processed {result['device_count']} devices")
+print(f"Found {result['vendor_count']} unique vendors")
+print(f"Output files: {result['output_files']}")
+
+# Access device data
+for mac, info in result['devices'].items():
+    print(f"{mac}: {info['vendor']} (VLAN: {info['vlan']})")
+
+# With SIEM export
+result = analyze_file(
+    input_file="mac_table.txt",
+    offline=True,
+    siem_export=True,
+    site="DC1",
+    environment="prod"
+)
+
+# With history tracking
+result = analyze_file(
+    input_file="mac_table.txt",
+    history_dir="history",
+    analyze_drift_flag=True,
+    site="DC1",
+    change_ticket="CHG-12345"
+)
+```
+
+**API Reference**: See `netvendor/api.py` for complete function signature and return value documentation.
 
 ---
 

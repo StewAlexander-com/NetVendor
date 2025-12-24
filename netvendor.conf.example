@@ -1,0 +1,37 @@
+# NetVendor Configuration File Example
+# 
+# Copy this file to netvendor.conf and customize for your environment.
+# Configuration file locations (checked in order):
+# 1. Current directory: ./netvendor.conf
+# 2. User config: ~/.config/netvendor/netvendor.conf
+# 3. System config: /etc/netvendor/netvendor.conf
+#
+# Environment variables (NETVENDOR_*) override config file values.
+# Command-line arguments override both config file and environment variables.
+
+[netvendor]
+
+# Offline mode: Use only local OUI cache, no external API calls
+# offline = false
+
+# History directory: Where to archive vendor summaries for drift analysis
+# history_dir = history
+
+# Analyze drift: Run drift analysis after archiving summary
+# analyze_drift = false
+
+# Site identifier: Site/region tag for SIEM exports and drift metadata
+# site = DC1
+
+# Environment identifier: Environment tag for SIEM exports
+# environment = prod
+
+# Change ticket: Change ticket/incident ID for drift correlation
+# change_ticket = 
+
+# SIEM export: Generate SIEM-friendly CSV/JSONL exports
+# siem_export = false
+
+# Output directory: Where to write output files
+# output_dir = output
+

@@ -20,6 +20,7 @@ from netvendor.utils.vendor_output_handler import (
 from netvendor.utils.drift_analysis import analyze_drift
 from netvendor.utils.siem_export import export_siem_events
 from netvendor.utils.runtime_logger import get_logger
+from netvendor.config import load_config
 
 console = Console()
 VERBOSE = os.getenv("NETVENDOR_VERBOSE", "0") in ("1", "true", "True")
@@ -187,6 +188,25 @@ def main():
 
     args = parser.parse_args()
     input_file = args.input_file
+    
+    # Load configuration (config file values can be overridden by CLI args)
+    config = load_config()
+    
+    # Apply config defaults (CLI args take precedence)
+    if not args.offline:
+        args.offline = config.get('offline', False)
+    if args.history_dir == "history" and config.get('history_dir') != "history":
+        args.history_dir = config.get('history_dir', "history")
+    if not args.analyze_drift:
+        args.analyze_drift = config.get('analyze_drift', False)
+    if not args.site:
+        args.site = config.get('site')
+    if not args.environment:
+        args.environment = config.get('environment')
+    if not args.change_ticket:
+        args.change_ticket = config.get('change_ticket')
+    if not args.siem_export:
+        args.siem_export = config.get('siem_export', False)
     
     # Initialize runtime logger
     logger = get_logger()

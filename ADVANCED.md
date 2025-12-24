@@ -44,6 +44,95 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 - **Vendor change without change ticket**: Correlate drift analysis showing vendor percentage changes with missing `change_ticket_id` values.
 - **Cross-site vendor anomalies**: Compare vendor distributions across sites using `site` field to identify inconsistent device types.
 
+### Example SIEM Detection Rules
+
+#### Elasticsearch (KQL)
+
+**New Vendor in Production VLAN:**
+```kql
+# Alert when a new vendor appears in production VLANs (e.g., VLANs 10-20)
+index="netvendor-*"
+  AND environment="prod"
+  AND vlan:("10" OR "11" OR "12" OR "13" OR "14" OR "15" OR "16" OR "17" OR "18" OR "19" OR "20")
+  AND NOT vendor:("Cisco Systems, Inc" OR "Hewlett Packard" OR "Juniper Networks" OR "Dell Inc")
+  AND NOT vendor:"Unknown"
+| stats count by mac, vendor, vlan, timestamp
+| where count == 1
+```
+
+**Vendor Change Detection:**
+```kql
+# Alert when a known MAC address changes vendor
+index="netvendor-*"
+  AND mac="00:11:22:33:44:55"  # Replace with specific MAC or use wildcard
+| sort timestamp desc
+| streamstats window=2 current=true values(vendor) as previous_vendor
+| where vendor != previous_vendor AND previous_vendor != null
+```
+
+**New Device in Sensitive Environment:**
+```kql
+# Detect new devices in production environment
+index="netvendor-*"
+  AND environment="prod"
+  AND timestamp > now()-1h
+| stats earliest(timestamp) as first_seen, latest(timestamp) as last_seen, count by mac, vendor, vlan
+| where first_seen > now()-2h  # Device first seen in last 2 hours
+```
+
+#### Splunk (SPL)
+
+**New Vendor in Production VLAN:**
+```spl
+index=netvendor environment=prod vlan IN (10,11,12,13,14,15,16,17,18,19,20)
+  NOT vendor IN ("Cisco Systems, Inc", "Hewlett Packard", "Juniper Networks", "Dell Inc", "Unknown")
+| stats count by mac, vendor, vlan, _time
+| where count=1
+```
+
+**Vendor Change Detection:**
+```spl
+index=netvendor mac="00:11:22:33:44:55"
+| sort _time desc
+| streamstats window=2 current=true values(vendor) as previous_vendor
+| where vendor != previous_vendor AND previous_vendor != null
+```
+
+**Baseline Comparison (New Vendors):**
+```spl
+# Compare current run with baseline from last 7 days
+index=netvendor site=DC1 environment=prod
+| stats values(vendor) as current_vendors by vlan
+| join type=left vlan [
+  | search index=netvendor site=DC1 environment=prod earliest=-7d@d latest=-1d@d
+  | stats values(vendor) as baseline_vendors by vlan
+]
+| eval new_vendors=mvfilter(NOT current_vendors IN baseline_vendors)
+| where new_vendors != ""
+```
+
+#### Saved Search Examples
+
+**Elasticsearch Saved Search** (for recurring alerts):
+- **Name**: "NetVendor - New Vendor in Production"
+- **Query**: Use the KQL query above
+- **Schedule**: Run every hour
+- **Action**: Send email/Slack notification when results found
+
+**Splunk Alert** (for real-time detection):
+- **Name**: "NetVendor - Vendor Change Alert"
+- **Query**: Use the SPL vendor change query above
+- **Trigger**: When count > 0
+- **Action**: Create incident ticket or send notification
+
+### SIEM Integration Best Practices
+
+1. **Index Configuration**: Create a dedicated index/indicator for NetVendor events (e.g., `netvendor-*` in Elastic, `netvendor` in Splunk)
+2. **Field Mapping**: Ensure `mac`, `vlan`, `site`, `environment`, and `timestamp` fields are properly indexed for fast queries
+3. **Baseline Creation**: Run baseline queries weekly to establish normal vendor distributions per VLAN/site
+4. **Alert Tuning**: Start with high-severity alerts (production VLANs, critical sites) and expand based on false positive rates
+5. **Correlation**: Join NetVendor events with change management tickets using `change_ticket_id` from drift analysis metadata
+
 ### Performance Considerations for Continuous Monitoring
 
 - **Collection Frequency**: For real-time posture monitoring, run NetVendor every 1-4 hours depending on network change velocity.
