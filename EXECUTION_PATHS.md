@@ -182,7 +182,7 @@ Config File Detection
 Load Configuration
     │
     ├─> Parse config file (INI/YAML/TOML)
-    ├─> Load environment variables (NETVENDOR_*)
+    ├─> Load environment variables (SHADOWVENDOR_*)
     └─> Apply defaults
     │
     ▼

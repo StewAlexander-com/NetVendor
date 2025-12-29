@@ -122,7 +122,7 @@ tests/test_execution_paths.py::test_config_env_override PASSED           [100%]
 
 ### Configuration Precedence:
 1. Command-line arguments (highest priority)
-2. Environment variables (`NETVENDOR_*`)
+2. Environment variables (`SHADOWVENDOR_*`)
 3. Configuration file (`shadowvendor.conf`, `shadowvendor.yaml`, `shadowvendor.toml`)
 4. Default values (lowest priority)
 

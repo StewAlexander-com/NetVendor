@@ -1,5 +1,5 @@
 """
-Output Handler for NetVendor
+Output Handler for ShadowVendor
 
 This module handles all output generation functionality including:
 - CSV file creation
