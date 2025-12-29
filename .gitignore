@@ -29,8 +29,9 @@ processed_files.json   # Processed files cache
 oui_database.json      # OUI database
 data/                  # Data directory
 
-# Test data files
+# Test data files (but allow tests/data/*.txt for quick start examples)
 *test*.txt
+!tests/data/test-*.txt
 *sample*.txt
 example*.txt
 mock*.txt
