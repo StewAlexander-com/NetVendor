@@ -1,5 +1,7 @@
 # 🚀 ShadowVendor
 
+![ShadowVendor Banner](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.png)
+
 ![Overview](docs/images/overview.png?v=14.0.0)
 *Interactive vendor distribution pie chart with detailed hover information - see device counts, percentages, and VLAN presence at a glance*
 
