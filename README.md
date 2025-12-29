@@ -1,7 +1,5 @@
 # 🚀 ShadowVendor
 
-![ShadowVendor Banner](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.png)
-
 ![Overview](docs/images/overview.png?v=14.0.0)
 
 **Overview Dashboard** - Interactive vendor distribution visualization:
