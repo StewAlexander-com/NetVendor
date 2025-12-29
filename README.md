@@ -610,15 +610,12 @@ pytest --cov=shadowvendor --cov-report=html
 
 ### Test Coverage
 
-ShadowVendor's test suite includes **20+ execution path tests** that validate every way users can run the tool:
+ShadowVendor's test suite includes **20+ execution path tests** covering:
 
-- ✅ **Package entry point** (`shadowvendor input_file.txt`) - Basic analysis
-- ✅ **Standalone script** (`python3 ShadowVendor.py`) - All flag combinations
-- ✅ **Python API** (`from shadowvendor import analyze_file`) - Programmatic usage
-- ✅ **Configuration-driven** - Config files and environment variables
-- ✅ **Input type detection** - MAC lists, MAC tables, ARP tables
-- ✅ **Error handling** - Missing files, empty files, invalid inputs
-- ✅ **Feature combinations** - Offline mode, SIEM export, drift analysis, history tracking
+- ✅ **Execution paths**: Package entry point, standalone script, Python API with all flag combinations (offline, SIEM, drift, history)
+- ✅ **Configuration**: Config files (INI, YAML, TOML) and environment variable overrides
+- ✅ **Input processing**: MAC lists, MAC tables, ARP tables with type detection and parsing
+- ✅ **Error handling**: Missing files, empty files, invalid inputs, and edge cases
 
 **Test data**: Sample inputs for validation are in `tests/data/`:
 - `test-mac-list.txt` - 100 MAC addresses
@@ -628,12 +625,8 @@ ShadowVendor's test suite includes **20+ execution path tests** that validate ev
 ### What Gets Tested
 
 **Execution Paths** (`tests/test_execution_paths.py`):
-- All ways to run ShadowVendor (package entry, standalone, Python API)
-- All flag combinations (offline, SIEM, drift, history)
-- Configuration file loading (INI, YAML, TOML)
-- Environment variable overrides
-- Input type detection and parsing
-- Error handling and edge cases
+- Package entry, standalone script, and Python API execution modes
+- Flag combinations and configuration file loading
 
 **Core Functionality** (`tests/test_shadowvendor.py`):
 - MAC address validation and normalization
