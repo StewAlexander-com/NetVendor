@@ -646,7 +646,17 @@ mypy shadowvendor
 **Latest Release: [v14.0.0](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v14.0.0)** - Major Release: Project Rebranding to ShadowVendor
 
 ShadowVendor (formerly NetVendor) is actively maintained and regularly updated. This release represents a major milestone with the complete rebranding from NetVendor to ShadowVendor, comprehensive testing improvements, and enhanced documentation.  
-**Recent improvements:**
+
+**v14.0.0 Major Release Highlights:**
+- 🎉 **Complete rebranding** from NetVendor to ShadowVendor (package, imports, env vars, output files)
+- ✅ **Comprehensive test suite** with 41+ tests covering all execution paths
+- 📚 **Enhanced documentation** (TUTORIAL.md, ADVANCED.md, EXECUTION_PATHS.md, TEST_COVERAGE.md)
+- 🐍 **Python API** for programmatic usage (`from shadowvendor import analyze_file`)
+- ⚙️ **Configuration file support** (INI, YAML, TOML) for easier automation
+- 🧪 **Test data included** for immediate quick start examples
+- 📦 **Improved installation** with multiple options for different use cases
+
+**Previous improvements:**
 - ✅ Enhanced MAC address parsing for Juniper, Aruba, Extreme, Brocade, and more
 - ✅ Improved OUIManager logic and normalization
 - ✅ Real-world OUI test coverage
@@ -655,7 +665,6 @@ ShadowVendor (formerly NetVendor) is actively maintained and regularly updated. 
 - ✅ Runtime logging for troubleshooting and performance analysis (JSONL format)
 - ✅ Enhanced error handling with user-friendly messages and actionable hints
 - ✅ Offline mode support for air-gapped networks (`--offline` flag)
-- ✅ Comprehensive README with TL;DR, workflows, table of contents, and quick-start examples
 - ✅ All tests pass and program output confirmed
 
 **Planned:**
