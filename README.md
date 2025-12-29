@@ -3,7 +3,11 @@
 ![ShadowVendor Banner](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.png)
 
 ![Overview](docs/images/overview.png?v=14.0.0)
-*Interactive vendor distribution pie chart with detailed hover information - see device counts, percentages, and VLAN presence at a glance*
+
+**Overview Dashboard** - Interactive vendor distribution visualization:
+- Hover over pie segments to see device counts, percentages, and VLAN presence
+- Quickly identify dominant vendors and device diversity
+- Export-ready for reports and presentations
 
 ## ⚡ TL;DR: Why You Should Care
 
@@ -50,9 +54,12 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), ShadowVendor transfo
   - [Windows Usage](#windows-usage)
   - [Verbose Output](#verbose-output)
   - [Runtime Logging](#runtime-logging)
+  - [Configuration](#configuration)
+  - [Python API](#python-api)
 - [📥 Supported Input Formats](#-supported-input-formats)
 - [📊 Output Details](#-output-details)
 - [🌟 Success Stories & Known Deployments](#-success-stories--known-deployments)
+- [🔒 Security Considerations](#-security-considerations)
 - [🔧 Advanced Topics](#-advanced-topics)
   - [Technical Tutorial](#technical-tutorial)
 - [🧪 Testing & Quality](#-testing--quality)
@@ -180,10 +187,35 @@ python3 ShadowVendor.py input_file.txt
 
 ShadowVendor generates several output files in the `output/` directory:
 
-- **Standard outputs** (always generated): Device CSV, Port CSV (for MAC tables), interactive HTML dashboard, and vendor summary text file
-- **Optional outputs** (with flags): SIEM exports (CSV/JSONL), historical archives, and drift analysis CSV
+**Output behavior:**
+- **Always generated**: Device CSV, interactive HTML dashboard, vendor summary text file
+- **Conditionally generated**: Port CSV (only for MAC address tables, not ARP or simple lists)
+- **Optional** (with flags): SIEM exports (CSV/JSONL), historical archives, drift analysis CSV
 
 See [Output Details](#-output-details) below for complete file descriptions.
+
+### Typical First Run
+
+**Quick workflow for first-time users:**
+
+1. **Paste your network output** into a file (e.g., `my_switch.txt`):
+   ```bash
+   # Copy output from: show mac address-table
+   # or: show arp
+   # or: just a list of MAC addresses
+   ```
+
+2. **Run ShadowVendor**:
+   ```bash
+   python3 ShadowVendor.py my_switch.txt
+   ```
+
+3. **Open the results**:
+   - **Interactive dashboard**: Open `output/vendor_distribution.html` in your browser
+   - **Device list**: Check `output/my_switch-Devices.csv` for detailed device information
+   - **Summary**: Read `output/vendor_summary.txt` for quick vendor counts
+
+**That's it!** You now have a complete vendor analysis of your network data.
 
 ---
 
@@ -245,17 +277,7 @@ python3 ShadowVendor.py \
 ```
 
 **Stable Schema** (all fields present in every record):
-
-- `timestamp`: UTC ISO-8601 collection time (e.g., `2025-10-31T16:23:45Z`)
-- `site`: Site/region identifier (e.g., `DC1`, `HQ`, `us-east-1`)
-- `environment`: Environment identifier (e.g., `prod`, `dev`, `staging`)
-- `mac`: Normalized MAC address (`xx:xx:xx:xx:xx:xx`)
-- `vendor`: Vendor name from OUI lookup (or `Unknown` if not found)
-- `device_name`: Device identifier (derived from MAC)
-- `vlan`: VLAN ID (or `N/A` if not available)
-- `interface`: Network interface/port identifier (e.g., `Gi1/0/1`, `ge-0/0/0`)
-- `input_type`: Source data type (`mac_list`, `mac_table`, `arp_table`, `unknown`)
-- `source_file`: Original input filename
+- `timestamp`, `site`, `environment`, `mac`, `vendor`, `device_name`, `vlan`, `interface`, `input_type`, `source_file`
 
 **Correlation-friendly design:**
 - All fields consistently named and present in every record
@@ -263,9 +285,11 @@ python3 ShadowVendor.py \
 - UTC ISO-8601 timestamps for time-based correlation
 - Site and environment tags enable multi-site/environment dashboards
 
+For complete SIEM schema documentation and integration examples, see [ADVANCED.md](ADVANCED.md#-posture-change-detection--security-monitoring).
+
 ### Cross-Platform Compatibility
 
-ShadowVendor is designed to work on **Linux (Debian/Ubuntu), macOS (Intel and Apple Silicon), and Windows**. All file operations use UTF-8 encoding and cross-platform path handling.
+ShadowVendor is designed to work on **Linux (Debian/Ubuntu), macOS (Intel and Apple Silicon), and Windows**. All file operations use UTF-8 encoding and cross-platform path handling for seamless operation across environments.
 
 **Windows Usage:**
 ```powershell
@@ -330,7 +354,7 @@ ShadowVendor supports configuration files and environment variables to reduce CL
 
 **Supported formats**: INI/ConfigParser (`.conf`, `.ini`), YAML (`.yaml`, `.yml` - requires PyYAML), TOML (`.toml` - requires tomli/tomllib)
 
-**Example INI config** (`shadowvendor.conf`):
+**Example config** (`shadowvendor.conf`):
 ```ini
 [shadowvendor]
 offline = true
@@ -340,26 +364,9 @@ environment = prod
 siem_export = true
 ```
 
-**Example YAML config** (`shadowvendor.yaml`):
-```yaml
-shadowvendor:
-  offline: true
-  history_dir: /var/lib/shadowvendor/history
-  site: DC1
-  environment: prod
-  siem_export: true
-```
-
-**Environment variables** (override config file):
-- `SHADOWVENDOR_OFFLINE=true`
-- `SHADOWVENDOR_HISTORY_DIR=/var/lib/shadowvendor/history`
-- `SHADOWVENDOR_SITE=DC1`
-- `SHADOWVENDOR_ENVIRONMENT=prod`
-- `SHADOWVENDOR_SIEM_EXPORT=true`
-
 **Precedence**: Command-line arguments > Environment variables > Config file > Defaults
 
-See `shadowvendor.conf.example` and `shadowvendor.yaml.example` for complete examples.
+For complete configuration examples (INI, YAML, TOML) and environment variable reference, see [CONFIG.md](CONFIG.md).
 
 ### Python API
 
@@ -419,18 +426,35 @@ ShadowVendor automatically detects and parses the following formats:
 
 ### 2. MAC Address Tables (Multi-vendor)
 
+**Cisco:**
 ```
 Vlan    Mac Address       Type        Ports
 10      0011.2233.4455    DYNAMIC     Gi1/0/1
-20      00:0E:83:11:22:33 DYNAMIC     ge-0/0/0
-30      B8:AC:6F:77:88:99 DYNamic     1:1
 ```
 
-- **Cisco:** `0011.2233.4455`, `Gi1/0/1`
-- **HP/Aruba:** `00:24:81:44:55:66`, `1`
-- **Juniper:** `00:0E:83:11:22:33/ff:ff:ff:ff:ff:ff`, `ge-0/0/0`
-- **Extreme:** `B8-AC-6F-77-88-99/ff-ff-ff-ff-ff-ff`, `1:1`
-- **Brocade:** `00:11:22:33:44:55/ffff.ffff.ffff`, `1/1`
+**HP/Aruba:**
+```
+Vlan    Mac Address       Type        Ports
+20      00:24:81:44:55:66 DYNAMIC     1
+```
+
+**Juniper:**
+```
+Vlan    Mac Address       Type        Ports
+30      00:0E:83:11:22:33 DYNAMIC     ge-0/0/0
+```
+
+**Extreme:**
+```
+Vlan    Mac Address       Type        Ports
+40      B8-AC-6F-77-88-99 DYNamic     1:1
+```
+
+**Brocade:**
+```
+Vlan    Mac Address       Type        Ports
+50      00:11:22:33:44:55 DYNAMIC     1/1
+```
 
 ### 3. ARP Tables
 
@@ -452,31 +476,37 @@ Internet  192.168.1.1      -          0011.2233.4455  ARPA   Vlan10
 
 ### Standard Outputs
 
+**Use these dashboards during change windows to confirm no unexpected vendors appear.**
+
 ![Security Dashboard](docs/images/security-dashboard.png?v=12.8)
-*🔒 Device count analysis per VLAN - quickly identify VLANs with high device concentrations for security monitoring*
+
+**Security Dashboard** - Device count analysis per VLAN:
+- Identify VLANs with high device concentrations for security monitoring
+- Spot anomalies in device distribution across network segments
+- Quick visual reference for security reviews
 
 ![Vendor Dashboard](docs/images/vendor-dashboard.png?v=12.8)
-*📊 Comprehensive multi-panel VLAN analysis dashboard - view device counts, vendor diversity, heatmaps, and top vendor distributions across your network segments*
+
+**Vendor Dashboard** - Comprehensive multi-panel VLAN analysis:
+- Device counts, vendor diversity, and heatmaps
+- Top vendor distributions across network segments
+- Cross-VLAN vendor comparison for change validation
 
 **Device Information CSV** (`{input_file}-Devices.csv`):
-- One row per device
-- Columns: MAC, Vendor, VLAN, Port
+- One row per device with columns: MAC, Vendor, VLAN, Port
 - Always generated
 
 **Port Report CSV** (`{input_file}-Ports.csv`):
 - Port utilization and device mapping
-- Only generated for MAC address tables (not ARP or simple lists)
 - Columns: Port, Total Devices, VLANs, Vendors, Device Details
+- Only generated for MAC address tables (not ARP or simple lists)
 
 **Vendor Distribution HTML** (`vendor_distribution.html`):
-- Interactive dashboard with charts
-- Vendor distribution pie chart
-- VLAN analysis with multiple subplots
+- Interactive dashboard with vendor distribution pie chart and VLAN analysis subplots
 - Always generated
 
 **Vendor Summary Text** (`vendor_summary.txt`):
-- Plain text summary with vendor counts and percentages
-- Formatted table for quick reference
+- Plain text summary with vendor counts and percentages in formatted table
 - Always generated
 
 ### Optional Outputs
@@ -513,6 +543,16 @@ ShadowVendor is used in production environments for network monitoring, security
 
 ---
 
+## 🔒 Security Considerations
+
+ShadowVendor is designed with security in mind:
+- **Read-only operation**: ShadowVendor reads text exports only and does not make changes to network devices
+- **Offline mode**: `--offline` flag enables air-gapped network analysis without external API calls
+- **No network access required**: All vendor lookups use local OUI cache; external API is optional
+- **Safe for production**: No device modifications, no credentials stored, no persistent connections
+
+For security teams evaluating the tool: ShadowVendor processes static text files and generates reports. It does not connect to network devices, modify configurations, or store sensitive data beyond the OUI cache (public IEEE data).
+
 ## 🔧 Advanced Topics
 
 For detailed information on advanced topics, see **[ADVANCED.md](ADVANCED.md)**:
@@ -533,7 +573,7 @@ For detailed information on advanced topics, see **[ADVANCED.md](ADVANCED.md)**:
 
 ## 🧪 Testing & Quality
 
-ShadowVendor includes a comprehensive test suite that validates all execution paths, input formats, and features to ensure reliability and correctness.
+ShadowVendor includes a comprehensive test suite that validates all execution paths, input formats, and features to ensure reliability and correctness. The test suite uses realistic network device outputs and mock data for reproducible validation.
 
 ### Running Tests
 
@@ -670,6 +710,11 @@ ShadowVendor (formerly NetVendor) is actively maintained and regularly updated. 
 - ✅ Enhanced error handling with user-friendly messages and actionable hints
 - ✅ Offline mode support for air-gapped networks (`--offline` flag)
 - ✅ All tests pass and program output confirmed
+
+**Versioning & Stability:**
+- **SIEM schema**: Stable since v14.0.0 - all fields consistently named and present
+- **Core CLI flags**: Stable since v14.0.0 - backward compatible
+- **Python API**: Stable since v14.0.0 - `analyze_file()` signature and return values are stable
 
 **Planned:**
 - More vendor format support
