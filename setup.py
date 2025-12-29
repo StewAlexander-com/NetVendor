@@ -13,7 +13,7 @@ setup(
     python_requires=">=3.9",
     author="Stewart Alexander",
     author_email="stewart@stewalexander.com",
-    description="A tool for analyzing network device vendors from MAC addresses",
+    description="Network device vendor analysis tool - Transform MAC address tables into interactive dashboards, detect new vendors, and export SIEM events for security monitoring",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/StewAlexander-com/ShadowVendor",

@@ -5,9 +5,27 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "shadowvendor"
 version = "14.0.0"
-description = "A tool for analyzing network device vendors from MAC addresses"
+description = "Network device vendor analysis tool - Transform MAC address tables into interactive dashboards, detect new vendors, and export SIEM events for security monitoring"
 authors = [
     { name = "Stewart Alexander", email = "stewart@stewalexander.com" }
+]
+keywords = [
+    "network-analysis",
+    "mac-address",
+    "network-security",
+    "siem",
+    "network-monitoring",
+    "vendor-detection",
+    "cybersecurity",
+    "network-engineering",
+    "python",
+    "network-automation",
+    "posture-detection",
+    "network-visualization",
+    "cisco",
+    "juniper",
+    "arp-table",
+    "network-device-analysis"
 ]
 dependencies = [
     "requests>=2.31.0",
