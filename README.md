@@ -127,17 +127,31 @@ python3 ShadowVendor.py \
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- Required packages: `requests`, `plotly`, `rich`, `tqdm`
-- Input file containing MAC addresses or ARP data from your network devices
+- Python 3.9 or higher (Python 3.8+ supported)
+- pip (Python package installer)
 
 ### Installation
 
+**Option 1: Install as a package (recommended for Python API usage)**
 ```bash
 git clone https://github.com/StewAlexander-com/ShadowVendor.git
 cd ShadowVendor
 pip install -e .
 ```
+
+**Option 2: Use standalone script (no installation required)**
+```bash
+git clone https://github.com/StewAlexander-com/ShadowVendor.git
+cd ShadowVendor
+pip install -r requirements.txt  # Install dependencies only
+python3 ShadowVendor.py input_file.txt  # Run directly
+```
+
+**Dependencies will be automatically installed** when you run `pip install -e .` or `pip install -r requirements.txt`. Required packages:
+- `requests` (for OUI API lookups)
+- `plotly` (for interactive HTML dashboards)
+- `tqdm` (for progress bars)
+- `rich` (for enhanced terminal output)
 
 ---
 

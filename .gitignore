@@ -129,3 +129,4 @@ test_*.py
 test_empty_history/
 test_history/
 test_verify/
+user_test_output/
