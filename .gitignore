@@ -3,6 +3,11 @@ output/
 vendor_distribution.html
 *-Devices.csv
 vendor_summary.txt
+*shadowvendor_siem.*
+*shadowvendor_runtime.log
+# Legacy netvendor files (should not exist, but ignore if they do)
+*netvendor_siem.*
+*netvendor_runtime.log
 
 # Network data files (case insensitive)
 *[Aa][Rr][Pp]*.txt      # ARP data files
