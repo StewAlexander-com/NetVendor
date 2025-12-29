@@ -38,6 +38,16 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), ShadowVendor transf
    - Support 8D/5-why root cause analysis
    - Identify unauthorized device introductions during incident investigations
 
+### Quick Example: SIEM Detector
+
+**Detect new vendors in production VLANs** (Elasticsearch KQL):
+```kql
+index="shadowvendor-*" environment="prod" vlan IN (10,11,12,13,14,15,16,17,18,19,20)
+  NOT vendor IN ("Cisco Systems, Inc", "Hewlett Packard", "Juniper Networks", "Dell Inc", "Unknown")
+| stats count by mac, vendor, vlan, timestamp
+| where count == 1
+```
+
 ### Example SIEM Queries
 
 - **New vendor in sensitive VLAN**: Find MACs where `vlan` matches sensitive VLANs and `vendor` is not in the historical baseline for that VLAN.
