@@ -1,6 +1,6 @@
 # 🚀 ShadowVendor
 
-![ShadowVendor Banner](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.jpg)
+![ShadowVendor Banner](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.png)
 
 ![Overview](docs/images/overview.png?v=14.0.0)
 *Interactive vendor distribution pie chart with detailed hover information - see device counts, percentages, and VLAN presence at a glance*
@@ -645,7 +645,7 @@ mypy shadowvendor
 
 ## 📈 Project Status
 
-![ShadowVendor v14.0.0](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.jpg)
+![ShadowVendor v14.0.0](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.png)
 
 **Latest Release: [v14.0.0](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v14.0.0)** - Major Release: Project Rebranding to ShadowVendor
 
