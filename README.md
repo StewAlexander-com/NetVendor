@@ -1,6 +1,6 @@
 # 🚀 ShadowVendor
 
-![Overview](docs/images/overview.png?v=12.8)
+![Overview](docs/images/overview.png?v=14.0.0)
 *Interactive vendor distribution pie chart with detailed hover information - see device counts, percentages, and VLAN presence at a glance*
 
 ## ⚡ TL;DR: Why You Should Care
@@ -643,9 +643,9 @@ mypy shadowvendor
 
 ## 📈 Project Status
 
-**Latest Release: [v12.8](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v12.8)** - Enhanced HTML Dashboard Readability
+**Latest Release: [v14.0.0](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v14.0.0)** - Major Release: Project Rebranding to ShadowVendor
 
-ShadowVendor is actively maintained and regularly updated.  
+ShadowVendor (formerly NetVendor) is actively maintained and regularly updated. This release represents a major milestone with the complete rebranding from NetVendor to ShadowVendor, comprehensive testing improvements, and enhanced documentation.  
 **Recent improvements:**
 - ✅ Enhanced MAC address parsing for Juniper, Aruba, Extreme, Brocade, and more
 - ✅ Improved OUIManager logic and normalization

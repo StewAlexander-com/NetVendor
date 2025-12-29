@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "shadowvendor"
-version = "0.1.0"
+version = "14.0.0"
 description = "A tool for analyzing network device vendors from MAC addresses"
 authors = [
     { name = "Stewart Alexander", email = "stewart@stewalexander.com" }
