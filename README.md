@@ -643,6 +643,8 @@ mypy shadowvendor
 
 ## 📈 Project Status
 
+![ShadowVendor v14.0.0](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.png)
+
 **Latest Release: [v14.0.0](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v14.0.0)** - Major Release: Project Rebranding to ShadowVendor
 
 ShadowVendor (formerly NetVendor) is actively maintained and regularly updated. This release represents a major milestone with the complete rebranding from NetVendor to ShadowVendor, comprehensive testing improvements, and enhanced documentation.  
