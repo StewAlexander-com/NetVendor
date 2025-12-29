@@ -1,6 +1,6 @@
-# 🔧 NetVendor Advanced Topics
+# 🔧 ShadowVendor Advanced Topics
 
-This document covers advanced topics, detailed operational guidance, and in-depth technical information for NetVendor. For basic usage and quick start, see the [README.md](README.md).
+This document covers advanced topics, detailed operational guidance, and in-depth technical information for ShadowVendor. For basic usage and quick start, see the [README.md](README.md).
 
 ## 📑 Table of Contents
 
@@ -12,7 +12,7 @@ This document covers advanced topics, detailed operational guidance, and in-dept
 
 ## 🔒 Posture-Change Detection & Security Monitoring
 
-When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transforms from a static inventory tool into a **posture-change sensor** that enables proactive security monitoring and incident response.
+When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), ShadowVendor transforms from a static inventory tool into a **posture-change sensor** that enables proactive security monitoring and incident response.
 
 ### Key Capabilities
 
@@ -26,10 +26,10 @@ When integrated with a SIEM (Elastic, Splunk, QRadar, etc.), NetVendor transform
 
 ### SIEM Integration Workflow
 
-1. **Regular Collection**: Schedule NetVendor runs (e.g., hourly/daily) with `--siem-export --site <SITE> --environment <ENV>` to generate normalized events.
+1. **Regular Collection**: Schedule ShadowVendor runs (e.g., hourly/daily) with `--siem-export --site <SITE> --environment <ENV>` to generate normalized events.
 2. **SIEM Ingestion**: Configure Filebeat/Elastic Agent or similar to ingest `output/siem/netvendor_siem.json` (JSONL format).
 3. **Correlation Rules**: Create SIEM rules that:
-   - Join current NetVendor events with historical baselines using `mac`, `vlan`, `site`
+   - Join current ShadowVendor events with historical baselines using `mac`, `vlan`, `site`
    - Alert when `vendor` field changes for a known `mac` in a sensitive `vlan`
    - Detect new `mac` addresses with previously unseen `vendor` values
    - Correlate vendor changes with `change_ticket_id` from drift analysis metadata
@@ -114,28 +114,28 @@ index=netvendor site=DC1 environment=prod
 #### Saved Search Examples
 
 **Elasticsearch Saved Search** (for recurring alerts):
-- **Name**: "NetVendor - New Vendor in Production"
+- **Name**: "ShadowVendor - New Vendor in Production"
 - **Query**: Use the KQL query above
 - **Schedule**: Run every hour
 - **Action**: Send email/Slack notification when results found
 
 **Splunk Alert** (for real-time detection):
-- **Name**: "NetVendor - Vendor Change Alert"
+- **Name**: "ShadowVendor - Vendor Change Alert"
 - **Query**: Use the SPL vendor change query above
 - **Trigger**: When count > 0
 - **Action**: Create incident ticket or send notification
 
 ### SIEM Integration Best Practices
 
-1. **Index Configuration**: Create a dedicated index/indicator for NetVendor events (e.g., `netvendor-*` in Elastic, `netvendor` in Splunk)
+1. **Index Configuration**: Create a dedicated index/indicator for ShadowVendor events (e.g., `netvendor-*` in Elastic, `netvendor` in Splunk)
 2. **Field Mapping**: Ensure `mac`, `vlan`, `site`, `environment`, and `timestamp` fields are properly indexed for fast queries
 3. **Baseline Creation**: Run baseline queries weekly to establish normal vendor distributions per VLAN/site
 4. **Alert Tuning**: Start with high-severity alerts (production VLANs, critical sites) and expand based on false positive rates
-5. **Correlation**: Join NetVendor events with change management tickets using `change_ticket_id` from drift analysis metadata
+5. **Correlation**: Join ShadowVendor events with change management tickets using `change_ticket_id` from drift analysis metadata
 
 ### Performance Considerations for Continuous Monitoring
 
-- **Collection Frequency**: For real-time posture monitoring, run NetVendor every 1-4 hours depending on network change velocity.
+- **Collection Frequency**: For real-time posture monitoring, run ShadowVendor every 1-4 hours depending on network change velocity.
 - **Baseline Maintenance**: Archive vendor summaries with `--history-dir` and `--change-ticket` to maintain accurate baselines for comparison.
 - **SIEM Storage**: Each run generates ~500 bytes per device in JSONL format. For 10,000 devices, expect ~5MB per run. Plan SIEM retention accordingly.
 - **Query Performance**: Index `mac`, `vlan`, `site`, and `timestamp` fields in your SIEM for optimal correlation rule performance.
@@ -171,7 +171,7 @@ index=netvendor site=DC1 environment=prod
 ### SIEM Integration
 
 - **Stable schema usage**: SIEM exports use a stable schema with all fields present in every record. Design your SIEM correlation rules to leverage `mac`, `vlan`, `site`, `environment`, and `timestamp` fields for reliable joins and filtering.
-- **Collection scheduling**: For posture-change detection, schedule regular NetVendor runs (e.g., hourly/daily) with `--siem-export --site <SITE> --environment <ENV>`. Consistent collection intervals enable accurate baseline comparisons.
+- **Collection scheduling**: For posture-change detection, schedule regular ShadowVendor runs (e.g., hourly/daily) with `--siem-export --site <SITE> --environment <ENV>`. Consistent collection intervals enable accurate baseline comparisons.
 - **SIEM storage planning**: Each device generates ~500 bytes in JSONL format. Plan SIEM retention based on collection frequency and device count. Index `mac`, `vlan`, `site`, and `timestamp` fields for optimal query performance.
 
 ### Troubleshooting & Debugging
@@ -194,7 +194,7 @@ index=netvendor site=DC1 environment=prod
 ### Reproducibility
 
 - **Dependency pinning**: Pin and install dependencies from this repo. Archive `output/data/oui_cache.json` with reports for future re-runs to ensure consistent vendor identification.
-- **Version tracking**: Include NetVendor version and commit hash in your reports or SIEM metadata for reproducibility. Document the flags used for each analysis run.
+- **Version tracking**: Include ShadowVendor version and commit hash in your reports or SIEM metadata for reproducibility. Document the flags used for each analysis run.
 
 ---
 
@@ -214,7 +214,7 @@ index=netvendor site=DC1 environment=prod
 
 ### Network & API Behavior
 
-- **Internet connectivity**: API vendor lookups require internet access only when new OUIs are encountered. With `--offline` flag, the tool operates entirely without network access, using only the local OUI cache. This makes NetVendor suitable for air-gapped networks and ensures consistent, fast results.
+- **Internet connectivity**: API vendor lookups require internet access only when new OUIs are encountered. With `--offline` flag, the tool operates entirely without network access, using only the local OUI cache. This makes ShadowVendor suitable for air-gapped networks and ensures consistent, fast results.
 - **Offline mode performance**: When using `--offline`, processing is significantly faster (no network latency) and completely deterministic. All vendor lookups come from `output/data/oui_cache.json`. Uncached MACs will appear as `Unknown` in this mode.
 - **Online mode behavior**: Without `--offline`, the tool will attempt API lookups for unknown OUIs. API requests have a 5-second timeout per request to prevent hangs on slow/unreliable networks. Failed requests are retried with exponential backoff across multiple services (maximum 2 retry cycles per service).
 - **Rate limiting**: When online, automatic rate limiting (1-2 seconds between calls) prevents API throttling. Service rotation handles temporary failures gracefully.

@@ -1,12 +1,12 @@
-# NetVendor Execution Paths & Behavior Graph
+# ShadowVendor Execution Paths & Behavior Graph
 
-This document maps all ways users can run NetVendor, the execution flow for each path, and test coverage.
+This document maps all ways users can run ShadowVendor, the execution flow for each path, and test coverage.
 
 ## 📊 Execution Paths Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    NetVendor Execution Paths                     │
+│                   ShadowVendor Execution Paths                   │
 └─────────────────────────────────────────────────────────────────┘
                               │
         ┌─────────────────────┼─────────────────────┐

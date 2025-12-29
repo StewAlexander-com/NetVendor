@@ -1,6 +1,6 @@
-# 🔍 NetVendor Technical Tutorial
+# 🔍 ShadowVendor Technical Tutorial
 
-**A Deep Dive into How NetVendor Works**
+**A Deep Dive into How ShadowVendor Works**
 
 ## Audience & Goals
 
@@ -16,13 +16,13 @@ This tutorial is designed for:
 - Trust the tool's behavior in production (offline mode, atomic writes, error handling)
 - Debug issues by knowing which components to inspect
 - Extend functionality by understanding extension points
-- Integrate NetVendor into SIEM workflows with confidence
+- Integrate ShadowVendor into SIEM workflows with confidence
 
 ---
 
 ## Design Decisions & Tradeoffs
 
-This table summarizes the key architectural decisions that shape NetVendor's implementation philosophy:
+This table summarizes the key architectural decisions that shape ShadowVendor's implementation philosophy:
 
 | Design Decision | Rationale | Tradeoff/Consideration |
 |----------------|-----------|------------------------|
@@ -37,7 +37,7 @@ This table summarizes the key architectural decisions that shape NetVendor's imp
 | **[Cross-platform path handling](#why-it-works-this-way)** | `pathlib.Path` and explicit UTF-8 encoding ensure Windows/Linux/macOS compatibility | Must test on all platforms; some platform-specific edge cases (e.g., Windows file locking) |
 | **[Dictionary-based device storage](#processing-pipeline)** | MAC addresses as keys enable automatic deduplication; last occurrence wins | No preservation of duplicate MAC order; requires normalized MAC format as keys |
 
-**Philosophy Summary**: NetVendor prioritizes **reliability** (offline-first, atomic operations), **performance** (caching, rate limiting), and **operational safety** (error handling, cross-platform compatibility) over convenience features that could compromise production readiness.
+**Philosophy Summary**: ShadowVendor prioritizes **reliability** (offline-first, atomic operations), **performance** (caching, rate limiting), and **operational safety** (error handling, cross-platform compatibility) over convenience features that could compromise production readiness.
 
 ---
 
@@ -80,7 +80,7 @@ This table summarizes the key architectural decisions that shape NetVendor's imp
 ## 📑 Table of Contents
 
 - [Design Decisions & Tradeoffs](#design-decisions--tradeoffs)
-- [What NetVendor Does](#what-netvendor-does)
+- [What ShadowVendor Does](#what-shadowvendor-does)
 - [Architecture Overview](#architecture-overview)
 - [Processing Pipeline](#processing-pipeline)
 - [Why It Works This Way](#why-it-works-this-way)
@@ -97,9 +97,9 @@ This table summarizes the key architectural decisions that shape NetVendor's imp
 
 ---
 
-## What NetVendor Does
+## What ShadowVendor Does
 
-NetVendor is a network analysis tool that transforms raw network device outputs (MAC address tables, ARP tables, or simple MAC lists) into structured, actionable intelligence. At its core, it:
+ShadowVendor is a network analysis tool that transforms raw network device outputs (MAC address tables, ARP tables, or simple MAC lists) into structured, actionable intelligence. At its core, it:
 
 1. **Parses** network device outputs from multiple vendors (Cisco, Juniper, HP/Aruba, Extreme, Brocade, etc.)
 2. **Normalizes** MAC addresses to a consistent format (`xx:xx:xx:xx:xx:xx`)
@@ -131,7 +131,7 @@ Vlan    Mac Address       Type        Ports
 
 ## Architecture Overview
 
-NetVendor follows a modular architecture with clear separation of concerns:
+ShadowVendor follows a modular architecture with clear separation of concerns:
 
 ```
 NetVendor.py (Main Entry Point)
@@ -230,9 +230,9 @@ NetVendor.py (Main Entry Point)
 
 ### Design Philosophy
 
-NetVendor was designed with several key principles:
+ShadowVendor was designed with several key principles:
 
-1. **Vendor-Agnostic Parsing**: Network devices from different manufacturers output data in different formats. NetVendor uses pattern matching and heuristics rather than rigid format requirements, making it flexible and robust.
+1. **Vendor-Agnostic Parsing**: Network devices from different manufacturers output data in different formats. ShadowVendor uses pattern matching and heuristics rather than rigid format requirements, making it flexible and robust.
 
 2. **Offline-First Architecture**: The tool prioritizes local caching and can operate entirely offline. This is critical for air-gapped networks and ensures consistent, fast results.
 
@@ -251,7 +251,7 @@ Different network teams use different data sources:
 - **MAC Tables**: Rich context (VLANs, ports) from switches
 - **ARP Tables**: Router/L3 device data with IP context
 
-NetVendor auto-detects the format, eliminating manual preprocessing.
+ShadowVendor auto-detects the format, eliminating manual preprocessing.
 
 #### Why OUI Caching?
 
@@ -397,7 +397,7 @@ else:  # MAC table
 
 ### File Type Detection
 
-NetVendor uses multiple heuristics to detect file types:
+ShadowVendor uses multiple heuristics to detect file types:
 
 #### MAC Address Validation
 
@@ -773,7 +773,7 @@ def save_cache(self):
 
 ### Output Generation
 
-NetVendor generates multiple output formats, each serving different use cases:
+ShadowVendor generates multiple output formats, each serving different use cases:
 
 #### Device CSV Generation
 
@@ -991,7 +991,7 @@ def export_siem_events(
 
 ## Extension Points
 
-This section provides step-by-step guides for extending NetVendor's functionality.
+This section provides step-by-step guides for extending ShadowVendor's functionality.
 
 ### Adding a New MAC-Table Vendor Format
 
@@ -1083,7 +1083,7 @@ This section provides step-by-step guides for extending NetVendor's functionalit
 
 ## Test Strategy
 
-NetVendor's test suite is located in `tests/` and provides comprehensive coverage of all execution paths, core functionality, and edge cases. This section explains **how the testing process works**, from running tests to understanding results.
+ShadowVendor's test suite is located in `tests/` and provides comprehensive coverage of all execution paths, core functionality, and edge cases. This section explains **how the testing process works**, from running tests to understanding results.
 
 ### Understanding the Test Process
 
@@ -1125,7 +1125,7 @@ tests/
 
 **Comprehensive execution path validation** (`test_execution_paths.py` - 20 tests):
 
-NetVendor validates every way users can run the tool:
+ShadowVendor validates every way users can run the tool:
 
 1. **Package Entry Point** (2 tests):
    - `test_package_entry_point_basic()` - `netvendor input_file.txt`
@@ -1157,7 +1157,7 @@ NetVendor validates every way users can run the tool:
    - Empty file errors
    - Invalid input errors
 
-**Why this matters**: These tests ensure that whether users run NetVendor via CLI, Python API, or configuration files, all paths work correctly and produce expected outputs.
+**Why this matters**: These tests ensure that whether users run ShadowVendor via CLI, Python API, or configuration files, all paths work correctly and produce expected outputs.
 
 See **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** for detailed execution path documentation and behavior graphs.
 
@@ -1265,8 +1265,8 @@ def test_standalone_script_basic(sample_mac_table_file, temp_dir):
    - `os.chdir(temp_dir)` changes to the temporary directory
 
 3. **Test execution**:
-   - `main()` runs NetVendor with the mocked arguments
-   - NetVendor processes the test file and generates outputs
+   - `main()` runs ShadowVendor with the mocked arguments
+   - ShadowVendor processes the test file and generates outputs
 
 4. **Assertion validation**:
    - `assert (temp_dir / "output" / "...-Devices.csv").exists()` checks if CSV was created
@@ -1323,7 +1323,7 @@ def test_standalone_script_basic(sample_mac_table_file, temp_dir):
 
 ### Testing Philosophy
 
-NetVendor's testing approach ensures:
+ShadowVendor's testing approach ensures:
 - **Complete coverage**: Every execution path is validated
 - **Real-world scenarios**: Tests use realistic network device outputs
 - **Isolation**: Tests use temporary directories and mock data
@@ -1531,7 +1531,7 @@ Common issues and how to debug them using the knowledge from this tutorial.
 
 ## Summary
 
-NetVendor's architecture is designed for:
+ShadowVendor's architecture is designed for:
 
 1. **Flexibility**: Handles multiple input formats without preprocessing
 2. **Performance**: Caching and offline mode ensure fast, consistent results

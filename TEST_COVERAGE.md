@@ -1,8 +1,8 @@
-# NetVendor Test Coverage Summary
+# ShadowVendor Test Coverage Summary
 
 ## Overview
 
-This document summarizes test coverage for all NetVendor execution paths, ensuring every way users can run the tool is validated with mock data.
+This document summarizes test coverage for all ShadowVendor execution paths, ensuring every way users can run the tool is validated with mock data.
 
 ## Test Suite Structure
 
