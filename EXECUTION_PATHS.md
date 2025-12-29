@@ -1,12 +1,12 @@
-# NetVendor Execution Paths & Behavior Graph
+# ShadowVendor Execution Paths & Behavior Graph
 
-This document maps all ways users can run NetVendor, the execution flow for each path, and test coverage.
+This document maps all ways users can run ShadowVendor, the execution flow for each path, and test coverage.
 
 ## 📊 Execution Paths Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    NetVendor Execution Paths                     │
+│                    ShadowVendor Execution Paths                     │
 └─────────────────────────────────────────────────────────────────┘
                               │
         ┌─────────────────────┼─────────────────────┐
@@ -16,8 +16,8 @@ This document maps all ways users can run NetVendor, the execution flow for each
 │  Entry Point │      │ Standalone   │      │  Python API  │
 │  (Basic)     │      │ Script (Full)│      │  (Programmatic)│
 │              │      │              │      │              │
-│ netvendor    │      │ NetVendor.py │      │ analyze_file()│
-│ -m netvendor │      │ [flags]      │      │              │
+│ shadowvendor    │      │ ShadowVendor.py │      │ analyze_file()│
+│ -m shadowvendor │      │ [flags]      │      │              │
 └──────────────┘      └──────────────┘      └──────────────┘
         │                     │                     │
         │                     │                     │
@@ -41,17 +41,17 @@ This document maps all ways users can run NetVendor, the execution flow for each
 
 ### Path 1: Package Entry Point (Basic)
 
-**Command**: `netvendor input_file.txt` or `python3 -m netvendor input_file.txt`
+**Command**: `shadowvendor input_file.txt` or `python3 -m shadowvendor input_file.txt`
 
 **Flow**:
 ```
 User Command
     │
     ▼
-netvendor/__main__.py
+shadowvendor/__main__.py
     │
     ▼
-netvendor/core/netvendor.py::main()
+shadowvendor/core/shadowvendor.py::main()
     │
     ├─> Check dependencies
     ├─> Initialize OUIManager (online mode)
@@ -72,14 +72,14 @@ netvendor/core/netvendor.py::main()
 
 ### Path 2: Standalone Script (Full Features)
 
-**Command**: `python3 NetVendor.py input_file.txt [flags]`
+**Command**: `python3 ShadowVendor.py input_file.txt [flags]`
 
 **Flow**:
 ```
 User Command with Flags
     │
     ▼
-NetVendor.py::main()
+ShadowVendor.py::main()
     │
     ├─> Load configuration (config file → env vars → defaults)
     ├─> Parse CLI arguments (override config)
@@ -120,14 +120,14 @@ NetVendor.py::main()
 
 ### Path 3: Python API (Programmatic)
 
-**Command**: `from netvendor import analyze_file`
+**Command**: `from shadowvendor import analyze_file`
 
 **Flow**:
 ```
 Python Code
     │
     ▼
-netvendor/api.py::analyze_file()
+shadowvendor/api.py::analyze_file()
     │
     ├─> Validate input file
     ├─> Create output directory
@@ -168,15 +168,15 @@ netvendor/api.py::analyze_file()
 
 ### Path 4: Configuration-Driven Execution
 
-**Command**: `python3 NetVendor.py input_file.txt` (with config file present)
+**Command**: `python3 ShadowVendor.py input_file.txt` (with config file present)
 
 **Flow**:
 ```
 Config File Detection
     │
-    ├─> Check: ./netvendor.conf
-    ├─> Check: ~/.config/netvendor/netvendor.conf
-    └─> Check: /etc/netvendor/netvendor.conf
+    ├─> Check: ./shadowvendor.conf
+    ├─> Check: ~/.config/shadowvendor/shadowvendor.conf
+    └─> Check: /etc/shadowvendor/shadowvendor.conf
     │
     ▼
 Load Configuration
@@ -186,7 +186,7 @@ Load Configuration
     └─> Apply defaults
     │
     ▼
-NetVendor.py::main()
+ShadowVendor.py::main()
     │
     ├─> Apply config values as defaults
     ├─> Parse CLI arguments (override config)
@@ -273,15 +273,15 @@ Input File
 ```
 Do you need advanced features (offline, SIEM, drift)?
     │
-    ├─> NO → Use: netvendor input_file.txt
+    ├─> NO → Use: shadowvendor input_file.txt
     │         (Simple, fast, basic analysis)
     │
     └─> YES → Do you need programmatic control?
               │
-              ├─> NO → Use: python3 NetVendor.py input_file.txt [flags]
+              ├─> NO → Use: python3 ShadowVendor.py input_file.txt [flags]
               │         (Full CLI features, config file support)
               │
-              └─> YES → Use: from netvendor import analyze_file
+              └─> YES → Use: from shadowvendor import analyze_file
                         (Python API, automation-friendly)
 ```
 
@@ -289,8 +289,8 @@ Do you need advanced features (offline, SIEM, drift)?
 
 ## 📝 Notes
 
-- **Package entry point** (`netvendor`) is limited to basic analysis for simplicity
-- **Standalone script** (`NetVendor.py`) supports all features via flags
+- **Package entry point** (`shadowvendor`) is limited to basic analysis for simplicity
+- **Standalone script** (`ShadowVendor.py`) supports all features via flags
 - **Python API** provides same functionality as standalone script but programmatically
 - **Configuration files** reduce CLI flag churn for recurring jobs
 - All paths use the same core processing pipeline for consistency

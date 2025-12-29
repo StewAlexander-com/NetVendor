@@ -1,11 +1,11 @@
 """
-NetVendor Python API
+ShadowVendor Python API
 
-This module provides a programmatic interface to NetVendor functionality,
+This module provides a programmatic interface to ShadowVendor functionality,
 enabling integration into automation scripts and other tools.
 
 Example usage:
-    from netvendor import analyze_file
+    from shadowvendor import analyze_file
     
     result = analyze_file(
         input_file="mac_table.txt",
@@ -27,17 +27,17 @@ import shutil
 import os
 from contextlib import contextmanager
 
-from netvendor.core.oui_manager import OUIManager
-from netvendor.utils.vendor_output_handler import (
+from shadowvendor.core.oui_manager import OUIManager
+from shadowvendor.utils.vendor_output_handler import (
     make_csv,
     generate_port_report,
     create_vendor_distribution,
     save_vendor_summary
 )
-from netvendor.utils.drift_analysis import analyze_drift
-from netvendor.utils.siem_export import export_siem_events
-from netvendor.utils.runtime_logger import get_logger
-from netvendor.core.netvendor import (
+from shadowvendor.utils.drift_analysis import analyze_drift
+from shadowvendor.utils.siem_export import export_siem_events
+from shadowvendor.utils.runtime_logger import get_logger
+from shadowvendor.core.netvendor import (
     is_mac_address,
     is_arp_table as is_arp_table_line,
     format_mac_address
@@ -70,7 +70,7 @@ def analyze_file(
     """
     Analyze a network device output file and generate reports.
     
-    This is the main programmatic API for NetVendor. It processes MAC address
+    This is the main programmatic API for ShadowVendor. It processes MAC address
     tables, ARP tables, or MAC lists and generates vendor distribution reports.
     
     Args:
@@ -83,7 +83,7 @@ def analyze_file(
         change_ticket: Change ticket/incident ID for drift correlation
         siem_export: If True, generate SIEM-friendly CSV/JSONL exports
         output_dir: Directory for output files (default: "output")
-        verbose: If True, enable verbose output (requires NETVENDOR_VERBOSE env var)
+        verbose: If True, enable verbose output (requires SHADOWVENDOR_VERBOSE env var)
     
     Returns:
         Dictionary with:
@@ -119,7 +119,7 @@ def analyze_file(
     except PermissionError:
         raise PermissionError(f"Cannot create output directory: {output_dir}")
     
-    # Initialize logger (respects NETVENDOR_LOG env var)
+    # Initialize logger (respects SHADOWVENDOR_LOG env var)
     logger = get_logger()
     
     # Initialize OUI manager
@@ -250,8 +250,8 @@ def analyze_file(
             environment=environment,
             input_type=input_type,
         )
-        output_files.append(output_path / "output" / "siem" / "netvendor_siem.csv")
-        output_files.append(output_path / "output" / "siem" / "netvendor_siem.json")
+        output_files.append(output_path / "output" / "siem" / "shadowvendor_siem.csv")
+        output_files.append(output_path / "output" / "siem" / "shadowvendor_siem.json")
     
     # Archive vendor summary (if history_dir specified)
     if history_dir:

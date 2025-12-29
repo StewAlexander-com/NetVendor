@@ -1,8 +1,8 @@
-# NetVendor Test Coverage Summary
+# ShadowVendor Test Coverage Summary
 
 ## Overview
 
-This document summarizes test coverage for all NetVendor execution paths, ensuring every way users can run the tool is validated with mock data.
+This document summarizes test coverage for all ShadowVendor execution paths, ensuring every way users can run the tool is validated with mock data.
 
 ## Test Suite Structure
 
@@ -12,11 +12,11 @@ This document summarizes test coverage for all NetVendor execution paths, ensuri
 **Status**: ✅ All passing
 
 #### Package Entry Point Tests
-- ✅ `test_package_entry_point_basic()` - Basic `netvendor input_file.txt`
-- ✅ `test_module_execution()` - `python3 -m netvendor input_file.txt`
+- ✅ `test_package_entry_point_basic()` - Basic `shadowvendor input_file.txt`
+- ✅ `test_module_execution()` - `python3 -m shadowvendor input_file.txt`
 
 #### Standalone Script Tests
-- ✅ `test_standalone_script_basic()` - `python3 NetVendor.py input_file.txt` (no flags)
+- ✅ `test_standalone_script_basic()` - `python3 ShadowVendor.py input_file.txt` (no flags)
 - ✅ `test_standalone_script_offline()` - `--offline` flag
 - ✅ `test_standalone_script_siem_export()` - `--siem-export` with site/environment
 - ✅ `test_standalone_script_history_drift()` - `--history-dir --analyze-drift`
@@ -45,7 +45,7 @@ This document summarizes test coverage for all NetVendor execution paths, ensuri
 
 ### Core Functionality Tests
 
-#### `tests/test_netvendor.py` (9 tests)
+#### `tests/test_shadowvendor.py` (9 tests)
 - MAC address validation
 - MAC address table detection
 - Port information parsing
@@ -131,7 +131,7 @@ python3 -m pytest tests/test_execution_paths.py::test_python_api_all_features -v
 
 ### Run with coverage:
 ```bash
-python3 -m pytest tests/ --cov=netvendor --cov-report=html
+python3 -m pytest tests/ --cov=shadowvendor --cov-report=html
 ```
 
 ## Test Validation Checklist

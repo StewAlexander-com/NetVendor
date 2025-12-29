@@ -1,4 +1,4 @@
-# 🚀 NetVendor
+# 🚀 ShadowVendor
 
 ![Overview](docs/images/overview.png?v=12.8)
 *Interactive vendor distribution pie chart with detailed hover information - see device counts, percentages, and VLAN presence at a glance*
@@ -9,9 +9,9 @@
 - **Detect new/unknown vendors**: Identify previously unseen devices and track vendor distribution changes over time
 - **Export SIEM events**: Generate normalized CSV/JSONL exports for Elastic, Splunk, and other SIEMs to enable posture-change detection
 
-**Quick start:** `python3 NetVendor.py input_file.txt` → Check `output/` for results
+**Quick start:** `python3 ShadowVendor.py input_file.txt` → Check `output/` for results
 
-**Try it in 60 seconds:** `python3 NetVendor.py tests/data/test-mac-table.txt` (then open `output/vendor_distribution.html` in your browser) → See dashboards without touching your own network data
+**Try it in 60 seconds:** `python3 ShadowVendor.py tests/data/test-mac-table.txt` (then open `output/vendor_distribution.html` in your browser) → See dashboards without touching your own network data
 
 ## 👥 Who is This For?
 
@@ -24,9 +24,9 @@
 
 ## 📖 Introduction
 
-**NetVendor** is a Python tool for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of devices on a network. It processes MAC address tables and ARP data from a wide range of network devices (including Cisco, HP/Aruba, Juniper, Extreme, Brocade, and more), providing detailed insights into your network's composition.
+**ShadowVendor** is a Python tool for network administrators and cybersecurity professionals to analyze and visualize the vendor distribution of devices on a network. It processes MAC address tables and ARP data from a wide range of network devices (including Cisco, HP/Aruba, Juniper, Extreme, Brocade, and more), providing detailed insights into your network's composition.
 
-When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), NetVendor transforms from a static inventory tool into a **posture-change sensor** that enables proactive security monitoring and incident response.
+When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), ShadowVendor transforms from a static inventory tool into a **posture-change sensor** that enables proactive security monitoring and incident response.
 
 ---
 
@@ -38,7 +38,7 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), NetVendor transforms
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [📋 Quick Reference](#-quick-reference)
-  - [Ways to Run NetVendor](#ways-to-run-netvendor)
+  - [Ways to Run ShadowVendor](#ways-to-run-shadowvendor)
   - [Expected Outputs](#expected-outputs)
 - [📋 Detailed Usage](#-detailed-usage)
   - [Command-Line Flags](#command-line-flags)
@@ -76,19 +76,19 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), NetVendor transforms
 
 **Basic Analysis:**
 ```bash
-python3 NetVendor.py input_file.txt
+python3 ShadowVendor.py input_file.txt
 ```
 → Generates standard outputs: Device CSV, Port CSV (if MAC table), HTML dashboard, Vendor Summary
 
 **Offline Analysis (air-gapped networks):**
 ```bash
-python3 NetVendor.py --offline input_file.txt
+python3 ShadowVendor.py --offline input_file.txt
 ```
 → Uses only local OUI cache, no external API calls
 
 **SIEM Integration:**
 ```bash
-python3 NetVendor.py \
+python3 ShadowVendor.py \
   --siem-export \
   --site DC1 \
   --environment prod \
@@ -98,7 +98,7 @@ python3 NetVendor.py \
 
 **Historical Tracking with Drift Analysis:**
 ```bash
-python3 NetVendor.py \
+python3 ShadowVendor.py \
   --history-dir history \
   --site DC1 \
   --change-ticket CHG-12345 \
@@ -109,7 +109,7 @@ python3 NetVendor.py \
 
 **Complete Workflow (all features):**
 ```bash
-python3 NetVendor.py \
+python3 ShadowVendor.py \
   --offline \
   --history-dir history \
   --analyze-drift \
@@ -134,8 +134,8 @@ python3 NetVendor.py \
 ### Installation
 
 ```bash
-git clone https://github.com/StewAlexander-com/NetVendor.git
-cd NetVendor
+git clone https://github.com/StewAlexander-com/ShadowVendor.git
+cd ShadowVendor
 pip install -e .
 ```
 
@@ -143,26 +143,26 @@ pip install -e .
 
 ## 📋 Quick Reference
 
-### Ways to Run NetVendor
+### Ways to Run ShadowVendor
 
 **1. Simple Package Entry Point** (basic usage, no flags):
 ```bash
-netvendor input_file.txt
+shadowvendor input_file.txt
 # or
-python3 -m netvendor input_file.txt
+python3 -m shadowvendor input_file.txt
 ```
 *Limited to basic analysis only - no advanced features*
 
 **2. Standalone Script** (full feature set with all flags):
 ```bash
-python3 NetVendor.py input_file.txt
+python3 ShadowVendor.py input_file.txt
 ```
 
-**Important:** For all advanced features (offline mode, history tracking, SIEM export, drift analysis), use `python3 NetVendor.py`. The package entry point (`netvendor`) is a simple wrapper that only accepts an input file argument and does not support flags.
+**Important:** For all advanced features (offline mode, history tracking, SIEM export, drift analysis), use `python3 ShadowVendor.py`. The package entry point (`shadowvendor`) is a simple wrapper that only accepts an input file argument and does not support flags.
 
 ### Expected Outputs
 
-NetVendor generates several output files in the `output/` directory:
+ShadowVendor generates several output files in the `output/` directory:
 
 - **Standard outputs** (always generated): Device CSV, Port CSV (for MAC tables), interactive HTML dashboard, and vendor summary text file
 - **Optional outputs** (with flags): SIEM exports (CSV/JSONL), historical archives, and drift analysis CSV
@@ -192,7 +192,7 @@ See [Output Details](#-output-details) below for complete file descriptions.
 Use the `--offline` flag when you want to avoid any external vendor lookups (e.g., on air‑gapped networks). Devices that are not already present in the local OUI cache will appear as `Unknown`.
 
 ```bash
-python3 NetVendor.py --offline input_file.txt
+python3 ShadowVendor.py --offline input_file.txt
 ```
 
 ### Historical Drift Analysis
@@ -200,7 +200,7 @@ python3 NetVendor.py --offline input_file.txt
 Track how vendor composition changes over time and correlate with change windows/incidents:
 
 ```bash
-python3 NetVendor.py \
+python3 ShadowVendor.py \
   --history-dir history \
   --site DC1 \
   --change-ticket CHG-12345 \
@@ -221,7 +221,7 @@ python3 NetVendor.py \
 For SIEM integration (Elastic, Splunk, etc.), generate normalized CSV and JSONL events:
 
 ```bash
-python3 NetVendor.py \
+python3 ShadowVendor.py \
   --siem-export \
   --site DC1 \
   --environment prod \
@@ -249,19 +249,19 @@ python3 NetVendor.py \
 
 ### Cross-Platform Compatibility
 
-NetVendor is designed to work on **Linux (Debian/Ubuntu), macOS (Intel and Apple Silicon), and Windows**. All file operations use UTF-8 encoding and cross-platform path handling.
+ShadowVendor is designed to work on **Linux (Debian/Ubuntu), macOS (Intel and Apple Silicon), and Windows**. All file operations use UTF-8 encoding and cross-platform path handling.
 
 **Windows Usage:**
 ```powershell
 # Set encoding environment variables (recommended)
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUTF8 = "1"
-python3 NetVendor.py input_file.txt
+python3 ShadowVendor.py input_file.txt
 ```
 
 **Linux/macOS Usage:**
 ```bash
-python3 NetVendor.py input_file.txt
+python3 ShadowVendor.py input_file.txt
 ```
 
 **Cross-Platform Considerations:**
@@ -274,28 +274,28 @@ python3 NetVendor.py input_file.txt
 
 ### Verbose Output
 
-Control debug output with the `NETVENDOR_VERBOSE` environment variable (only supported by `NetVendor.py`):
+Control debug output with the `SHADOWVENDOR_VERBOSE` environment variable (only supported by `ShadowVendor.py`):
 
 ```bash
 # Quiet mode (default)
-python3 NetVendor.py input_file.txt
+python3 ShadowVendor.py input_file.txt
 
 # Verbose mode - detailed processing information
-NETVENDOR_VERBOSE=1 python3 NetVendor.py input_file.txt
+SHADOWVENDOR_VERBOSE=1 python3 ShadowVendor.py input_file.txt
 ```
 
 When verbose mode is enabled, you'll see file type detection details, per-line processing information, sample device entries, CSV writing progress, and output file content preview.
 
 ### Runtime Logging
 
-For troubleshooting and performance analysis, NetVendor can log runtime behavior to a structured log file:
+For troubleshooting and performance analysis, ShadowVendor can log runtime behavior to a structured log file:
 
 ```bash
 # Enable runtime logging
-NETVENDOR_LOG=1 python3 NetVendor.py input_file.txt
+SHADOWVENDOR_LOG=1 python3 ShadowVendor.py input_file.txt
 ```
 
-When enabled, a log file is created at `output/netvendor_runtime.log` in JSONL format (one JSON object per line). Each entry includes:
+When enabled, a log file is created at `output/shadowvendor_runtime.log` in JSONL format (one JSON object per line). Each entry includes:
 - `timestamp`: UTC ISO-8601 timestamp
 - `event_type`: Type of event (e.g., "processing_start", "file_type_detection", "error")
 - `event_data`: Event-specific data
@@ -305,52 +305,52 @@ The logger captures key runtime events including file processing, error conditio
 
 ### Configuration
 
-NetVendor supports configuration files and environment variables to reduce CLI flag churn in recurring jobs.
+ShadowVendor supports configuration files and environment variables to reduce CLI flag churn in recurring jobs.
 
 **Configuration file locations** (checked in order):
-1. Current directory: `./netvendor.conf` (or `.yaml`, `.toml`)
-2. User config: `~/.config/netvendor/netvendor.conf`
-3. System config: `/etc/netvendor/netvendor.conf`
+1. Current directory: `./shadowvendor.conf` (or `.yaml`, `.toml`)
+2. User config: `~/.config/shadowvendor/shadowvendor.conf`
+3. System config: `/etc/shadowvendor/shadowvendor.conf`
 
 **Supported formats**: INI/ConfigParser (`.conf`, `.ini`), YAML (`.yaml`, `.yml` - requires PyYAML), TOML (`.toml` - requires tomli/tomllib)
 
-**Example INI config** (`netvendor.conf`):
+**Example INI config** (`shadowvendor.conf`):
 ```ini
-[netvendor]
+[shadowvendor]
 offline = true
-history_dir = /var/lib/netvendor/history
+history_dir = /var/lib/shadowvendor/history
 site = DC1
 environment = prod
 siem_export = true
 ```
 
-**Example YAML config** (`netvendor.yaml`):
+**Example YAML config** (`shadowvendor.yaml`):
 ```yaml
-netvendor:
+shadowvendor:
   offline: true
-  history_dir: /var/lib/netvendor/history
+  history_dir: /var/lib/shadowvendor/history
   site: DC1
   environment: prod
   siem_export: true
 ```
 
 **Environment variables** (override config file):
-- `NETVENDOR_OFFLINE=true`
-- `NETVENDOR_HISTORY_DIR=/var/lib/netvendor/history`
-- `NETVENDOR_SITE=DC1`
-- `NETVENDOR_ENVIRONMENT=prod`
-- `NETVENDOR_SIEM_EXPORT=true`
+- `SHADOWVENDOR_OFFLINE=true`
+- `SHADOWVENDOR_HISTORY_DIR=/var/lib/shadowvendor/history`
+- `SHADOWVENDOR_SITE=DC1`
+- `SHADOWVENDOR_ENVIRONMENT=prod`
+- `SHADOWVENDOR_SIEM_EXPORT=true`
 
 **Precedence**: Command-line arguments > Environment variables > Config file > Defaults
 
-See `netvendor.conf.example` and `netvendor.yaml.example` for complete examples.
+See `shadowvendor.conf.example` and `shadowvendor.yaml.example` for complete examples.
 
 ### Python API
 
-NetVendor provides a programmatic Python API for integration into automation scripts and other tools:
+ShadowVendor provides a programmatic Python API for integration into automation scripts and other tools:
 
 ```python
-from netvendor import analyze_file
+from shadowvendor import analyze_file
 
 # Basic usage
 result = analyze_file("mac_table.txt", offline=True)
@@ -382,15 +382,15 @@ result = analyze_file(
 )
 ```
 
-**API Reference**: See `netvendor/api.py` for complete function signature and return value documentation.
+**API Reference**: See `shadowvendor/api.py` for complete function signature and return value documentation.
 
 ---
 
 ## 📥 Supported Input Formats
 
-**Just paste your raw `show mac address-table` output into a file; NetVendor will auto-detect the format.** No heavy data cleaning required - the tool handles headers, whitespace, and various vendor formats automatically.
+**Just paste your raw `show mac address-table` output into a file; ShadowVendor will auto-detect the format.** No heavy data cleaning required - the tool handles headers, whitespace, and various vendor formats automatically.
 
-NetVendor automatically detects and parses the following formats:
+ShadowVendor automatically detects and parses the following formats:
 
 ### 1. Simple MAC Address List
 
@@ -466,8 +466,8 @@ Internet  192.168.1.1      -          0011.2233.4455  ARPA   Vlan10
 ### Optional Outputs
 
 **SIEM Export Files** (requires `--siem-export`, written to `output/siem/` directory):
-- `siem/netvendor_siem.csv`: Line-delimited CSV with header
-- `siem/netvendor_siem.json`: JSONL format (one JSON object per line)
+- `siem/shadowvendor_siem.csv`: Line-delimited CSV with header
+- `siem/shadowvendor_siem.json`: JSONL format (one JSON object per line)
 - Both contain identical data with stable schema for SIEM correlation
 
 **History Archive Files** (requires `--history-dir`):
@@ -486,14 +486,14 @@ Internet  192.168.1.1      -          0011.2233.4455  ARPA   Vlan10
 
 ## 🌟 Success Stories & Known Deployments
 
-NetVendor is used in production environments for network monitoring, security posture tracking, and asset management. While specific deployment details are kept confidential, the tool has been successfully deployed in:
+ShadowVendor is used in production environments for network monitoring, security posture tracking, and asset management. While specific deployment details are kept confidential, the tool has been successfully deployed in:
 
 - **Enterprise SOC environments**: Integrated with Elastic Stack and Splunk for continuous posture-change detection across multiple data centers
 - **Network operations teams**: Daily analysis of MAC address tables from Cisco, Juniper, and Aruba switches to track device inventory and vendor distribution
 - **Air-gapped networks**: Offline mode enables vendor identification in isolated environments without external API dependencies
 - **Change management workflows**: Historical drift analysis with change ticket correlation supports incident response and root cause analysis
 
-**Have a success story to share?** We'd love to hear how you're using NetVendor! See the [Community section](#-community) for details on how to contribute your success story.
+**Have a success story to share?** We'd love to hear how you're using ShadowVendor! See the [Community section](#-community) for details on how to contribute your success story.
 
 ---
 
@@ -507,7 +507,7 @@ For detailed information on advanced topics, see **[ADVANCED.md](ADVANCED.md)**:
 
 ### Technical Tutorial
 
-**Want to understand how NetVendor works under the hood?** See **[TUTORIAL.md](TUTORIAL.md)** for a comprehensive technical deep-dive covering:
+**Want to understand how ShadowVendor works under the hood?** See **[TUTORIAL.md](TUTORIAL.md)** for a comprehensive technical deep-dive covering:
 - Architecture and design decisions
 - Code walkthroughs with examples
 - Data flow diagrams
@@ -517,7 +517,7 @@ For detailed information on advanced topics, see **[ADVANCED.md](ADVANCED.md)**:
 
 ## 🧪 Testing & Quality
 
-NetVendor includes a comprehensive test suite that validates all execution paths, input formats, and features to ensure reliability and correctness.
+ShadowVendor includes a comprehensive test suite that validates all execution paths, input formats, and features to ensure reliability and correctness.
 
 ### Running Tests
 
@@ -537,7 +537,7 @@ pytest -v
 pytest tests/test_execution_paths.py -v
 
 # Test core parsing and format detection
-pytest tests/test_netvendor.py -v
+pytest tests/test_shadowvendor.py -v
 
 # Test vendor lookup and caching
 pytest tests/test_oui_manager.py -v
@@ -551,16 +551,16 @@ pytest tests/test_api.py -v
 
 **Test with coverage report:**
 ```bash
-pytest --cov=netvendor --cov-report=html
+pytest --cov=shadowvendor --cov-report=html
 ```
 
 ### Test Coverage
 
-NetVendor's test suite includes **20+ execution path tests** that validate every way users can run the tool:
+ShadowVendor's test suite includes **20+ execution path tests** that validate every way users can run the tool:
 
-- ✅ **Package entry point** (`netvendor input_file.txt`) - Basic analysis
-- ✅ **Standalone script** (`python3 NetVendor.py`) - All flag combinations
-- ✅ **Python API** (`from netvendor import analyze_file`) - Programmatic usage
+- ✅ **Package entry point** (`shadowvendor input_file.txt`) - Basic analysis
+- ✅ **Standalone script** (`python3 ShadowVendor.py`) - All flag combinations
+- ✅ **Python API** (`from shadowvendor import analyze_file`) - Programmatic usage
 - ✅ **Configuration-driven** - Config files and environment variables
 - ✅ **Input type detection** - MAC lists, MAC tables, ARP tables
 - ✅ **Error handling** - Missing files, empty files, invalid inputs
@@ -574,14 +574,14 @@ NetVendor's test suite includes **20+ execution path tests** that validate every
 ### What Gets Tested
 
 **Execution Paths** (`tests/test_execution_paths.py`):
-- All ways to run NetVendor (package entry, standalone, Python API)
+- All ways to run ShadowVendor (package entry, standalone, Python API)
 - All flag combinations (offline, SIEM, drift, history)
 - Configuration file loading (INI, YAML, TOML)
 - Environment variable overrides
 - Input type detection and parsing
 - Error handling and edge cases
 
-**Core Functionality** (`tests/test_netvendor.py`):
+**Core Functionality** (`tests/test_shadowvendor.py`):
 - MAC address validation and normalization
 - File type detection (MAC list, MAC table, ARP table)
 - Port information parsing
@@ -605,7 +605,7 @@ NetVendor's test suite includes **20+ execution path tests** that validate every
 
 ### Testing Philosophy
 
-NetVendor's testing approach prioritizes:
+ShadowVendor's testing approach prioritizes:
 - **Comprehensive coverage**: Every execution path is tested
 - **Real-world data**: Tests use realistic network device outputs
 - **Isolation**: Tests use temporary directories to avoid side effects
@@ -622,16 +622,16 @@ For detailed testing documentation, see:
 If configured locally:
 ```bash
 ruff check .
-mypy netvendor
+mypy shadowvendor
 ```
 
 ---
 
 ## 📈 Project Status
 
-**Latest Release: [v12.8](https://github.com/StewAlexander-com/NetVendor/releases/tag/v12.8)** - Enhanced HTML Dashboard Readability
+**Latest Release: [v12.8](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v12.8)** - Enhanced HTML Dashboard Readability
 
-NetVendor is actively maintained and regularly updated.  
+ShadowVendor is actively maintained and regularly updated.  
 **Recent improvements:**
 - ✅ Enhanced MAC address parsing for Juniper, Aruba, Extreme, Brocade, and more
 - ✅ Improved OUIManager logic and normalization
@@ -655,17 +655,17 @@ NetVendor is actively maintained and regularly updated.
 
 ## 🤝 Community
 
-NetVendor is an open-source project, and we welcome contributions from the community!
+ShadowVendor is an open-source project, and we welcome contributions from the community!
 
 ### Getting Help & Reporting Issues
 
-- **Report bugs or request features**: Open an [issue on GitHub](https://github.com/StewAlexander-com/NetVendor/issues)
+- **Report bugs or request features**: Open an [issue on GitHub](https://github.com/StewAlexander-com/ShadowVendor/issues)
 - **Ask questions**: Open a GitHub issue with the "question" label for general questions and use cases
 - **Security issues**: Please report security vulnerabilities privately through GitHub's security advisory system
 
 ### Contributing Success Stories
 
-We'd love to hear how you're using NetVendor! Share your success stories by:
+We'd love to hear how you're using ShadowVendor! Share your success stories by:
 - Opening a GitHub issue with your use case (anonymized as needed)
 - Submitting a pull request to add your deployment to the [Success Stories section](#-success-stories--known-deployments)
 - Sharing your experience in an issue thread

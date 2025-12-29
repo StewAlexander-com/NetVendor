@@ -1,12 +1,12 @@
-# NetVendor Configuration File Example (YAML format)
+# ShadowVendor Configuration File Example (YAML format)
 # 
-# Copy this file to netvendor.yaml and customize for your environment.
+# Copy this file to shadowvendor.yaml and customize for your environment.
 # Requires PyYAML: pip install pyyaml
 #
-# Environment variables (NETVENDOR_*) override config file values.
+# Environment variables (SHADOWVENDOR_*) override config file values.
 # Command-line arguments override both config file and environment variables.
 
-netvendor:
+shadowvendor:
   # Offline mode: Use only local OUI cache, no external API calls
   offline: false
   

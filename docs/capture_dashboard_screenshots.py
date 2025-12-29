@@ -72,7 +72,7 @@ def main():
     
     if not html_file.exists():
         print(f"Error: Dashboard HTML not found at {html_file}")
-        print("Please run NetVendor first to generate the dashboard.")
+        print("Please run ShadowVendor first to generate the dashboard.")
         sys.exit(1)
     
     output_dir.mkdir(parents=True, exist_ok=True)

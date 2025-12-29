@@ -1,11 +1,11 @@
 """
-Comprehensive tests for all NetVendor execution paths.
+Comprehensive tests for all ShadowVendor execution paths.
 
-This test suite validates every way users can run NetVendor:
-1. Package entry point (basic): netvendor input_file.txt
-2. Module execution: python3 -m netvendor input_file.txt
-3. Standalone script (full features): python3 NetVendor.py input_file.txt
-4. Python API: from netvendor import analyze_file
+This test suite validates every way users can run ShadowVendor:
+1. Package entry point (basic): shadowvendor input_file.txt
+2. Module execution: python3 -m shadowvendor input_file.txt
+3. Standalone script (full features): python3 ShadowVendor.py input_file.txt
+4. Python API: from shadowvendor import analyze_file
 5. All flag combinations and configurations
 """
 
@@ -18,8 +18,8 @@ import json
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from netvendor import analyze_file
-from netvendor.config import load_config
+from shadowvendor import analyze_file
+from shadowvendor.config import load_config
 
 
 @pytest.fixture
@@ -64,18 +64,18 @@ Internet  192.168.1.2      -          00:AA:BB:CC:DD:EE ARPA   Vlan20
 
 
 # ============================================================================
-# Execution Path 1: Package Entry Point (Basic) - netvendor input_file.txt
+# Execution Path 1: Package Entry Point (Basic) - shadowvendor input_file.txt
 # ============================================================================
 
 def test_package_entry_point_basic(sample_mac_list_file, temp_dir):
-    """Test: netvendor input_file.txt (basic package entry point)."""
-    # This tests the netvendor/core/netvendor.py::main() path
+    """Test: shadowvendor input_file.txt (basic package entry point)."""
+    # This tests the shadowvendor/core/netvendor.py::main() path
     # Note: This entry point doesn't support flags, only basic analysis
-    from netvendor.core.netvendor import main
+    from shadowvendor.core.netvendor import main
     import sys
     
     # Mock sys.argv for the test
-    with patch('sys.argv', ['netvendor', str(sample_mac_list_file)]):
+    with patch('sys.argv', ['shadowvendor', str(sample_mac_list_file)]):
         # Change to temp_dir to avoid cluttering test directory
         old_cwd = os.getcwd()
         try:
@@ -91,16 +91,16 @@ def test_package_entry_point_basic(sample_mac_list_file, temp_dir):
 
 
 # ============================================================================
-# Execution Path 2: Module Execution - python3 -m netvendor input_file.txt
+# Execution Path 2: Module Execution - python3 -m shadowvendor input_file.txt
 # ============================================================================
 
 def test_module_execution(sample_mac_list_file, temp_dir):
-    """Test: python3 -m netvendor input_file.txt."""
+    """Test: python3 -m shadowvendor input_file.txt."""
     # This should call the same path as package entry point
-    from netvendor.core.netvendor import main
+    from shadowvendor.core.netvendor import main
     import sys
     
-    with patch('sys.argv', ['netvendor', str(sample_mac_list_file)]):
+    with patch('sys.argv', ['shadowvendor', str(sample_mac_list_file)]):
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -113,16 +113,16 @@ def test_module_execution(sample_mac_list_file, temp_dir):
 
 
 # ============================================================================
-# Execution Path 3: Standalone Script - python3 NetVendor.py input_file.txt
+# Execution Path 3: Standalone Script - python3 ShadowVendor.py input_file.txt
 # ============================================================================
 
 def test_standalone_script_basic(sample_mac_table_file, temp_dir):
-    """Test: python3 NetVendor.py input_file.txt (basic, no flags)."""
-    # Test the full NetVendor.py main() function
-    from NetVendor import main
+    """Test: python3 ShadowVendor.py input_file.txt (basic, no flags)."""
+    # Test the full ShadowVendor.py main() function
+    from ShadowVendor import main
     import sys
     
-    with patch('sys.argv', ['NetVendor.py', str(sample_mac_table_file)]):
+    with patch('sys.argv', ['ShadowVendor.py', str(sample_mac_table_file)]):
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -138,11 +138,11 @@ def test_standalone_script_basic(sample_mac_table_file, temp_dir):
 
 
 def test_standalone_script_offline(sample_mac_table_file, temp_dir):
-    """Test: python3 NetVendor.py --offline input_file.txt."""
-    from NetVendor import main
+    """Test: python3 ShadowVendor.py --offline input_file.txt."""
+    from ShadowVendor import main
     import sys
     
-    with patch('sys.argv', ['NetVendor.py', '--offline', str(sample_mac_table_file)]):
+    with patch('sys.argv', ['ShadowVendor.py', '--offline', str(sample_mac_table_file)]):
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -155,12 +155,12 @@ def test_standalone_script_offline(sample_mac_table_file, temp_dir):
 
 
 def test_standalone_script_siem_export(sample_mac_table_file, temp_dir):
-    """Test: python3 NetVendor.py --siem-export --site DC1 --environment prod input_file.txt."""
-    from NetVendor import main
+    """Test: python3 ShadowVendor.py --siem-export --site DC1 --environment prod input_file.txt."""
+    from ShadowVendor import main
     import sys
     
     with patch('sys.argv', [
-        'NetVendor.py',
+        'ShadowVendor.py',
         '--siem-export',
         '--site', 'DC1',
         '--environment', 'prod',
@@ -172,11 +172,11 @@ def test_standalone_script_siem_export(sample_mac_table_file, temp_dir):
             main()
             
             # Verify SIEM exports
-            assert (temp_dir / "output" / "siem" / "netvendor_siem.csv").exists()
-            assert (temp_dir / "output" / "siem" / "netvendor_siem.json").exists()
+            assert (temp_dir / "output" / "siem" / "shadowvendor_siem.csv").exists()
+            assert (temp_dir / "output" / "siem" / "shadowvendor_siem.json").exists()
             
             # Verify SIEM JSON content
-            with open(temp_dir / "output" / "siem" / "netvendor_siem.json", 'r') as f:
+            with open(temp_dir / "output" / "siem" / "shadowvendor_siem.json", 'r') as f:
                 first_line = f.readline()
                 event = json.loads(first_line)
                 assert event['site'] == 'DC1'
@@ -188,14 +188,14 @@ def test_standalone_script_siem_export(sample_mac_table_file, temp_dir):
 
 
 def test_standalone_script_history_drift(sample_mac_table_file, temp_dir):
-    """Test: python3 NetVendor.py --history-dir history --analyze-drift --site DC1 input_file.txt."""
-    from NetVendor import main
+    """Test: python3 ShadowVendor.py --history-dir history --analyze-drift --site DC1 input_file.txt."""
+    from ShadowVendor import main
     import sys
     
     history_dir = temp_dir / "history"
     
     with patch('sys.argv', [
-        'NetVendor.py',
+        'ShadowVendor.py',
         '--history-dir', str(history_dir),
         '--analyze-drift',
         '--site', 'DC1',
@@ -228,14 +228,14 @@ def test_standalone_script_history_drift(sample_mac_table_file, temp_dir):
 
 
 def test_standalone_script_all_features(sample_mac_table_file, temp_dir):
-    """Test: python3 NetVendor.py --offline --history-dir X --analyze-drift --siem-export --site X --environment Y --change-ticket Z input_file.txt."""
-    from NetVendor import main
+    """Test: python3 ShadowVendor.py --offline --history-dir X --analyze-drift --siem-export --site X --environment Y --change-ticket Z input_file.txt."""
+    from ShadowVendor import main
     import sys
     
     history_dir = temp_dir / "history"
     
     with patch('sys.argv', [
-        'NetVendor.py',
+        'ShadowVendor.py',
         '--offline',
         '--history-dir', str(history_dir),
         '--analyze-drift',
@@ -255,15 +255,15 @@ def test_standalone_script_all_features(sample_mac_table_file, temp_dir):
             assert (temp_dir / "output" / f"{sample_mac_table_file.stem}-Ports.csv").exists()
             assert (temp_dir / "output" / "vendor_distribution.html").exists()
             assert (temp_dir / "output" / "vendor_summary.txt").exists()
-            assert (temp_dir / "output" / "siem" / "netvendor_siem.csv").exists()
-            assert (temp_dir / "output" / "siem" / "netvendor_siem.json").exists()
+            assert (temp_dir / "output" / "siem" / "shadowvendor_siem.csv").exists()
+            assert (temp_dir / "output" / "siem" / "shadowvendor_siem.json").exists()
             assert (history_dir / "vendor_drift.csv").exists()
         finally:
             os.chdir(old_cwd)
 
 
 # ============================================================================
-# Execution Path 4: Python API - from netvendor import analyze_file
+# Execution Path 4: Python API - from shadowvendor import analyze_file
 # ============================================================================
 
 def test_python_api_basic(sample_mac_list_file, temp_dir):
@@ -309,42 +309,42 @@ def test_python_api_all_features(sample_mac_table_file, temp_dir):
 
 def test_config_file_ini(sample_mac_table_file, temp_dir):
     """Test: Configuration from INI file."""
-    config_file = temp_dir / "netvendor.conf"
-    config_file.write_text("""[netvendor]
+    config_file = temp_dir / "shadowvendor.conf"
+    config_file.write_text("""[shadowvendor]
 offline = true
 site = DC1
 environment = prod
 siem_export = true
 """)
     
-    from NetVendor import main
+    from ShadowVendor import main
     import sys
     
-    with patch('sys.argv', ['NetVendor.py', str(sample_mac_table_file)]):
+    with patch('sys.argv', ['ShadowVendor.py', str(sample_mac_table_file)]):
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
             main()
             
             # Verify config was applied (SIEM export should be enabled)
-            assert (temp_dir / "output" / "siem" / "netvendor_siem.json").exists()
+            assert (temp_dir / "output" / "siem" / "shadowvendor_siem.json").exists()
         finally:
             os.chdir(old_cwd)
 
 
 def test_config_file_env_override(sample_mac_table_file, temp_dir):
     """Test: Environment variables override config file."""
-    config_file = temp_dir / "netvendor.conf"
-    config_file.write_text("""[netvendor]
+    config_file = temp_dir / "shadowvendor.conf"
+    config_file.write_text("""[shadowvendor]
 offline = false
 site = DC1
 """)
     
-    from NetVendor import main
+    from ShadowVendor import main
     import sys
     
-    with patch('sys.argv', ['NetVendor.py', str(sample_mac_table_file)]):
-        with patch.dict(os.environ, {'NETVENDOR_OFFLINE': 'true', 'NETVENDOR_SITE': 'DC2'}):
+    with patch('sys.argv', ['ShadowVendor.py', str(sample_mac_table_file)]):
+        with patch.dict(os.environ, {'SHADOWVENDOR_OFFLINE': 'true', 'SHADOWVENDOR_SITE': 'DC2'}):
             old_cwd = os.getcwd()
             try:
                 os.chdir(temp_dir)
@@ -352,8 +352,8 @@ site = DC1
                 
                 # Environment should override config
                 # Verify SIEM export has DC2 (from env, not DC1 from config)
-                if (temp_dir / "output" / "siem" / "netvendor_siem.json").exists():
-                    with open(temp_dir / "output" / "siem" / "netvendor_siem.json", 'r') as f:
+                if (temp_dir / "output" / "siem" / "shadowvendor_siem.json").exists():
+                    with open(temp_dir / "output" / "siem" / "shadowvendor_siem.json", 'r') as f:
                         first_line = f.readline()
                         if first_line:
                             event = json.loads(first_line)
@@ -419,10 +419,10 @@ def test_arp_table_input(sample_arp_table_file, temp_dir):
 
 def test_missing_input_file(temp_dir):
     """Test: Error handling for missing input file."""
-    from NetVendor import main
+    from ShadowVendor import main
     import sys
     
-    with patch('sys.argv', ['NetVendor.py', 'nonexistent.txt']):
+    with patch('sys.argv', ['ShadowVendor.py', 'nonexistent.txt']):
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -473,8 +473,8 @@ def test_config_loading_defaults():
 
 def test_config_loading_from_file(temp_dir):
     """Test: Configuration loads from file."""
-    config_file = temp_dir / "netvendor.conf"
-    config_file.write_text("""[netvendor]
+    config_file = temp_dir / "shadowvendor.conf"
+    config_file.write_text("""[shadowvendor]
 offline = true
 site = TEST_SITE
 environment = test
@@ -489,13 +489,13 @@ environment = test
 
 def test_config_env_override(temp_dir):
     """Test: Environment variables override config file."""
-    config_file = temp_dir / "netvendor.conf"
-    config_file.write_text("""[netvendor]
+    config_file = temp_dir / "shadowvendor.conf"
+    config_file.write_text("""[shadowvendor]
 offline = false
 site = CONFIG_SITE
 """)
     
-    with patch.dict(os.environ, {'NETVENDOR_OFFLINE': 'true', 'NETVENDOR_SITE': 'ENV_SITE'}):
+    with patch.dict(os.environ, {'SHADOWVENDOR_OFFLINE': 'true', 'SHADOWVENDOR_SITE': 'ENV_SITE'}):
         config = load_config(config_file)
         
         # Env vars should override config

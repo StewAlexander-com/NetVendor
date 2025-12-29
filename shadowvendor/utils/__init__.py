@@ -1,5 +1,5 @@
 """
-Utility functions for NetVendor package.
+Utility functions for ShadowVendor package.
 """
 
 from ..core.oui_manager import OUIManager

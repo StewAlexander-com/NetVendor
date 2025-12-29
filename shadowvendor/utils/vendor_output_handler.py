@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Module for handling output generation in the NetVendor package.
+Module for handling output generation in the ShadowVendor package.
 This module provides functions for creating various output files:
 - CSV files with device information
 - Port-based reports

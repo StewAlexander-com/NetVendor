@@ -1,7 +1,7 @@
 """
 Generate updated dashboard images for README.md
 
-This script creates representative images of the NetVendor dashboard
+This script creates representative images of the ShadowVendor dashboard
 with the latest styling improvements (v12.8+).
 """
 
@@ -13,7 +13,7 @@ import sys
 # Create images directory if it doesn't exist
 os.makedirs('images', exist_ok=True)
 
-# Realistic sample data matching actual NetVendor output
+# Realistic sample data matching actual ShadowVendor output
 vendors = [
     'Cisco Systems, Inc',
     'Hewlett Packard',

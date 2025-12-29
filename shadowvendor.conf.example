@@ -1,15 +1,15 @@
-# NetVendor Configuration File Example
+# ShadowVendor Configuration File Example
 # 
-# Copy this file to netvendor.conf and customize for your environment.
+# Copy this file to shadowvendor.conf and customize for your environment.
 # Configuration file locations (checked in order):
-# 1. Current directory: ./netvendor.conf
-# 2. User config: ~/.config/netvendor/netvendor.conf
-# 3. System config: /etc/netvendor/netvendor.conf
+# 1. Current directory: ./shadowvendor.conf
+# 2. User config: ~/.config/shadowvendor/shadowvendor.conf
+# 3. System config: /etc/shadowvendor/shadowvendor.conf
 #
-# Environment variables (NETVENDOR_*) override config file values.
+# Environment variables (SHADOWVENDOR_*) override config file values.
 # Command-line arguments override both config file and environment variables.
 
-[netvendor]
+[shadowvendor]
 
 # Offline mode: Use only local OUI cache, no external API calls
 # offline = false

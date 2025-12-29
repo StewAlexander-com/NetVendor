@@ -1,7 +1,7 @@
 """
-SIEM Export Utilities for NetVendor
+SIEM Export Utilities for ShadowVendor
 
-This module standardizes NetVendor results into SIEM-friendly CSV and JSONL
+This module standardizes ShadowVendor results into SIEM-friendly CSV and JSONL
 formats that can be ingested by systems like Elastic, Splunk, or other SIEMs.
 
 Design goals:
@@ -44,8 +44,8 @@ def export_siem_events(
         input_type: Optional logical input type ("mac_list", "mac_table", "arp_table").
 
     Outputs (created in `output/siem/` directory):
-        - output/siem/netvendor_siem.csv (line-delimited CSV)
-        - output/siem/netvendor_siem.json (JSONL, one JSON object per line)
+        - output/siem/shadowvendor_siem.csv (line-delimited CSV)
+        - output/siem/shadowvendor_siem.json (JSONL, one JSON object per line)
 
     Schema (stable, SIEM-friendly field names):
         - timestamp: UTC ISO-8601 collection time (e.g., "2025-10-31T16:23:45Z")
@@ -74,8 +74,8 @@ def export_siem_events(
     source_file = Path(input_file).name
     timestamp = _current_timestamp()
 
-    csv_path = siem_dir / "netvendor_siem.csv"
-    json_path = siem_dir / "netvendor_siem.json"
+    csv_path = siem_dir / "shadowvendor_siem.csv"
+    json_path = siem_dir / "shadowvendor_siem.json"
 
     # Stable schema with SIEM-friendly field names
     fieldnames = [

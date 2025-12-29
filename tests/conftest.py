@@ -1,4 +1,4 @@
-"""Pytest configuration for NetVendor tests."""
+"""Pytest configuration for ShadowVendor tests."""
 
 import os
 import tempfile
@@ -10,11 +10,11 @@ def setup_test_environment():
     # Create a temporary directory for test data
     with tempfile.TemporaryDirectory() as tmpdir:
         # Set environment variables
-        os.environ["NETVENDOR_DATA_DIR"] = tmpdir
-        os.environ["NETVENDOR_OUTPUT_DIR"] = os.path.join(tmpdir, "output")
+        os.environ["SHADOWVENDOR_DATA_DIR"] = tmpdir
+        os.environ["SHADOWVENDOR_OUTPUT_DIR"] = os.path.join(tmpdir, "output")
         
         # Create output directory
-        os.makedirs(os.environ["NETVENDOR_OUTPUT_DIR"], exist_ok=True)
+        os.makedirs(os.environ["SHADOWVENDOR_OUTPUT_DIR"], exist_ok=True)
         
         yield
         

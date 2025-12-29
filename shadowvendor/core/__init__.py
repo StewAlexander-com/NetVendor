@@ -1,4 +1,4 @@
-"""Core functionality for NetVendor package."""
+"""Core functionality for ShadowVendor package."""
 
 from .netvendor import (
     check_dependencies,

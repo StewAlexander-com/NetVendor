@@ -1,5 +1,5 @@
 """
-Helper functions for NetVendor package.
+Helper functions for ShadowVendor package.
 """
 
 def get_format_type(first_line: str) -> str:

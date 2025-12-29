@@ -1,15 +1,15 @@
 """
-Configuration management for NetVendor.
+Configuration management for ShadowVendor.
 
 Supports configuration from:
-- Environment variables (NETVENDOR_*)
-- Configuration file (netvendor.conf, netvendor.yaml, netvendor.toml)
+- Environment variables (SHADOWVENDOR_*)
+- Configuration file (shadowvendor.conf, shadowvendor.yaml, shadowvendor.toml)
 - Default values
 
 Configuration file locations (checked in order):
-1. Current directory: ./netvendor.conf (or .yaml, .toml)
-2. User config: ~/.config/netvendor/netvendor.conf
-3. System config: /etc/netvendor/netvendor.conf
+1. Current directory: ./shadowvendor.conf (or .yaml, .toml)
+2. User config: ~/.config/shadowvendor/shadowvendor.conf
+3. System config: /etc/shadowvendor/shadowvendor.conf
 """
 
 import os
@@ -19,8 +19,8 @@ from typing import Dict, Any, Optional, Union
 from configparser import ConfigParser
 
 
-class NetVendorConfig:
-    """Configuration manager for NetVendor."""
+class ShadowVendorConfig:
+    """Configuration manager for ShadowVendor."""
     
     def __init__(self, config_file: Optional[Union[str, Path]] = None):
         """
@@ -66,21 +66,21 @@ class NetVendorConfig:
         
         # Check current directory
         for ext in ['.conf', '.ini', '.yaml', '.yml', '.toml']:
-            path = Path(f'netvendor{ext}')
+            path = Path(f'shadowvendor{ext}')
             if path.exists():
                 return path
         
         # Check user config directory
-        user_config_dir = Path.home() / '.config' / 'netvendor'
+        user_config_dir = Path.home() / '.config' / 'shadowvendor'
         for ext in ['.conf', '.ini', '.yaml', '.yml', '.toml']:
-            path = user_config_dir / f'netvendor{ext}'
+            path = user_config_dir / f'shadowvendor{ext}'
             if path.exists():
                 return path
         
         # Check system config directory
-        system_config_dir = Path('/etc') / 'netvendor'
+        system_config_dir = Path('/etc') / 'shadowvendor'
         for ext in ['.conf', '.ini', '.yaml', '.yml', '.toml']:
-            path = system_config_dir / f'netvendor{ext}'
+            path = system_config_dir / f'shadowvendor{ext}'
             if path.exists():
                 return path
         
@@ -110,8 +110,8 @@ class NetVendorConfig:
         parser = ConfigParser()
         parser.read(config_path, encoding='utf-8')
         
-        if 'netvendor' in parser:
-            section = parser['netvendor']
+        if 'shadowvendor' in parser:
+            section = parser['shadowvendor']
             config = {}
             for key in section:
                 value = section[key]
@@ -134,8 +134,8 @@ class NetVendorConfig:
                 data = yaml.safe_load(f)
                 if isinstance(data, dict):
                     # Support both flat and nested config
-                    if 'netvendor' in data:
-                        self._update_config(data['netvendor'])
+                    if 'shadowvendor' in data:
+                        self._update_config(data['shadowvendor'])
                     else:
                         self._update_config(data)
         except ImportError:
@@ -160,8 +160,8 @@ class NetVendorConfig:
             
             if isinstance(data, dict):
                 # Support both flat and nested config
-                if 'netvendor' in data:
-                    self._update_config(data['netvendor'])
+                if 'shadowvendor' in data:
+                    self._update_config(data['shadowvendor'])
                 else:
                     self._update_config(data)
         except ImportError:
@@ -173,14 +173,14 @@ class NetVendorConfig:
     def _load_from_env(self):
         """Load configuration from environment variables."""
         env_mapping = {
-            'NETVENDOR_OFFLINE': ('offline', bool),
-            'NETVENDOR_HISTORY_DIR': ('history_dir', str),
-            'NETVENDOR_ANALYZE_DRIFT': ('analyze_drift', bool),
-            'NETVENDOR_SITE': ('site', str),
-            'NETVENDOR_ENVIRONMENT': ('environment', str),
-            'NETVENDOR_CHANGE_TICKET': ('change_ticket', str),
-            'NETVENDOR_SIEM_EXPORT': ('siem_export', bool),
-            'NETVENDOR_OUTPUT_DIR': ('output_dir', str),
+            'SHADOWVENDOR_OFFLINE': ('offline', bool),
+            'SHADOWVENDOR_HISTORY_DIR': ('history_dir', str),
+            'SHADOWVENDOR_ANALYZE_DRIFT': ('analyze_drift', bool),
+            'SHADOWVENDOR_SITE': ('site', str),
+            'SHADOWVENDOR_ENVIRONMENT': ('environment', str),
+            'SHADOWVENDOR_CHANGE_TICKET': ('change_ticket', str),
+            'SHADOWVENDOR_SIEM_EXPORT': ('siem_export', bool),
+            'SHADOWVENDOR_OUTPUT_DIR': ('output_dir', str),
         }
         
         for env_var, (config_key, config_type) in env_mapping.items():
@@ -208,20 +208,20 @@ class NetVendorConfig:
         return self.config.copy()
 
 
-def load_config(config_file: Optional[Union[str, Path]] = None) -> NetVendorConfig:
+def load_config(config_file: Optional[Union[str, Path]] = None) -> ShadowVendorConfig:
     """
-    Load NetVendor configuration.
+    Load ShadowVendor configuration.
     
     Args:
         config_file: Optional path to configuration file
     
     Returns:
-        NetVendorConfig instance
+        ShadowVendorConfig instance
     
     Example:
         >>> config = load_config()
         >>> offline = config.get('offline', False)
         >>> site = config.get('site')
     """
-    return NetVendorConfig(config_file)
+    return ShadowVendorConfig(config_file)
 

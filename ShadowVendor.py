@@ -10,20 +10,20 @@ from pathlib import Path
 from datetime import datetime, timezone
 from rich.console import Console
 
-from netvendor.core.oui_manager import OUIManager
-from netvendor.utils.vendor_output_handler import (
+from shadowvendor.core.oui_manager import OUIManager
+from shadowvendor.utils.vendor_output_handler import (
     make_csv,
     generate_port_report,
     create_vendor_distribution,
     save_vendor_summary
 )
-from netvendor.utils.drift_analysis import analyze_drift
-from netvendor.utils.siem_export import export_siem_events
-from netvendor.utils.runtime_logger import get_logger
-from netvendor.config import load_config
+from shadowvendor.utils.drift_analysis import analyze_drift
+from shadowvendor.utils.siem_export import export_siem_events
+from shadowvendor.utils.runtime_logger import get_logger
+from shadowvendor.config import load_config
 
 console = Console()
-VERBOSE = os.getenv("NETVENDOR_VERBOSE", "0") in ("1", "true", "True")
+VERBOSE = os.getenv("SHADOWVENDOR_VERBOSE", "0") in ("1", "true", "True")
 
 def check_dependencies():
     """
@@ -132,7 +132,7 @@ def format_mac_address(mac: str) -> str:
 
 def main():
     """
-    Main entry point for the NetVendor package.
+    Main entry point for the ShadowVendor package.
     """
     # Check if required modules are installed
     check_dependencies()
@@ -182,7 +182,7 @@ def main():
         "--siem-export",
         action="store_true",
         help="Export normalized CSV/JSONL events for SIEM ingestion "
-             "(netvendor_siem.csv / netvendor_siem.json in output/siem/ directory). "
+             "(shadowvendor_siem.csv / shadowvendor_siem.json in output/siem/ directory). "
              "Each record includes: timestamp, site, environment, mac, vendor, device_name, vlan, interface, input_type, source_file."
     )
 

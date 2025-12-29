@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="netvendor",
+    name="shadowvendor",
     version="1.0.0",
     packages=find_packages(),
     install_requires=[
@@ -16,7 +16,7 @@ setup(
     description="A tool for analyzing network device vendors from MAC addresses",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/StewAlexander-com/NetVendor",
+    url="https://github.com/StewAlexander-com/ShadowVendor",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: System Administrators",

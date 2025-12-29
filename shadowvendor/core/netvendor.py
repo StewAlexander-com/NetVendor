@@ -246,7 +246,7 @@ def main():
     # Check command line arguments
     if len(sys.argv) != 2:
         console.print("[red]Error: Please provide an input file.[/red]")
-        console.print("Usage: netvendor <input_file>")
+        console.print("Usage: shadowvendor <input_file>")
         sys.exit(1)
 
     input_file = sys.argv[1]

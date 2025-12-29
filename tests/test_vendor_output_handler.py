@@ -8,13 +8,13 @@ import json
 import pytest
 import tempfile
 from pathlib import Path
-from netvendor.utils.vendor_output_handler import (
+from shadowvendor.utils.vendor_output_handler import (
     make_csv,
     generate_port_report,
     create_vendor_distribution,
     save_vendor_summary
 )
-from netvendor.core.oui_manager import OUIManager
+from shadowvendor.core.oui_manager import OUIManager
 
 @pytest.fixture
 def temp_output_dir():

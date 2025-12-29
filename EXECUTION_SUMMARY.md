@@ -1,9 +1,9 @@
-# NetVendor Execution Paths - Complete Summary
+# ShadowVendor Execution Paths - Complete Summary
 
 ## ✅ Task Completion Status
 
 **All tasks completed successfully:**
-- ✅ Confirmed all ways users can run NetVendor
+- ✅ Confirmed all ways users can run ShadowVendor
 - ✅ Built comprehensive behavior graph
 - ✅ Created test validations for each execution path
 - ✅ Tested using mock data (all 20 tests passing)
@@ -11,14 +11,14 @@
 ## 📋 Execution Paths Confirmed
 
 ### 1. Package Entry Point (Basic)
-- **Command**: `netvendor input_file.txt` or `python3 -m netvendor input_file.txt`
-- **Entry Point**: `netvendor/__main__.py` → `netvendor/core/netvendor.py::main()`
+- **Command**: `shadowvendor input_file.txt` or `python3 -m shadowvendor input_file.txt`
+- **Entry Point**: `shadowvendor/__main__.py` → `shadowvendor/core/shadowvendor.py::main()`
 - **Features**: Basic analysis only (no flags supported)
 - **Test**: `test_package_entry_point_basic()`, `test_module_execution()`
 
 ### 2. Standalone Script (Full Features)
-- **Command**: `python3 NetVendor.py input_file.txt [flags]`
-- **Entry Point**: `NetVendor.py::main()`
+- **Command**: `python3 ShadowVendor.py input_file.txt [flags]`
+- **Entry Point**: `ShadowVendor.py::main()`
 - **Features**: All flags supported (--offline, --siem-export, --history-dir, --analyze-drift, etc.)
 - **Tests**: 
   - `test_standalone_script_basic()` - No flags
@@ -28,16 +28,16 @@
   - `test_standalone_script_all_features()` - All features combined
 
 ### 3. Python API (Programmatic)
-- **Command**: `from netvendor import analyze_file`
-- **Entry Point**: `netvendor/api.py::analyze_file()`
+- **Command**: `from shadowvendor import analyze_file`
+- **Entry Point**: `shadowvendor/api.py::analyze_file()`
 - **Features**: All features available via function parameters
 - **Tests**: 
   - `test_python_api_basic()` - Basic usage
   - `test_python_api_all_features()` - Full feature set
 
 ### 4. Configuration-Driven
-- **Command**: `python3 NetVendor.py input_file.txt` (with config file)
-- **Entry Point**: `NetVendor.py::main()` → `netvendor/config.py::load_config()`
+- **Command**: `python3 ShadowVendor.py input_file.txt` (with config file)
+- **Entry Point**: `ShadowVendor.py::main()` → `shadowvendor/config.py::load_config()`
 - **Features**: Config file (INI/YAML/TOML) + environment variables
 - **Tests**: 
   - `test_config_file_ini()` - INI config loading
@@ -115,15 +115,15 @@ tests/test_execution_paths.py::test_config_env_override PASSED           [100%]
 ## 🔍 Key Findings
 
 ### Execution Path Differences:
-- **Package entry point** (`netvendor`) is intentionally limited to basic analysis for simplicity
-- **Standalone script** (`NetVendor.py`) provides full feature set via CLI flags
+- **Package entry point** (`shadowvendor`) is intentionally limited to basic analysis for simplicity
+- **Standalone script** (`ShadowVendor.py`) provides full feature set via CLI flags
 - **Python API** (`analyze_file()`) provides same functionality programmatically
 - **Configuration files** reduce CLI flag churn for recurring jobs
 
 ### Configuration Precedence:
 1. Command-line arguments (highest priority)
 2. Environment variables (`NETVENDOR_*`)
-3. Configuration file (`netvendor.conf`, `netvendor.yaml`, `netvendor.toml`)
+3. Configuration file (`shadowvendor.conf`, `shadowvendor.yaml`, `shadowvendor.toml`)
 4. Default values (lowest priority)
 
 ### Input Type Detection:

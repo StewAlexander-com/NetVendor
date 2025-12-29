@@ -1,6 +1,6 @@
-# 🔍 NetVendor Technical Tutorial
+# 🔍 ShadowVendor Technical Tutorial
 
-**A Deep Dive into How NetVendor Works**
+**A Deep Dive into How ShadowVendor Works**
 
 ## Audience & Goals
 
@@ -16,28 +16,28 @@ This tutorial is designed for:
 - Trust the tool's behavior in production (offline mode, atomic writes, error handling)
 - Debug issues by knowing which components to inspect
 - Extend functionality by understanding extension points
-- Integrate NetVendor into SIEM workflows with confidence
+- Integrate ShadowVendor into SIEM workflows with confidence
 
 ---
 
 ## Design Decisions & Tradeoffs
 
-This table summarizes the key architectural decisions that shape NetVendor's implementation philosophy:
+This table summarizes the key architectural decisions that shape ShadowVendor's implementation philosophy:
 
 | Design Decision | Rationale | Tradeoff/Consideration |
 |----------------|-----------|------------------------|
 | **[Offline-first OUI cache](#vendor-lookup-system)** | Enables air-gapped operation, ensures consistent results, eliminates network dependencies | Initial cache population required; uncached MACs appear as "Unknown" in offline mode |
 | **[Atomic file writes](#cache-persistence)** | Prevents corruption if process is interrupted (critical for Windows/cross-platform) | Slightly more complex than direct writes; requires temp file + rename pattern |
-| **[JSONL runtime logging](README.md#runtime-logging)** | Structured logs enable troubleshooting and performance analysis; one JSON object per line is SIEM-friendly | Logging disabled by default to avoid performance impact; requires explicit `NETVENDOR_LOG=1` |
+| **[JSONL runtime logging](README.md#runtime-logging)** | Structured logs enable troubleshooting and performance analysis; one JSON object per line is SIEM-friendly | Logging disabled by default to avoid performance impact; requires explicit `SHADOWVENDOR_LOG=1` |
 | **[Rate-limited API lookups](#api-lookup-with-rate-limiting)** | Respects API service limits, prevents throttling, enables service rotation | Adds latency for uncached lookups; requires careful timing management |
 | **[Multi-tier vendor lookup](#lookup-strategy)** | Cache-first strategy maximizes speed and reliability; API fallback ensures coverage | Complex state management (cache, failed_lookups, service rotation); requires careful error handling |
 | **[Vendor-agnostic parsing](#file-type-detection)** | Pattern matching and heuristics handle diverse network device formats without rigid requirements | May misclassify edge cases; requires robust error handling for invalid lines |
-| **[Progressive enhancement](#when-to-use-different-features)** | Basic functionality works out-of-the-box; advanced features (SIEM, drift) are opt-in via flags | Two entry points (`netvendor` vs `NetVendor.py`) can be confusing; flags required for advanced features |
+| **[Progressive enhancement](#when-to-use-different-features)** | Basic functionality works out-of-the-box; advanced features (SIEM, drift) are opt-in via flags | Two entry points (`shadowvendor` vs `ShadowVendor.py`) can be confusing; flags required for advanced features |
 | **[Stable SIEM schema](#siem-export)** | All fields present in every record enables reliable correlation rules and joins | Slightly larger file size (empty fields); requires consistent field naming across versions |
 | **[Cross-platform path handling](#why-it-works-this-way)** | `pathlib.Path` and explicit UTF-8 encoding ensure Windows/Linux/macOS compatibility | Must test on all platforms; some platform-specific edge cases (e.g., Windows file locking) |
 | **[Dictionary-based device storage](#processing-pipeline)** | MAC addresses as keys enable automatic deduplication; last occurrence wins | No preservation of duplicate MAC order; requires normalized MAC format as keys |
 
-**Philosophy Summary**: NetVendor prioritizes **reliability** (offline-first, atomic operations), **performance** (caching, rate limiting), and **operational safety** (error handling, cross-platform compatibility) over convenience features that could compromise production readiness.
+**Philosophy Summary**: ShadowVendor prioritizes **reliability** (offline-first, atomic operations), **performance** (caching, rate limiting), and **operational safety** (error handling, cross-platform compatibility) over convenience features that could compromise production readiness.
 
 ---
 
@@ -67,7 +67,7 @@ This table summarizes the key architectural decisions that shape NetVendor's imp
 **Then:**
 - Run `pytest -q` to see existing tests
 - Look at `tests/data/` for sample input files
-- Review `tests/test_netvendor.py` for parsing tests
+- Review `tests/test_shadowvendor.py` for parsing tests
 - Check `tests/test_oui_manager.py` for vendor lookup tests
 
 **Key extension points:**
@@ -80,7 +80,7 @@ This table summarizes the key architectural decisions that shape NetVendor's imp
 ## 📑 Table of Contents
 
 - [Design Decisions & Tradeoffs](#design-decisions--tradeoffs)
-- [What NetVendor Does](#what-netvendor-does)
+- [What ShadowVendor Does](#what-shadowvendor-does)
 - [Architecture Overview](#architecture-overview)
 - [Processing Pipeline](#processing-pipeline)
 - [Why It Works This Way](#why-it-works-this-way)
@@ -97,9 +97,9 @@ This table summarizes the key architectural decisions that shape NetVendor's imp
 
 ---
 
-## What NetVendor Does
+## What ShadowVendor Does
 
-NetVendor is a network analysis tool that transforms raw network device outputs (MAC address tables, ARP tables, or simple MAC lists) into structured, actionable intelligence. At its core, it:
+ShadowVendor is a network analysis tool that transforms raw network device outputs (MAC address tables, ARP tables, or simple MAC lists) into structured, actionable intelligence. At its core, it:
 
 1. **Parses** network device outputs from multiple vendors (Cisco, Juniper, HP/Aruba, Extreme, Brocade, etc.)
 2. **Normalizes** MAC addresses to a consistent format (`xx:xx:xx:xx:xx:xx`)
@@ -131,16 +131,16 @@ Vlan    Mac Address       Type        Ports
 
 ## Architecture Overview
 
-NetVendor follows a modular architecture with clear separation of concerns:
+ShadowVendor follows a modular architecture with clear separation of concerns:
 
 ```
-NetVendor.py (Main Entry Point)
+ShadowVendor.py (Main Entry Point)
     │
-    ├── netvendor/core/
-    │   ├── netvendor.py          # Core parsing logic
+    ├── shadowvendor/core/
+    │   ├── shadowvendor.py          # Core parsing logic
     │   └── oui_manager.py         # Vendor lookup system
     │
-    └── netvendor/utils/
+    └── shadowvendor/utils/
         ├── vendor_output_handler.py  # CSV, HTML, text generation
         ├── drift_analysis.py        # Historical analysis
         ├── siem_export.py           # SIEM event generation
@@ -168,14 +168,14 @@ NetVendor.py (Main Entry Point)
 ┌─────────────────┐
 │ File Type        │
 │ Detection        │
-│ (netvendor.py)   │
+│ (shadowvendor.py)   │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
 │ Line-by-Line     │
 │ Parsing          │
-│ (netvendor.py)   │
+│ (shadowvendor.py)   │
 └────────┬────────┘
          │
          ▼
@@ -217,7 +217,7 @@ NetVendor.py (Main Entry Point)
 
 **Processing Steps:**
 
-1. **Entry Point** (`NetVendor.py`): Parses CLI arguments, initializes logger and OUI manager
+1. **Entry Point** (`ShadowVendor.py`): Parses CLI arguments, initializes logger and OUI manager
 2. **File Type Detection**: Reads first 2 lines to determine format (MAC list, ARP table, or MAC table)
 3. **Line-by-Line Parsing**: Extracts MAC addresses, VLANs, and ports based on detected format
 4. **MAC Normalization**: Converts all MAC formats to `xx:xx:xx:xx:xx:xx`
@@ -230,9 +230,9 @@ NetVendor.py (Main Entry Point)
 
 ### Design Philosophy
 
-NetVendor was designed with several key principles:
+ShadowVendor was designed with several key principles:
 
-1. **Vendor-Agnostic Parsing**: Network devices from different manufacturers output data in different formats. NetVendor uses pattern matching and heuristics rather than rigid format requirements, making it flexible and robust.
+1. **Vendor-Agnostic Parsing**: Network devices from different manufacturers output data in different formats. ShadowVendor uses pattern matching and heuristics rather than rigid format requirements, making it flexible and robust.
 
 2. **Offline-First Architecture**: The tool prioritizes local caching and can operate entirely offline. This is critical for air-gapped networks and ensures consistent, fast results.
 
@@ -251,7 +251,7 @@ Different network teams use different data sources:
 - **MAC Tables**: Rich context (VLANs, ports) from switches
 - **ARP Tables**: Router/L3 device data with IP context
 
-NetVendor auto-detects the format, eliminating manual preprocessing.
+ShadowVendor auto-detects the format, eliminating manual preprocessing.
 
 #### Why OUI Caching?
 
@@ -298,7 +298,7 @@ The following sections dive deep into each component of the processing pipeline:
 
 #### Step 1: Entry Point and Initialization
 
-**File**: `NetVendor.py`
+**File**: `ShadowVendor.py`
 
 ```python
 def main():
@@ -317,7 +317,7 @@ def main():
 
 #### Step 2: File Type Detection
 
-**File**: `NetVendor.py` (lines 271-296)
+**File**: `ShadowVendor.py` (lines 271-296)
 
 ```python
 with open(input_file, 'r', encoding='utf-8') as f:
@@ -347,7 +347,7 @@ with open(input_file, 'r', encoding='utf-8') as f:
 
 #### Step 3: Line-by-Line Parsing
 
-**File**: `NetVendor.py` (lines 290-335)
+**File**: `ShadowVendor.py` (lines 290-335)
 
 The parsing logic differs based on detected file type:
 
@@ -397,11 +397,11 @@ else:  # MAC table
 
 ### File Type Detection
 
-NetVendor uses multiple heuristics to detect file types:
+ShadowVendor uses multiple heuristics to detect file types:
 
 #### MAC Address Validation
 
-**File**: `netvendor/core/netvendor.py` (lines 22-71)
+**File**: `shadowvendor/core/shadowvendor.py` (lines 22-71)
 
 ```python
 def is_mac_address(mac: str) -> bool:
@@ -443,7 +443,7 @@ def is_mac_address(mac: str) -> bool:
 
 #### ARP Table Detection
 
-**File**: `netvendor/core/netvendor.py` (lines 121-141)
+**File**: `shadowvendor/core/shadowvendor.py` (lines 121-141)
 
 ```python
 def is_arp_table(line: str) -> bool:
@@ -469,7 +469,7 @@ def is_arp_table(line: str) -> bool:
 
 #### MAC Table Detection
 
-**File**: `netvendor/core/netvendor.py` (lines 143-194)
+**File**: `shadowvendor/core/shadowvendor.py` (lines 143-194)
 
 ```python
 def is_mac_address_table(line: str) -> bool:
@@ -516,7 +516,7 @@ def is_mac_address_table(line: str) -> bool:
 
 ### MAC Address Normalization
 
-**File**: `netvendor/core/netvendor.py` (lines 94-119)
+**File**: `shadowvendor/core/shadowvendor.py` (lines 94-119)
 
 ```python
 def format_mac_address(mac: str) -> str:
@@ -569,7 +569,7 @@ The `OUIManager` class is the heart of vendor identification. Let's explore how 
 
 #### Architecture
 
-**File**: `netvendor/core/oui_manager.py`
+**File**: `shadowvendor/core/oui_manager.py`
 
 ```python
 class OUIManager:
@@ -641,7 +641,7 @@ def get_vendor(self, mac: str) -> str:
 
 #### OUI Normalization
 
-**File**: `netvendor/core/oui_manager.py` (lines 211-217)
+**File**: `shadowvendor/core/oui_manager.py` (lines 211-217)
 
 ```python
 def _normalize_mac(self, mac: str) -> str:
@@ -659,7 +659,7 @@ def _normalize_mac(self, mac: str) -> str:
 
 #### API Lookup with Rate Limiting
 
-**File**: `netvendor/core/oui_manager.py` (lines 256-302)
+**File**: `shadowvendor/core/oui_manager.py` (lines 256-302)
 
 ```python
 # Try API lookup
@@ -723,7 +723,7 @@ return None
 
 #### Rate Limiting Implementation
 
-**File**: `netvendor/core/oui_manager.py` (lines 219-226)
+**File**: `shadowvendor/core/oui_manager.py` (lines 219-226)
 
 ```python
 def _rate_limit(self, service):
@@ -740,7 +740,7 @@ def _rate_limit(self, service):
 
 #### Cache Persistence
 
-**File**: `netvendor/core/oui_manager.py` (lines 157-178)
+**File**: `shadowvendor/core/oui_manager.py` (lines 157-178)
 
 ```python
 def save_cache(self):
@@ -773,11 +773,11 @@ def save_cache(self):
 
 ### Output Generation
 
-NetVendor generates multiple output formats, each serving different use cases:
+ShadowVendor generates multiple output formats, each serving different use cases:
 
 #### Device CSV Generation
 
-**File**: `netvendor/utils/vendor_output_handler.py` (lines 26-67)
+**File**: `shadowvendor/utils/vendor_output_handler.py` (lines 26-67)
 
 ```python
 def make_csv(input_file: Union[Path, str], devices: Dict[str, Dict[str, str]], oui_manager: OUIManager) -> None:
@@ -813,7 +813,7 @@ def make_csv(input_file: Union[Path, str], devices: Dict[str, Dict[str, str]], o
 
 #### HTML Dashboard Generation
 
-**File**: `netvendor/utils/vendor_output_handler.py` (lines 134-391)
+**File**: `shadowvendor/utils/vendor_output_handler.py` (lines 134-391)
 
 The HTML dashboard uses Plotly to create interactive visualizations:
 
@@ -857,7 +857,7 @@ def create_vendor_distribution(devices: Dict[str, Dict[str, str]], oui_manager, 
 
 #### Port Report Generation
 
-**File**: `netvendor/utils/vendor_output_handler.py` (lines 69-132)
+**File**: `shadowvendor/utils/vendor_output_handler.py` (lines 69-132)
 
 ```python
 def generate_port_report(input_file: str, devices: Dict[str, Dict[str, str]], oui_manager, is_mac_table: bool = True) -> None:
@@ -906,7 +906,7 @@ def generate_port_report(input_file: str, devices: Dict[str, Dict[str, str]], ou
 
 #### Historical Drift Analysis
 
-**File**: `netvendor/utils/drift_analysis.py`
+**File**: `shadowvendor/utils/drift_analysis.py`
 
 Drift analysis tracks how vendor distributions change over time:
 
@@ -943,7 +943,7 @@ def analyze_drift(history_dir: Path, site: str = None, change_ticket_id: str = N
 
 #### SIEM Export
 
-**File**: `netvendor/utils/siem_export.py`
+**File**: `shadowvendor/utils/siem_export.py`
 
 SIEM export creates normalized events for security monitoring:
 
@@ -991,7 +991,7 @@ def export_siem_events(
 
 ## Extension Points
 
-This section provides step-by-step guides for extending NetVendor's functionality.
+This section provides step-by-step guides for extending ShadowVendor's functionality.
 
 ### Adding a New MAC-Table Vendor Format
 
@@ -999,7 +999,7 @@ This section provides step-by-step guides for extending NetVendor's functionalit
 
 **Steps**:
 
-1. **Add header pattern** in `netvendor/core/netvendor.py`, function `is_mac_address_table()`:
+1. **Add header pattern** in `shadowvendor/core/shadowvendor.py`, function `is_mac_address_table()`:
    ```python
    header_patterns = [
        # ... existing patterns ...
@@ -1007,17 +1007,17 @@ This section provides step-by-step guides for extending NetVendor's functionalit
    ]
    ```
 
-2. **Test detection** by adding a test case in `tests/test_netvendor.py`:
+2. **Test detection** by adding a test case in `tests/test_shadowvendor.py`:
    ```python
    def test_your_vendor_format():
        assert is_mac_address_table("VLAN MAC Type YourVendorHeader")
    ```
 
-3. **Verify parsing** - The existing parsing logic in `NetVendor.py` (lines 320-335) should handle most formats, but if your vendor uses a different column order, modify the parsing logic there.
+3. **Verify parsing** - The existing parsing logic in `ShadowVendor.py` (lines 320-335) should handle most formats, but if your vendor uses a different column order, modify the parsing logic there.
 
-4. **Run tests**: `pytest tests/test_netvendor.py::test_your_vendor_format -v`
+4. **Run tests**: `pytest tests/test_shadowvendor.py::test_your_vendor_format -v`
 
-**Files to modify**: `netvendor/core/netvendor.py`, `tests/test_netvendor.py`
+**Files to modify**: `shadowvendor/core/shadowvendor.py`, `tests/test_shadowvendor.py`
 
 ### Adding Another OUI API Backend
 
@@ -1025,7 +1025,7 @@ This section provides step-by-step guides for extending NetVendor's functionalit
 
 **Steps**:
 
-1. **Add service configuration** in `netvendor/core/oui_manager.py`, `__init__()` method:
+1. **Add service configuration** in `shadowvendor/core/oui_manager.py`, `__init__()` method:
    ```python
    self.api_services = [
        # ... existing services ...
@@ -1048,7 +1048,7 @@ This section provides step-by-step guides for extending NetVendor's functionalit
 
 3. **Test with offline mode disabled** to verify API integration.
 
-**Files to modify**: `netvendor/core/oui_manager.py`
+**Files to modify**: `shadowvendor/core/oui_manager.py`
 
 ### Adding a New Output Type
 
@@ -1056,7 +1056,7 @@ This section provides step-by-step guides for extending NetVendor's functionalit
 
 **Steps**:
 
-1. **Create new function** in `netvendor/utils/vendor_output_handler.py`:
+1. **Create new function** in `shadowvendor/utils/vendor_output_handler.py`:
    ```python
    def generate_your_format(devices: Dict, oui_manager: OUIManager, input_file: Path) -> None:
        """Generate your custom output format."""
@@ -1064,9 +1064,9 @@ This section provides step-by-step guides for extending NetVendor's functionalit
        # Your generation logic here
    ```
 
-2. **Call from main script** in `NetVendor.py`, after other output generation:
+2. **Call from main script** in `ShadowVendor.py`, after other output generation:
    ```python
-   from netvendor.utils.vendor_output_handler import generate_your_format
+   from shadowvendor.utils.vendor_output_handler import generate_your_format
    # ... existing outputs ...
    generate_your_format(devices, oui_manager, input_file)
    ```
@@ -1077,13 +1077,13 @@ This section provides step-by-step guides for extending NetVendor's functionalit
        # Test your format generation
    ```
 
-**Files to modify**: `netvendor/utils/vendor_output_handler.py`, `NetVendor.py`, `tests/test_vendor_output_handler.py`
+**Files to modify**: `shadowvendor/utils/vendor_output_handler.py`, `ShadowVendor.py`, `tests/test_vendor_output_handler.py`
 
 ---
 
 ## Test Strategy
 
-NetVendor's test suite is located in `tests/` and provides comprehensive coverage of all execution paths, core functionality, and edge cases. This section explains **how the testing process works**, from running tests to understanding results.
+ShadowVendor's test suite is located in `tests/` and provides comprehensive coverage of all execution paths, core functionality, and edge cases. This section explains **how the testing process works**, from running tests to understanding results.
 
 ### Understanding the Test Process
 
@@ -1104,7 +1104,7 @@ tests/
 ├── __init__.py
 ├── conftest.py                      # Shared fixtures (temp_dir, sample files)
 ├── test_execution_paths.py         # All execution paths (20+ tests)
-├── test_netvendor.py                # Parsing and format detection tests
+├── test_shadowvendor.py                # Parsing and format detection tests
 ├── test_oui_manager.py              # Vendor lookup and caching tests
 ├── test_vendor_output_handler.py    # Output generation tests
 ├── test_api.py                      # Python API tests
@@ -1125,11 +1125,11 @@ tests/
 
 **Comprehensive execution path validation** (`test_execution_paths.py` - 20 tests):
 
-NetVendor validates every way users can run the tool:
+ShadowVendor validates every way users can run the tool:
 
 1. **Package Entry Point** (2 tests):
-   - `test_package_entry_point_basic()` - `netvendor input_file.txt`
-   - `test_module_execution()` - `python3 -m netvendor input_file.txt`
+   - `test_package_entry_point_basic()` - `shadowvendor input_file.txt`
+   - `test_module_execution()` - `python3 -m shadowvendor input_file.txt`
 
 2. **Standalone Script** (5 tests):
    - `test_standalone_script_basic()` - No flags
@@ -1157,13 +1157,13 @@ NetVendor validates every way users can run the tool:
    - Empty file errors
    - Invalid input errors
 
-**Why this matters**: These tests ensure that whether users run NetVendor via CLI, Python API, or configuration files, all paths work correctly and produce expected outputs.
+**Why this matters**: These tests ensure that whether users run ShadowVendor via CLI, Python API, or configuration files, all paths work correctly and produce expected outputs.
 
 See **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** for detailed execution path documentation and behavior graphs.
 
 ### Core Functionality Testing
 
-**Parsing Functions** (`test_netvendor.py`):
+**Parsing Functions** (`test_shadowvendor.py`):
 - `test_is_mac_address()` - Validates MAC address detection across formats (colon, hyphen, dot, mask formats)
 - `test_is_mac_address_table()` - Tests MAC table format detection (Cisco, HP/Aruba, Juniper, Extreme, Brocade)
 - `test_format_mac_address()` - Ensures normalization works correctly (all formats → `xx:xx:xx:xx:xx:xx`)
@@ -1203,13 +1203,13 @@ pytest -v
 pytest tests/test_execution_paths.py -v
 
 # Run specific test file
-pytest tests/test_netvendor.py -v
+pytest tests/test_shadowvendor.py -v
 
 # Run specific test function
-pytest tests/test_netvendor.py::test_is_mac_address -v
+pytest tests/test_shadowvendor.py::test_is_mac_address -v
 
 # Run with coverage report (shows which code is tested)
-pytest --cov=netvendor --cov-report=html
+pytest --cov=shadowvendor --cov-report=html
 # Opens htmlcov/index.html in browser showing line-by-line coverage
 ```
 
@@ -1237,11 +1237,11 @@ Let's walk through what happens when a test runs:
 
 ```python
 def test_standalone_script_basic(sample_mac_table_file, temp_dir):
-    """Test: python3 NetVendor.py input_file.txt (basic, no flags)."""
-    from NetVendor import main
+    """Test: python3 ShadowVendor.py input_file.txt (basic, no flags)."""
+    from ShadowVendor import main
     import sys
     
-    with patch('sys.argv', ['NetVendor.py', str(sample_mac_table_file)]):
+    with patch('sys.argv', ['ShadowVendor.py', str(sample_mac_table_file)]):
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -1265,8 +1265,8 @@ def test_standalone_script_basic(sample_mac_table_file, temp_dir):
    - `os.chdir(temp_dir)` changes to the temporary directory
 
 3. **Test execution**:
-   - `main()` runs NetVendor with the mocked arguments
-   - NetVendor processes the test file and generates outputs
+   - `main()` runs ShadowVendor with the mocked arguments
+   - ShadowVendor processes the test file and generates outputs
 
 4. **Assertion validation**:
    - `assert (temp_dir / "output" / "...-Devices.csv").exists()` checks if CSV was created
@@ -1323,7 +1323,7 @@ def test_standalone_script_basic(sample_mac_table_file, temp_dir):
 
 ### Testing Philosophy
 
-NetVendor's testing approach ensures:
+ShadowVendor's testing approach ensures:
 - **Complete coverage**: Every execution path is validated
 - **Real-world scenarios**: Tests use realistic network device outputs
 - **Isolation**: Tests use temporary directories and mock data
@@ -1335,7 +1335,7 @@ NetVendor's testing approach ensures:
 **Step-by-step guide for adding a new test:**
 
 1. **Identify what to test**: Decide what functionality needs validation
-   - New parser format? → Add to `test_netvendor.py`
+   - New parser format? → Add to `test_shadowvendor.py`
    - New execution path? → Add to `test_execution_paths.py`
    - New output format? → Add to `test_vendor_output_handler.py`
 
@@ -1353,10 +1353,10 @@ NetVendor's testing approach ensures:
    def test_my_feature(my_test_file, temp_dir):
        """Test: Description of what this test validates."""
        # Setup
-       from NetVendor import main
+       from ShadowVendor import main
        
        # Execute
-       with patch('sys.argv', ['NetVendor.py', str(my_test_file)]):
+       with patch('sys.argv', ['ShadowVendor.py', str(my_test_file)]):
            main()
        
        # Verify
@@ -1398,11 +1398,11 @@ NetVendor's testing approach ensures:
 pytest -q
 
 # Run with coverage report
-pytest --cov=netvendor --cov-report=term-missing
+pytest --cov=shadowvendor --cov-report=term-missing
 # Shows which lines of code are not covered by tests
 
 # Generate HTML coverage report
-pytest --cov=netvendor --cov-report=html
+pytest --cov=shadowvendor --cov-report=html
 # Opens htmlcov/index.html showing line-by-line coverage
 ```
 
@@ -1432,20 +1432,20 @@ Common issues and how to debug them using the knowledge from this tutorial.
 
 3. **Verify MAC normalization**: Test the MAC format
    ```python
-   from netvendor.core.netvendor import format_mac_address
+   from shadowvendor.core.shadowvendor import format_mac_address
    print(format_mac_address("your-mac-format"))
    ```
 
 4. **Test OUI extraction**: Verify the OUI portion is correct
    ```python
-   from netvendor.core.oui_manager import OUIManager
+   from shadowvendor.core.oui_manager import OUIManager
    oui_manager = OUIManager()
    print(oui_manager._normalize_mac("00:11:22:33:44:55"))  # Should output "00:11:22"
    ```
 
-5. **Enable verbose mode**: Run with `NETVENDOR_VERBOSE=1` to see lookup details
+5. **Enable verbose mode**: Run with `SHADOWVENDOR_VERBOSE=1` to see lookup details
 
-**Files to inspect**: `netvendor/core/oui_manager.py` (lines 228-302), `output/data/oui_cache.json`
+**Files to inspect**: `shadowvendor/core/oui_manager.py` (lines 228-302), `output/data/oui_cache.json`
 
 ### Issue: Very Slow First Run
 
@@ -1456,10 +1456,10 @@ Common issues and how to debug them using the knowledge from this tutorial.
 **Solutions**:
 
 1. **Pre-populate cache**: Run once on representative data, then use `--offline` for production
-2. **Check API status**: Verify API services are responding (see `netvendor/core/oui_manager.py` lines 68-83)
+2. **Check API status**: Verify API services are responding (see `shadowvendor/core/oui_manager.py` lines 68-83)
 3. **Review rate limits**: Check if rate limits are too conservative (lines 219-226)
 
-**Files to inspect**: `netvendor/core/oui_manager.py` (rate limiting logic)
+**Files to inspect**: `shadowvendor/core/oui_manager.py` (rate limiting logic)
 
 ### Issue: No SIEM Outputs Created
 
@@ -1467,12 +1467,12 @@ Common issues and how to debug them using the knowledge from this tutorial.
 
 **Debugging steps**:
 
-1. **Check flag parsing**: Verify `args.siem_export` is True in `NetVendor.py`
-2. **Check directory creation**: Look for errors in `netvendor/utils/siem_export.py` (lines 63-72)
+1. **Check flag parsing**: Verify `args.siem_export` is True in `ShadowVendor.py`
+2. **Check directory creation**: Look for errors in `shadowvendor/utils/siem_export.py` (lines 63-72)
 3. **Check permissions**: Ensure write access to `output/siem/` directory
-4. **Enable runtime logging**: Run with `NETVENDOR_LOG=1` and check `output/netvendor_runtime.log`
+4. **Enable runtime logging**: Run with `SHADOWVENDOR_LOG=1` and check `output/shadowvendor_runtime.log`
 
-**Files to inspect**: `NetVendor.py` (SIEM export call), `netvendor/utils/siem_export.py` (lines 27-141)
+**Files to inspect**: `ShadowVendor.py` (SIEM export call), `shadowvendor/utils/siem_export.py` (lines 27-141)
 
 ### Issue: File Type Not Detected Correctly
 
@@ -1489,13 +1489,13 @@ Common issues and how to debug them using the knowledge from this tutorial.
 
 2. **Test detection functions**: Use the detection functions directly
    ```python
-   from netvendor.core.netvendor import is_mac_address, is_arp_table, is_mac_address_table
+   from shadowvendor.core.shadowvendor import is_mac_address, is_arp_table, is_mac_address_table
    # Test with your file's first line
    ```
 
-3. **Add debug output**: Temporarily add print statements in `NetVendor.py` file type detection (lines 271-296)
+3. **Add debug output**: Temporarily add print statements in `ShadowVendor.py` file type detection (lines 271-296)
 
-**Files to inspect**: `NetVendor.py` (file type detection), `netvendor/core/netvendor.py` (detection functions)
+**Files to inspect**: `ShadowVendor.py` (file type detection), `shadowvendor/core/shadowvendor.py` (detection functions)
 
 ### Issue: Port Information Missing
 
@@ -1506,13 +1506,13 @@ Common issues and how to debug them using the knowledge from this tutorial.
 1. **Verify input format**: Check if your MAC table includes port information
 2. **Test port parsing**: Use `parse_port_info()` function
    ```python
-   from netvendor.core.netvendor import parse_port_info
+   from shadowvendor.core.shadowvendor import parse_port_info
    print(parse_port_info("your-mac-table-line"))
    ```
 
-3. **Check parsing logic**: Review MAC table parsing in `NetVendor.py` (lines 320-335)
+3. **Check parsing logic**: Review MAC table parsing in `ShadowVendor.py` (lines 320-335)
 
-**Files to inspect**: `NetVendor.py` (MAC table parsing), `netvendor/core/netvendor.py` (parse_port_info)
+**Files to inspect**: `ShadowVendor.py` (MAC table parsing), `shadowvendor/core/shadowvendor.py` (parse_port_info)
 
 ### Issue: Cache Not Persisting
 
@@ -1525,13 +1525,13 @@ Common issues and how to debug them using the knowledge from this tutorial.
 3. **Verify cache file**: Check if `output/data/oui_cache.json` exists and has entries
 4. **Check for errors**: Look for permission errors in console output
 
-**Files to inspect**: `netvendor/core/oui_manager.py` (save_cache, load_cache)
+**Files to inspect**: `shadowvendor/core/oui_manager.py` (save_cache, load_cache)
 
 ---
 
 ## Summary
 
-NetVendor's architecture is designed for:
+ShadowVendor's architecture is designed for:
 
 1. **Flexibility**: Handles multiple input formats without preprocessing
 2. **Performance**: Caching and offline mode ensure fast, consistent results
@@ -1546,5 +1546,5 @@ The tool transforms raw network data into actionable intelligence through a care
 **💡 For more information:**
 - See [README.md](README.md) for user documentation
 - See [ADVANCED.md](ADVANCED.md) for operational best practices
-- Explore the codebase: `netvendor/core/` and `netvendor/utils/`
+- Explore the codebase: `shadowvendor/core/` and `shadowvendor/utils/`
 

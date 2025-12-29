@@ -1,15 +1,15 @@
-"""Tests for the NetVendor package."""
+"""Tests for the ShadowVendor package."""
 
 import os
 import tempfile
 from pathlib import Path
 import pytest
-from netvendor.core import check_dependencies, is_mac_address, is_mac_address_table, parse_port_info
-from netvendor.core.oui_manager import OUIManager
-from netvendor.utils.helpers import (
+from shadowvendor.core import check_dependencies, is_mac_address, is_mac_address_table, parse_port_info
+from shadowvendor.core.oui_manager import OUIManager
+from shadowvendor.utils.helpers import (
     get_format_type
 )
-from netvendor.core.netvendor import (
+from shadowvendor.core.netvendor import (
     format_mac_address
 )
 
@@ -17,7 +17,7 @@ from netvendor.core.netvendor import (
 def oui_manager():
     """Create a temporary OUI manager for testing."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        os.environ["NETVENDOR_DATA_DIR"] = tmpdir
+        os.environ["SHADOWVENDOR_DATA_DIR"] = tmpdir
         manager = OUIManager()
         yield manager
 

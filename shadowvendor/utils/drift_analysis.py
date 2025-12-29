@@ -1,5 +1,5 @@
 """
-Drift Analysis Utilities for NetVendor
+Drift Analysis Utilities for ShadowVendor
 
 This module provides helper functions to review how vendor distributions
 change over time, based on archived `vendor_summary.txt` files.
@@ -10,11 +10,11 @@ Design goals:
 - Provide a simple, offline-friendly way to compare snapshots.
 
 Typical workflow:
-1. After each NetVendor run, copy or save the generated `vendor_summary.txt`
+1. After each ShadowVendor run, copy or save the generated `vendor_summary.txt`
    with a timestamped name, e.g.:
    `cp output/vendor_summary.txt history/vendor_summary-2025-10-31.txt`
 2. Point this module at the directory containing those archived summaries:
-   `python -m netvendor.utils.drift_analysis history/`
+   `python -m shadowvendor.utils.drift_analysis history/`
 3. Inspect the generated `vendor_drift.csv` for time-series changes.
 """
 
@@ -40,7 +40,7 @@ class Snapshot:
 
 def parse_vendor_summary_file(path: Path) -> Snapshot:
     """
-    Parse a `vendor_summary.txt` file produced by NetVendor and its companion metadata.
+    Parse a `vendor_summary.txt` file produced by ShadowVendor and its companion metadata.
 
     The expected format is:
         Network Device Vendor Summary
@@ -240,11 +240,11 @@ def main(argv: List[str] | None = None) -> None:
     Simple CLI entrypoint for drift analysis.
 
     Usage:
-        python -m netvendor.utils.drift_analysis /path/to/history_dir
+        python -m shadowvendor.utils.drift_analysis /path/to/history_dir
     """
     args = argv if argv is not None else sys.argv[1:]
     if len(args) != 1:
-        print("Usage: python -m netvendor.utils.drift_analysis <history_dir>")
+        print("Usage: python -m shadowvendor.utils.drift_analysis <history_dir>")
         sys.exit(1)
 
     history_dir = Path(args[0])

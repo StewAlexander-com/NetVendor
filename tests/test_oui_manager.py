@@ -5,7 +5,7 @@ import tempfile
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
-from netvendor.core.oui_manager import OUIManager
+from shadowvendor.core.oui_manager import OUIManager
 
 # Skip this suite if legacy database-style API is not present
 import pytest as _pytest

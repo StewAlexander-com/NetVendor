@@ -4,7 +4,7 @@ Features:
 - Support for dot-separated MAC addresses
 
 ### Enhanced Format Detection
-NetVendor now features improved file format detection:
+ShadowVendor now features improved file format detection:
 - Automatically identifies file type based on content
 - Handles multiple MAC address formats (colon-separated, dot-separated, no separators)
 - Intelligently extracts VLAN information from different sources:
@@ -44,7 +44,7 @@ The tool generates several output files in the `output` directory:
    - Easy to share with team members
 
 ## Project Status
-NetVendor is actively maintained and regularly updated with new features and improvements. Recent updates include:
+ShadowVendor is actively maintained and regularly updated with new features and improvements. Recent updates include:
 - Enhanced file format detection and processing
 - Improved VLAN extraction across different file types
 - Better handling of various MAC address formats

@@ -1,15 +1,15 @@
 """
-Runtime Logger for NetVendor
+Runtime Logger for ShadowVendor
 
 This module provides structured logging of runtime behavior for troubleshooting
 and performance analysis. Logs are written to a file in the output directory.
 
 Usage:
     Enable logging via environment variable:
-        NETVENDOR_LOG=1 python3 NetVendor.py input_file.txt
+        SHADOWVENDOR_LOG=1 python3 ShadowVendor.py input_file.txt
     
     Or enable programmatically:
-        from netvendor.utils.runtime_logger import RuntimeLogger
+        from shadowvendor.utils.runtime_logger import RuntimeLogger
         logger = RuntimeLogger(enabled=True)
         logger.log_event("processing_start", {"file": "input.txt"})
 """
@@ -25,7 +25,7 @@ from typing import Any, Dict, Optional
 
 class RuntimeLogger:
     """
-    Structured logger for NetVendor runtime behavior.
+    Structured logger for ShadowVendor runtime behavior.
     
     Logs are written in JSONL format (one JSON object per line) for easy parsing
     and analysis. Each log entry includes:
@@ -40,12 +40,12 @@ class RuntimeLogger:
         Initialize the runtime logger.
         
         Args:
-            enabled: If True, enable logging. If None, check NETVENDOR_LOG env var.
-            log_file: Path to log file. If None, defaults to output/netvendor_runtime.log
+            enabled: If True, enable logging. If None, check SHADOWVENDOR_LOG env var.
+            log_file: Path to log file. If None, defaults to output/shadowvendor_runtime.log
         """
         # Check if logging is enabled
         if enabled is None:
-            enabled = os.getenv("NETVENDOR_LOG", "0") in ("1", "true", "True", "yes", "Yes")
+            enabled = os.getenv("SHADOWVENDOR_LOG", "0") in ("1", "true", "True", "yes", "Yes")
         
         self.enabled = enabled
         self.log_file: Optional[Path] = None
@@ -56,7 +56,7 @@ class RuntimeLogger:
             if log_file is None:
                 output_dir = Path("output")
                 output_dir.mkdir(exist_ok=True)
-                self.log_file = output_dir / "netvendor_runtime.log"
+                self.log_file = output_dir / "shadowvendor_runtime.log"
             else:
                 self.log_file = Path(log_file)
                 self.log_file.parent.mkdir(parents=True, exist_ok=True)

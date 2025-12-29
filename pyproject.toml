@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "netvendor"
+name = "shadowvendor"
 version = "0.1.0"
 description = "A tool for analyzing network device vendors from MAC addresses"
 authors = [
@@ -20,14 +20,14 @@ readme = "README.md"
 license = { text = "MIT" }
 
 [project.scripts]
-netvendor = "netvendor.core.netvendor:main"
-update-oui-cache = "netvendor.utils.update_oui_cache:main"
+shadowvendor = "shadowvendor.core.netvendor:main"
+update-oui-cache = "shadowvendor.utils.update_oui_cache:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["netvendor*"]
+include = ["shadowvendor*"]
 namespaces = false
 
 [project.urls]
-Homepage = "https://github.com/StewAlexander-com/NetVendor"
-Repository = "https://github.com/StewAlexander-com/NetVendor.git" 
+Homepage = "https://github.com/StewAlexander-com/ShadowVendor"
+Repository = "https://github.com/StewAlexander-com/ShadowVendor.git" 
