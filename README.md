@@ -175,7 +175,7 @@ pip install -r requirements.txt  # Install dependencies only
 python3 ShadowVendor.py input_file.txt  # Run directly
 ```
 
-**Dependencies will be automatically installed** when you run `pip install -e .` or `pip install -r requirements.txt`. Required packages:
+**Runtime dependencies** will be automatically installed when you run `pip install -e .` or `pip install -r requirements.txt`. Required packages:
 - `requests` (for OUI API lookups)
 - `plotly` (for interactive HTML dashboards)
 - `tqdm` (for progress bars)
