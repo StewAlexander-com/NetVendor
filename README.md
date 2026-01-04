@@ -181,6 +181,12 @@ python3 ShadowVendor.py input_file.txt  # Run directly
 - `tqdm` (for progress bars)
 - `rich` (for enhanced terminal output)
 
+**Development dependencies** (for testing and security scanning):
+- Install with: `pip install -r requirements-dev.txt`
+- Includes: `pytest`, `pytest-cov`, and `bandit` (security scanner)
+- Required for: Running tests (`pytest`), security scanning (`pytest --bandit`), and code coverage reports
+- **Note**: Development dependencies are optional for end users; only needed for contributors and CI/CD pipelines
+
 ---
 
 ## 📋 Quick Reference
@@ -672,29 +678,35 @@ pytest --cov=shadowvendor --cov-report=html
 
 ### Security Scanning
 
+**Bandit** is a security linter that scans Python code for common security vulnerabilities. It's included as a development dependency and can be run as part of the test suite.
+
+**Installation:**
+```bash
+# Install development dependencies (includes bandit, pytest, pytest-cov)
+pip install -r requirements-dev.txt
+```
+
 **Run Bandit security scanner as part of test suite:**
 ```bash
-# Install development dependencies (includes bandit)
-pip install -r requirements-dev.txt
-
-# Run tests with security scan
+# Run all tests with security scan
 pytest --bandit
 
-# Or run specific tests with security scan
+# Run specific tests with security scan
 pytest tests/test_api.py --bandit -v
 ```
 
-Bandit scans for common security issues including:
+**What Bandit checks:**
 - SQL injection vulnerabilities
 - Command injection risks
 - Insecure use of cryptographic functions
 - Hardcoded passwords and secrets
 - Insecure random number generation
+- Code execution vulnerabilities
 - And other security anti-patterns
 
 **Current status**: ✅ No security issues identified (with configured exclusions for intentional patterns)
 
-**Note**: The `--bandit` flag runs the security scan before executing tests. If security issues are found, the test suite will fail before running any tests.
+**Note**: The `--bandit` flag runs the security scan before executing tests. If security issues are found, the test suite will fail before running any tests. Bandit is a **development dependency** and is not required for normal ShadowVendor usage.
 
 ### Optional Linting/Type Checks
 
