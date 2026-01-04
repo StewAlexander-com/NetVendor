@@ -146,44 +146,44 @@ ShadowVendor prioritizes **reliability**, **performance**, and **operational saf
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐
+┌────────────────-─┐
 │ File Type        │
 │ Detection        │
-└────────┬────────┘
+└────────┬────────-┘
          │
          ▼
-┌─────────────────┐
+┌────────────────-─┐
 │ Line-by-Line     │
 │ Parsing          │
-└────────┬────────┘
+└────────┬───────-─┘
          │
          ▼
-┌─────────────────┐
+┌───────────────-──┐
 │ MAC Address      │
 │ Normalization    │
-└────────┬────────┘
+└────────┬───────-─┘
          │
          ▼
-┌─────────────────┐
+┌───────────────-──┐
 │ Device Dictionary│
 │ {mac: {vlan,     │
 │       port}}     │
-└────────┬────────┘
+└────────┬───────-─┘
          │
          ▼
-┌─────────────────┐
+┌──────────────-───┐
 │ Vendor Lookup    │
 │ (OUIManager)     │
 │ Cache → API      │
-└────────┬────────┘
+└────────┬───────-─┘
          │
          ▼
-┌─────────────────┐
-│ Enriched Devices │
-│ {mac: {vlan,     │
+┌────────────────-─-┐
+│ Enriched Devices  │
+│ {mac: {vlan,      │
 │       port,       │
-│       vendor}}   │
-└────────┬────────┘
+│       vendor}}    │
+└────────┬───────--─┘
          │
          ├──────────┬──────────┬──────────┐
          ▼          ▼          ▼          ▼
@@ -661,29 +661,29 @@ if vendor and vendor != "Unknown":
 ┌──────────────────────────────────────────────┐
 │  Step 2: Setup Cache Directory               │
 │  • Creates output/data/ directory            │
-│  • Sets cache_file = oui_cache.json           │
+│  • Sets cache_file = oui_cache.json          │
 └──────────────────┬───────────────────────────┘
                     │
                     ▼
 ┌──────────────────────────────────────────────┐
 │  Step 3: Load JSON Cache from Disk           │
 │  IF oui_cache.json EXISTS:                   │
-│    • Open file for reading                    │
-│    • json.load() → parse JSON                 │
-│    • self.cache.update(user_cache)            │
-│    • Merge with pre-seeded cache              │
+│    • Open file for reading                   │
+│    • json.load() → parse JSON                │
+│    • self.cache.update(user_cache)           │
+│    • Merge with pre-seeded cache             │
 └──────────────────┬───────────────────────────┘
                     │
                     ▼
-┌──────────────────────────────────────────────┐
-│  Step 4: Process Input File                  │
+┌──────────────────────────────────────────────-┐
+│  Step 4: Process Input File                   │
 │  • Parse MAC addresses                        │
-│  • Build devices dict: {mac: {vlan, port}}  │
-└──────────────────┬───────────────────────────┘
+│  • Build devices dict: {mac: {vlan, port}}    │
+└──────────────────┬───────────────────────────-┘
                     │
                     ▼
 ┌──────────────────────────────────────────────┐
-│  Step 5: Generate Outputs                   │
+│  Step 5: Generate Outputs                    │
 │  For each MAC:                               │
 │    vendor = oui_manager.get_vendor(mac)      │
 │    ┌────────────────────────────────────┐    │
@@ -691,7 +691,7 @@ if vendor and vendor != "Unknown":
 │    │  1. Normalize MAC → Extract OUI    │    │
 │    │  2. Check failed_lookups           │    │
 │    │  3. Check cache (self.cache)       │◄── │
-│    │  4. IF not found: Try API lookup  │    │
+│    │  4. IF not found: Try API lookup  │     │
 │    │  5. IF API success: Cache result   │    │
 │    └────────────────────────────────────┘    │
 └──────────────────┬───────────────────────────┘
@@ -699,7 +699,7 @@ if vendor and vendor != "Unknown":
                     ▼
 ┌──────────────────────────────────────────────┐
 │  Step 6: Cache Persistence                   │
-│  save_cache()                                 │
+│  save_cache()                                │
 │  • Create temp file: oui_cache.json.tmp      │
 │  • json.dump(self.cache, f)                  │
 │  • Atomic rename: .tmp → .json               │
