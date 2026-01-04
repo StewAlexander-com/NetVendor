@@ -34,6 +34,28 @@ When integrated with SIEMs (Elastic, Splunk, QRadar, etc.), ShadowVendor transfo
 
 ---
 
+## 📚 Documentation Overview
+
+ShadowVendor includes comprehensive documentation organized by audience and use case. This README provides the essential information to get started quickly. For deeper dives, see the specialized documentation:
+
+| Document | Purpose | Best For |
+|----------|---------|----------|
+| **[README.md](README.md)** (you are here) | Quick start, common workflows, basic usage | First-time users, quick reference |
+| **[TUTORIAL.md](TUTORIAL.md)** | Technical deep-dive, architecture, code walkthroughs | Contributors, developers, understanding internals |
+| **[ADVANCED.md](ADVANCED.md)** | Operational best practices, SIEM integration, production deployment | SOC engineers, network operations, production users |
+| **[CONFIG.md](CONFIG.md)** | Configuration files, environment variables, automation setup | Automation engineers, DevOps, recurring jobs |
+| **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** | Complete execution path documentation, behavior graphs | Testers, QA, understanding all execution modes |
+| **[TEST_COVERAGE.md](TEST_COVERAGE.md)** | Test coverage details, testing strategy | Contributors, QA engineers |
+
+**Navigation Guide:**
+- **New to ShadowVendor?** → Start here (README.md), then try the [Quick Start](#-getting-started)
+- **Want to understand how it works?** → Read [TUTORIAL.md](TUTORIAL.md) for architecture and code walkthroughs
+- **Deploying to production?** → See [ADVANCED.md](ADVANCED.md) for operational best practices
+- **Setting up automation?** → Check [CONFIG.md](CONFIG.md) for configuration examples
+- **Contributing code?** → Review [TUTORIAL.md](TUTORIAL.md#for-contributors) for extension points and testing
+
+---
+
 ## 📑 Table of Contents
 
 - [✨ Features](#-features)
@@ -283,7 +305,11 @@ python3 ShadowVendor.py \
 - UTC ISO-8601 timestamps for time-based correlation
 - Site and environment tags enable multi-site/environment dashboards
 
-For complete SIEM schema documentation and integration examples, see [ADVANCED.md](ADVANCED.md#-posture-change-detection--security-monitoring).
+**For complete SIEM integration:** See [ADVANCED.md](ADVANCED.md#-posture-change-detection--security-monitoring) for:
+- Detailed SIEM integration workflows
+- Correlation rule examples (Elastic, Splunk)
+- Posture-change detection strategies
+- Continuous monitoring setup
 
 ### Cross-Platform Compatibility
 
@@ -364,7 +390,11 @@ siem_export = true
 
 **Precedence**: Command-line arguments > Environment variables > Config file > Defaults
 
-For complete configuration examples (INI, YAML, TOML) and environment variable reference, see [CONFIG.md](CONFIG.md).
+**For complete configuration details:** See [CONFIG.md](CONFIG.md) for:
+- Complete configuration file examples (INI, YAML, TOML)
+- Environment variable reference
+- Configuration precedence rules
+- Automation setup examples
 
 ### Python API
 
@@ -403,7 +433,7 @@ result = analyze_file(
 )
 ```
 
-**API Reference**: See `shadowvendor/api.py` for complete function signature and return value documentation.
+**API Reference**: See `shadowvendor/api.py` for complete function signature and return value documentation. For code examples and integration patterns, see [TUTORIAL.md](TUTORIAL.md#for-contributors).
 
 ---
 
@@ -467,6 +497,8 @@ Internet  192.168.1.1      -          0011.2233.4455  ARPA   Vlan10
 - VLAN extraction from multiple sources (column, interface, etc.)
 - Port extraction for detailed switch analysis
 - Header skipping and robust error handling
+
+**Want to understand how format detection works?** See [TUTORIAL.md](TUTORIAL.md#file-type-detection) for detailed implementation and how to add support for new vendor formats.
 
 ---
 
@@ -553,19 +585,27 @@ For security teams evaluating the tool: ShadowVendor processes static text files
 
 ## 🔧 Advanced Topics
 
-For detailed information on advanced topics, see **[ADVANCED.md](ADVANCED.md)**:
+### Operational Guidance
+
+For detailed information on advanced topics and production deployment, see **[ADVANCED.md](ADVANCED.md)**:
 
 - **Posture-Change Detection & Security Monitoring**: SIEM integration workflows, correlation rules, and continuous monitoring strategies
 - **Operational Best Practices**: Vendor lookup optimization, cache management, output organization, troubleshooting, and cross-platform considerations
 - **Runtime Considerations**: Performance benchmarks, network behavior, disk space planning, and error handling details
 
-### Technical Tutorial
+### Technical Deep-Dive
 
 **Want to understand how ShadowVendor works under the hood?** See **[TUTORIAL.md](TUTORIAL.md)** for a comprehensive technical deep-dive covering:
-- Architecture and design decisions
-- Code walkthroughs with examples
-- Data flow diagrams
-- Implementation details for each component
+
+- **Architecture Overview**: Modular design, component relationships, data flow
+- **Execution Flow**: Step-by-step walkthrough from code execution to output generation
+- **Core Components**: File type detection, MAC normalization, vendor lookup system, OUI cache management
+- **For Contributors**: Extension points, adding new formats, testing strategy, debugging playbook
+
+**Perfect for:**
+- Developers who want to modify or extend ShadowVendor
+- Engineers who need to understand behavior in production
+- Contributors who want to add new features or formats
 
 ---
 
@@ -659,10 +699,10 @@ ShadowVendor's testing approach prioritizes:
 - **Mock data**: All tests use controlled mock data for reproducibility
 - **Cross-platform**: Tests validate Windows/Linux/macOS compatibility
 
-For detailed testing documentation, see:
-- **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** - Complete execution path documentation and behavior graphs
-- **[TEST_COVERAGE.md](TEST_COVERAGE.md)** - Detailed test coverage summary
-- **[TUTORIAL.md](TUTORIAL.md#test-strategy)** - Test strategy and debugging guide
+**For detailed testing documentation:**
+- **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** - Complete execution path documentation and behavior graphs (all ways to run ShadowVendor)
+- **[TEST_COVERAGE.md](TEST_COVERAGE.md)** - Detailed test coverage summary (what's tested and how)
+- **[TUTORIAL.md](TUTORIAL.md#test-strategy)** - Test strategy, writing new tests, and debugging guide (for contributors)
 
 ### Optional Linting/Type Checks
 
@@ -758,6 +798,29 @@ MIT License
 ## 👤 Author
 
 Stewart Alexander
+
+---
+
+---
+
+## 🗺️ Quick Navigation
+
+**Common paths through the documentation:**
+
+1. **First-time user workflow:**
+   - Start here (README.md) → [Getting Started](#-getting-started) → [Quick Reference](#-quick-reference) → Try it!
+
+2. **Production deployment workflow:**
+   - README.md → [Advanced Topics](#-advanced-topics) → [ADVANCED.md](ADVANCED.md) → [CONFIG.md](CONFIG.md)
+
+3. **Understanding internals workflow:**
+   - README.md → [Advanced Topics](#-advanced-topics) → [TUTORIAL.md](TUTORIAL.md) → [How It Works](TUTORIAL.md#how-it-works)
+
+4. **Contributing workflow:**
+   - README.md → [TUTORIAL.md](TUTORIAL.md#for-contributors) → [Extension Points](TUTORIAL.md#extension-points) → [Test Strategy](TUTORIAL.md#test-strategy)
+
+5. **Troubleshooting workflow:**
+   - README.md → [TUTORIAL.md](TUTORIAL.md#troubleshooting) → [Debugging Playbook](TUTORIAL.md#debugging-playbook) → [ADVANCED.md](ADVANCED.md#-operational-best-practices)
 
 ---
 
