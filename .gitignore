@@ -27,6 +27,7 @@ vendor_summary.txt
 failed_lookups.json    # Failed lookups cache
 processed_files.json   # Processed files cache
 oui_database.json      # OUI database
+oui_cache.json         # OUI cache file (user-generated)
 data/                  # Data directory
 
 # Test data files (but allow tests/data/*.txt for quick start examples)
