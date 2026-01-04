@@ -614,6 +614,8 @@ For detailed information on advanced topics and production deployment, see **[AD
 
 ## 🧪 Testing & Quality
 
+**TL;DR**: Comprehensive test suite (41+ tests) covering all execution paths, input formats, and features. Run `pytest -q` for quick validation. See [EXECUTION_PATHS.md](EXECUTION_PATHS.md) and [TEST_COVERAGE.md](TEST_COVERAGE.md) for details.
+
 ShadowVendor includes a comprehensive test suite that validates all execution paths, input formats, and features to ensure reliability and correctness. The test suite uses realistic network device outputs and mock data for reproducible validation.
 
 ### Running Tests
@@ -653,59 +655,20 @@ pytest --cov=shadowvendor --cov-report=html
 
 ### Test Coverage
 
-ShadowVendor's test suite includes **20+ execution path tests** covering:
+**Coverage summary**: 41+ tests covering execution paths, configuration, input processing, and error handling. Test data in `tests/data/` includes realistic MAC tables, ARP tables, and MAC lists.
 
-- ✅ **Execution paths**: Package entry point, standalone script, Python API with all flag combinations (offline, SIEM, drift, history)
-- ✅ **Configuration**: Config files (INI, YAML, TOML) and environment variable overrides
-- ✅ **Input processing**: MAC lists, MAC tables, ARP tables with type detection and parsing
-- ✅ **Error handling**: Missing files, empty files, invalid inputs, and edge cases
-
-**Test data**: Sample inputs for validation are in `tests/data/`:
-- `test-mac-list.txt` - 100 MAC addresses
-- `test-mac-table.txt` - 500+ MAC table entries (Cisco format)
-- `test-arp-table.txt` - ARP table format
-
-### What Gets Tested
-
-**Execution Paths** (`tests/test_execution_paths.py`):
-- Package entry, standalone script, and Python API execution modes
-- Flag combinations and configuration file loading
-
-**Core Functionality** (`tests/test_shadowvendor.py`):
-- MAC address validation and normalization
-- File type detection (MAC list, MAC table, ARP table)
-- Port information parsing
-- Format type detection
-
-**Vendor Lookup** (`tests/test_oui_manager.py`):
-- OUI cache functionality
-- Failed lookup tracking
-- API integration and rate limiting
-
-**Output Generation** (`tests/test_vendor_output_handler.py`):
-- CSV file generation
-- HTML dashboard creation
-- Port report generation
-- Vendor summary formatting
-
-**Python API** (`tests/test_api.py`):
-- API function signatures
-- Return value validation
-- Error handling
-
-### Testing Philosophy
-
-ShadowVendor's testing approach prioritizes:
-- **Comprehensive coverage**: Every execution path is tested
-- **Real-world data**: Tests use realistic network device outputs
-- **Isolation**: Tests use temporary directories to avoid side effects
-- **Mock data**: All tests use controlled mock data for reproducibility
-- **Cross-platform**: Tests validate Windows/Linux/macOS compatibility
+**What's tested:**
+- ✅ Execution paths (package entry, standalone script, Python API)
+- ✅ Configuration files (INI, YAML, TOML) and environment variables
+- ✅ Input processing (MAC lists, MAC tables, ARP tables)
+- ✅ Error handling (missing files, empty files, invalid inputs)
+- ✅ Core functionality (parsing, normalization, vendor lookup)
+- ✅ Output generation (CSV, HTML, port reports)
 
 **For detailed testing documentation:**
-- **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** - Complete execution path documentation and behavior graphs (all ways to run ShadowVendor)
-- **[TEST_COVERAGE.md](TEST_COVERAGE.md)** - Detailed test coverage summary (what's tested and how)
-- **[TUTORIAL.md](TUTORIAL.md#test-strategy)** - Test strategy, writing new tests, and debugging guide (for contributors)
+- **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)** - Complete execution path documentation
+- **[TEST_COVERAGE.md](TEST_COVERAGE.md)** - Detailed test coverage summary
+- **[TUTORIAL.md](TUTORIAL.md#test-strategy)** - Test strategy and debugging guide
 
 ### Optional Linting/Type Checks
 
@@ -719,45 +682,43 @@ mypy shadowvendor
 
 ## 📈 Project Status
 
+**TL;DR**: Actively maintained, production-ready. Latest: [v14.0.0](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v14.0.0) with complete rebranding, comprehensive testing, and enhanced documentation. Stable API and CLI since v14.0.0.
+
 ![ShadowVendor v14.0.0](https://raw.githubusercontent.com/StewAlexander-com/ShadowVendor/main/.github/og-image.png)
 
-ShadowVendor demonstrates comprehensive software engineering practices including test-driven development (41+ tests covering all execution paths), detailed technical documentation (TUTORIAL.md, ADVANCED.md, CONFIG.md), security-focused design (offline mode, read-only operations, air-gapped network support), and production-ready features (SIEM integration, historical drift analysis, cross-platform compatibility).
+ShadowVendor demonstrates comprehensive software engineering practices including test-driven development (41+ tests), detailed technical documentation, security-focused design (offline mode, read-only operations), and production-ready features (SIEM integration, historical drift analysis, cross-platform compatibility).
 
-**Latest Release: [v14.0.0](https://github.com/StewAlexander-com/ShadowVendor/releases/tag/v14.0.0)** - Major Release: Project Rebranding to ShadowVendor
+### Latest Release: v14.0.0
 
-ShadowVendor (formerly NetVendor) is actively maintained and regularly updated. This release represents a major milestone with the complete rebranding from NetVendor to ShadowVendor, comprehensive testing improvements, and enhanced documentation.  
+**Major Release: Project Rebranding to ShadowVendor**
 
-**v14.0.0 Major Release Highlights:**
-- 🎉 **Complete rebranding** from NetVendor to ShadowVendor (package, imports, env vars, output files)
-- ✅ **Comprehensive test suite** with 41+ tests covering all execution paths
-- 📚 **Enhanced documentation** (TUTORIAL.md, ADVANCED.md, EXECUTION_PATHS.md, TEST_COVERAGE.md)
-- 🐍 **Python API** for programmatic usage (`from shadowvendor import analyze_file`)
-- ⚙️ **Configuration file support** (INI, YAML, TOML) for easier automation
-- 🧪 **Test data included** for immediate quick start examples
-- 📦 **Improved installation** with multiple options for different use cases
+**Key highlights:**
+- 🎉 Complete rebranding from NetVendor to ShadowVendor
+- ✅ Comprehensive test suite (41+ tests covering all execution paths)
+- 📚 Enhanced documentation (TUTORIAL.md, ADVANCED.md, EXECUTION_PATHS.md, TEST_COVERAGE.md)
+- 🐍 Python API for programmatic usage
+- ⚙️ Configuration file support (INI, YAML, TOML)
+- 🧪 Test data included for quick start examples
 
-**Previous improvements:**
-- ✅ Enhanced MAC address parsing for Juniper, Aruba, Extreme, Brocade, and more
-- ✅ Improved OUIManager logic and normalization
-- ✅ Real-world OUI test coverage
-- ✅ Historical drift analysis with metadata correlation (timestamp, site, change_ticket_id)
-- ✅ SIEM export with stable schema for posture-change detection (CSV/JSONL in `output/siem/`)
-- ✅ Runtime logging for troubleshooting and performance analysis (JSONL format)
-- ✅ Enhanced error handling with user-friendly messages and actionable hints
-- ✅ Offline mode support for air-gapped networks (`--offline` flag)
-- ✅ All tests pass and program output confirmed
+**Recent improvements:**
+- Enhanced MAC address parsing (Juniper, Aruba, Extreme, Brocade)
+- Historical drift analysis with metadata correlation
+- SIEM export with stable schema for posture-change detection
+- Runtime logging for troubleshooting and performance analysis
+- Offline mode support for air-gapped networks
 
-**Versioning & Stability:**
-- **SIEM schema**: Stable since v14.0.0 - all fields consistently named and present
-- **Core CLI flags**: Stable since v14.0.0 - backward compatible
-- **Python API**: Stable since v14.0.0 - `analyze_file()` signature and return values are stable
+### Versioning & Stability
 
-**Planned:**
+- **SIEM schema**: Stable since v14.0.0
+- **Core CLI flags**: Stable since v14.0.0 (backward compatible)
+- **Python API**: Stable since v14.0.0
+
+### Planned Features
+
 - More vendor format support
 - Additional visualization options
 - Network topology mapping
-- GitHub Discussions for community questions and discussions
-- Community chat channels (Slack/Discord)
+- GitHub Discussions and community chat channels
 
 ---
 
