@@ -672,16 +672,16 @@ pytest --cov=shadowvendor --cov-report=html
 
 ### Security Scanning
 
-**Run Bandit security scanner:**
+**Run Bandit security scanner as part of test suite:**
 ```bash
 # Install development dependencies (includes bandit)
 pip install -r requirements-dev.txt
 
-# Run security scan
-bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py
+# Run tests with security scan
+pytest --bandit
 
-# Generate JSON report
-bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py -f json -o bandit-report.json
+# Or run specific tests with security scan
+pytest tests/test_api.py --bandit -v
 ```
 
 Bandit scans for common security issues including:
@@ -693,6 +693,8 @@ Bandit scans for common security issues including:
 - And other security anti-patterns
 
 **Current status**: ✅ No security issues identified (with configured exclusions for intentional patterns)
+
+**Note**: The `--bandit` flag runs the security scan before executing tests. If security issues are found, the test suite will fail before running any tests.
 
 ### Optional Linting/Type Checks
 

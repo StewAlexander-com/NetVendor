@@ -159,11 +159,14 @@ ShadowVendor uses **Bandit** for security scanning to detect potential security 
 # Install development dependencies
 pip install -r requirements-dev.txt
 
-# Run Bandit security scan
-bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py
+# Run tests with security scan (recommended)
+pytest --bandit
 
-# Generate detailed JSON report
-bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py -f json -o bandit-report.json
+# Run specific tests with security scan
+pytest tests/test_api.py --bandit -v
+
+# Or run Bandit directly (standalone)
+bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py
 ```
 
 ### Security Test Configuration
