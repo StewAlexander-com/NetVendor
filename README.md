@@ -589,8 +589,9 @@ ShadowVendor is designed with security in mind:
 - **Offline mode**: `--offline` flag enables air-gapped network analysis without external API calls
 - **No network access required**: All vendor lookups use local OUI cache; external API is optional
 - **Safe for production**: No device modifications, no credentials stored, no persistent connections
+- **Code security scanning**: Regular security scans with Bandit to detect potential vulnerabilities and code execution risks
 
-For security teams evaluating the tool: ShadowVendor processes static text files and generates reports. It does not connect to network devices, modify configurations, or store sensitive data beyond the OUI cache (public IEEE data).
+For security teams evaluating the tool: ShadowVendor processes static text files and generates reports. It does not connect to network devices, modify configurations, or store sensitive data beyond the OUI cache (public IEEE data). The codebase is regularly scanned for security issues using Bandit as part of the development and testing process.
 
 ## 🔧 Advanced Topics
 
