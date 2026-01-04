@@ -126,6 +126,10 @@ test_*.py
 *_test.py
 !tests/test_*.py
 
+# Security scan reports
+bandit-report.json
+*.bandit-report.json
+
 # Generated test output directories
 test_empty_history/
 test_history/
