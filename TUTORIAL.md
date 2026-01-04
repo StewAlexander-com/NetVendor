@@ -142,7 +142,7 @@ ShadowVendor prioritizes **reliability**, **performance**, and **operational saf
 └────────┬────────┘
          │
          ▼
-┌───────────────── ┐
+┌─────────────────-┐
 │ File Type        │
 │ Detection        │
 └────────┬────────-┘
@@ -179,7 +179,7 @@ ShadowVendor prioritizes **reliability**, **performance**, and **operational saf
 │ {mac: {vlan,      │
 │       port,       │
 │       vendor}}    │
-└────────┬────────-┘
+└────────┬────────--┘
          │
          ├──────────────────┬──────────────────┬──────────────┐
          ▼                  ▼                  ▼              ▼
