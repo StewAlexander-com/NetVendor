@@ -1,5 +1,7 @@
 # ⚙️ ShadowVendor Configuration Guide
 
+**Who should read this**: Automation engineers, DevOps teams, and anyone setting up recurring jobs or CI/CD pipelines that need configuration file examples and environment variable reference.
+
 This document provides detailed configuration examples for ShadowVendor. For a quick overview, see the [Configuration section](README.md#configuration) in the README.
 
 ## 📑 Table of Contents

@@ -1,5 +1,7 @@
 # 🔧 ShadowVendor Advanced Topics
 
+**Who should read this**: SOC engineers deploying SIEM integrations, network operations teams running production deployments, and anyone needing operational best practices and runtime considerations.
+
 This document covers advanced topics, detailed operational guidance, and in-depth technical information for ShadowVendor. For basic usage and quick start, see the [README.md](README.md).
 
 ## 📑 Table of Contents

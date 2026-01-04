@@ -1,5 +1,7 @@
 # ShadowVendor Execution Paths & Behavior Graph
 
+**Who should read this**: QA engineers, testers, and anyone evaluating ShadowVendor's reliability who needs to understand all execution modes and validate that every way to run the tool is properly tested.
+
 This document maps all ways users can run ShadowVendor, the execution flow for each path, and test coverage.
 
 ## 📊 Execution Paths Overview

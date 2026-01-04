@@ -1,5 +1,7 @@
 # ShadowVendor Test Coverage Summary
 
+**Who should read this**: QA engineers, contributors adding new features, and anyone evaluating test coverage who needs to understand what's tested, how tests are organized, and where to add new tests.
+
 ## Overview
 
 This document summarizes test coverage for all ShadowVendor execution paths, ensuring every way users can run the tool is validated with mock data.
