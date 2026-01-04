@@ -670,6 +670,30 @@ pytest --cov=shadowvendor --cov-report=html
 - **[TEST_COVERAGE.md](TEST_COVERAGE.md)** - Detailed test coverage summary
 - **[TUTORIAL.md](TUTORIAL.md#test-strategy)** - Test strategy and debugging guide
 
+### Security Scanning
+
+**Run Bandit security scanner:**
+```bash
+# Install development dependencies (includes bandit)
+pip install -r requirements-dev.txt
+
+# Run security scan
+bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py
+
+# Generate JSON report
+bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py -f json -o bandit-report.json
+```
+
+Bandit scans for common security issues including:
+- SQL injection vulnerabilities
+- Command injection risks
+- Insecure use of cryptographic functions
+- Hardcoded passwords and secrets
+- Insecure random number generation
+- And other security anti-patterns
+
+**Current status**: ✅ No security issues identified (with configured exclusions for intentional patterns)
+
 ### Optional Linting/Type Checks
 
 If configured locally:

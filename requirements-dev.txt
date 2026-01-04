@@ -1,0 +1,14 @@
+# Development dependencies for ShadowVendor
+# Install with: pip install -r requirements-dev.txt
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Security scanning
+bandit>=1.8.0
+
+# Optional: Linting and type checking (if configured locally)
+# ruff>=0.1.0
+# mypy>=1.0.0
+

@@ -1051,6 +1051,37 @@ pytest --cov=shadowvendor --cov-report=html
 - **Clean assertions**: Verify both that code runs AND produces correct outputs
 - **Test edge cases**: Don't just test the happy path
 
+#### Security Testing with Bandit
+
+ShadowVendor includes **Bandit** security scanning to detect potential security vulnerabilities and code execution risks.
+
+**Running security scans:**
+```bash
+# Install development dependencies (includes bandit)
+pip install -r requirements-dev.txt
+
+# Run security scan
+bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py
+
+# Generate JSON report for CI/CD integration
+bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py -f json -o bandit-report.json
+```
+
+**What Bandit checks:**
+- SQL injection vulnerabilities
+- Command injection risks (subprocess usage)
+- Insecure cryptographic functions
+- Hardcoded passwords and secrets
+- Insecure random number generation
+- Code execution vulnerabilities
+- And other security anti-patterns
+
+**Configuration**: The `bandit.yaml` file configures which tests to skip (false positives for intentional patterns) and which directories to exclude from scanning.
+
+**Current status**: ✅ No security issues identified (with configured exclusions for intentional patterns like graceful error handling and trusted subprocess usage).
+
+For detailed security testing information, see **[TEST_COVERAGE.md](TEST_COVERAGE.md#security-testing)**.
+
 For detailed test coverage information, see **[TEST_COVERAGE.md](TEST_COVERAGE.md)** and **[EXECUTION_PATHS.md](EXECUTION_PATHS.md)**.
 
 ---

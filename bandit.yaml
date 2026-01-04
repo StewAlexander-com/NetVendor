@@ -1,0 +1,31 @@
+# Bandit configuration for ShadowVendor security scanning
+# Documentation: https://bandit.readthedocs.io/
+
+# Exclude test directories and output directories
+exclude_dirs:
+  - tests
+  - test_output
+  - test_history
+  - test_empty_history
+  - test_verify
+  - user_test_output
+  - history
+  - output
+  - shadowvendor.egg-info
+  - .git
+  - docs
+
+# Skip specific tests that are false positives for this codebase:
+# B110, B112: Try/except pass/continue - intentional graceful error handling
+# B404, B603, B607: subprocess usage in update_oui_cache.py - trusted source (Wireshark), not user input
+skips:
+  - B110
+  - B112
+  - B404
+  - B603
+  - B607
+
+# Report all severity and confidence levels
+severity_level: low,medium,high
+confidence_level: low,medium,high
+

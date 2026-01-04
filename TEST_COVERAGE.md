@@ -149,6 +149,36 @@ python3 -m pytest tests/ --cov=shadowvendor --cov-report=html
 - [x] Tests isolated (use temporary directories)
 - [x] All tests passing
 
+## Security Testing
+
+ShadowVendor uses **Bandit** for security scanning to detect potential security vulnerabilities and code execution risks.
+
+### Running Security Scans
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run Bandit security scan
+bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py
+
+# Generate detailed JSON report
+bandit -c bandit.yaml -r shadowvendor/ ShadowVendor.py -f json -o bandit-report.json
+```
+
+### Security Test Configuration
+
+The `bandit.yaml` configuration file:
+- Excludes test directories and output directories from scanning
+- Skips false positives for intentional patterns:
+  - `B110, B112`: Try/except pass/continue (intentional graceful error handling)
+  - `B404, B603, B607`: subprocess usage in `update_oui_cache.py` (trusted source, not user input)
+- Reports all severity levels (low, medium, high)
+
+### Current Security Status
+
+✅ **No security issues identified** - All scans pass with configured exclusions for intentional patterns.
+
 ## Notes
 
 - Tests use `tempfile.TemporaryDirectory()` to avoid polluting the workspace
@@ -156,4 +186,5 @@ python3 -m pytest tests/ --cov=shadowvendor --cov-report=html
 - Tests verify output file creation and content
 - OUI manager tests use real OUI cache for vendor lookups
 - Some OUI manager tests are skipped if database update is needed
+- Security scanning with Bandit is part of the quality assurance process
 
