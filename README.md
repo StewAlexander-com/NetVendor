@@ -164,8 +164,7 @@ python3 ShadowVendor.py \
 **Option 1: Install as a package (recommended for Python API usage)**
 ```bash
 git clone https://github.com/StewAlexander-com/ShadowVendor.git
-cd ShadowVendor
-pip install -e .
+cd ShadowVendor && pip install -e .
 ```
 
 **Option 2: Use standalone script (no installation required)**
@@ -317,7 +316,11 @@ ShadowVendor is designed to work on **Linux (Debian/Ubuntu), macOS (Intel and Ap
 
 **Windows Usage:**
 ```powershell
-# Set encoding environment variables (recommended)
+$env:PYTHONIOENCODING="utf-8"; $env:PYTHONUTF8="1"; python3 ShadowVendor.py input_file.txt
+```
+
+Or set environment variables separately:
+```powershell
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUTF8 = "1"
 python3 ShadowVendor.py input_file.txt
